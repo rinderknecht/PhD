@@ -1,0 +1,37 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \SList{$(\textrm{T}_k,
+      \{\nu_k\})$}{k}{q})\\
+   \forall k \in [1..q].x, \textrm{T}_k \bouchon{91} \nu_k \rightarrow
+   \overline\nu_k\\
+   \bouchon{90} \domain{\mathcal{A}} \Gamma \rightarrow
+   \domain{\overline{\mathcal{A}}} \overline\Gamma\\
+   \overline\gamma \triangleq x \mapsto (\alpha, \tau,
+   \SList{$(\textrm{T}_k, \{\overline\nu_k\})$}{k}{q})}
+%-----
+  {\bouchon{90} \domain{\{x\} \uplus \mathcal{A}} \Gamma \rightarrow
+    \domain{\overline{\mathcal{A}}} \overline\Gamma \oplus
+    \overline\gamma}
+
+\inferrule
+  {}
+  {\bouchon{90} \domain{\varnothing} \Gamma \rightarrow
+    \domain{\varnothing} \Gamma}
+
+\inferrule
+  {\textsf{None} \bouchon{74} \Sigma \rightarrow \Sigma_0\\
+   \bouchon{72} \Sigma_0 \rightarrow \nu_0\\
+   x, \textrm{T} \bouchon{54} \nu_0 \mid \emptyL \rightarrow \nu_1\\
+   \bouchon{92} \nu_1 \rightarrow \overline\nu}
+  %-----
+  {x, \textrm{T} \bouchon{91} \textsf{Inter} \, (\Sigma) \rightarrow
+    \overline\nu}
+
+\inferrule
+  {\nu \nlhd \textsf{Inter} \, \wild}
+  %-----
+  {x, \textrm{T} \bouchon{91} \nu \rightarrow \nu}
+
+\end{mathparpagebreakable}

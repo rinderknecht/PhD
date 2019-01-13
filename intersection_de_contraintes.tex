@@ -1,0 +1,85 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+%%
+\inferrule
+  {x, \textrm{T} \bouchon{70} \nu \mid \Sigma \rightarrow
+    \overline\Sigma\\
+   \bouchon{72} \overline\Sigma \rightarrow \overline\nu}
+  %-----
+  {x, \textrm{T} \bouchon{73} \nu \mid \Sigma \rightarrow
+    \overline\nu}
+
+% Value constraint for INTEGER and CharString
+%
+\inferrule
+  {\textrm{T} \lhd \wildINTEGER \mid \textsf{CharString} \, \wild\\\\
+    \OR x = \REAL\\
+   \nu_0 \lhd \wild \wild \textbf{..} \wild \wild \mid \textsf{Value}
+   \, \wild\\
+   \nu_1 \lhd \wild \wild \textbf{..} \wild \wild \mid \textsf{Value}
+   \, \wild\\
+   \bouchon{71} \nu_0 \cap \nu_1 \rightarrow \nu_2}
+  %-----
+  {x, \textrm{T} \bouchon{70} \nu_0 \mid [\{\nu_1\}] \sqcup
+    \overline\Sigma \rightarrow [\{\nu_2\}] \listunion \overline\Sigma}
+
+% Value constraint for other types
+%
+\inferrule
+  {\{\textsf{Value} \, (v)\} \listin \overline\Sigma}
+  %-----
+  {x, \textrm{T} \bouchon{70} \textsf{Value} \, (v) \mid
+    \overline\Sigma \rightarrow \overline\Sigma}
+
+% SIZE
+%
+\inferrule
+  {\bouchon{72} \textrm{merge} \, (\nu_0, \nu_1) \rightarrow \nu_2\\
+   x, \textrm{T} \bouchon{54} \textsf{SIZE} \, \{\nu_2\} \mid \emptyL
+   \rightarrow \overline\nu}
+  %-----
+  {x, \textrm{T} \bouchon{70} \textsf{SIZE} \, \{\nu_0\} \mid
+    [\{\textsf{SIZE} \, \{\nu_1\}\}] \sqcup \overline\Sigma
+    \rightarrow [\{\overline\nu\}] \listunion \overline\Sigma}
+
+% FROM
+%
+\inferrule
+  {\bouchon{72} \textrm{merge} \, (\nu_0, \nu_1) \rightarrow \nu_2\\
+   x, \textrm{T} \bouchon{54} \textsf{FROM} \, \{\nu_2\} \mid \emptyL
+   \rightarrow \overline\nu}
+  %------
+  {x, \textrm{T} \bouchon{70} \textsf{FROM} \, \{\nu_0\} \mid
+    [\{\textsf{FROM} \, \{\nu_1\}\}] \sqcup \overline\Sigma
+    \rightarrow [\{\overline\nu\}] \listunion \overline\Sigma}
+
+% Others
+%
+\inferrule
+  {(\nu_0, \nu_1) \nlhd ((\wild \wild \textbf{..} \wild \wild \mid
+    \textsf{Value} \, \wild\!), (\wild \wild \textbf{..} \wild \wild
+    \mid \textsf{Value} \, \wild\!)) \\\\
+    \mid (\textsf{SIZE} \, \wild\!, \textsf{SIZE} \, \wild\!) \mid
+    (\textsf{FROM} \, \wild\!, \textsf{FROM} \, \wild\!)\\\\
+   x, \textrm{T} \bouchon{70} \nu_0 \mid \Sigma \rightarrow \overline\Sigma_0}
+  %----
+  {x, \textrm{T} \bouchon{70} \nu_0 \mid [\{\nu_1\}] \sqcup
+    \overline\Sigma \rightarrow [\{\nu_1\}] \listunion
+    \overline\Sigma_0}
+
+\inferrule
+  {}
+  {x, \textrm{T} \bouchon{70} \nu_0 \mid \emptyL \rightarrow
+    [\{\nu_0\}]}
+
+\inferrule
+  {}
+  {\bouchon{72} [\{\nu\}] \rightarrow \nu}
+
+\inferrule
+  {\Sigma \nlhd [\wild]}
+  %-----
+  {\bouchon{72} \Sigma \rightarrow \textsf{Inter} \, (\Sigma)}
+
+\end{mathparpagebreakable}

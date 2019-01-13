@@ -1,0 +1,241 @@
+%%-*-latex-*-
+
+\lettrine{L}{'essor de la télématique}, au carrefour de la
+télécommunication et de l'informatique, doit prendre en compte la
+diversité des architectures et des services. Les spécifications de
+protocoles \emph{Open Systems Interconnection} (OSI) sont une des
+bases possibles pour la conception et la réalisation de systèmes
+informatiques hétérogènes distribués. Ces normes de communication sont
+publiées conjointement par les organismes internationaux
+ISO\footnote{Contrairement à une idée répandue, ISO est le préfixe
+  grec signifiant \emph{égal} ou \emph{même}, correct dans les trois
+  langues officielles de l'organisme: l'anglais, le français et le
+  russe.} et l'\emph{International Telecommunication Union} (ITU),
+rédigés en langues véhiculaires et vernaculaires.
+
+Le langage de spécification ASN.1~\citep{ASN94}, soit \emph{Abstract
+  Syntax Notation One} en anglais, est une norme conjointe de l'ISO et
+de l'ITU-T (secteur télécommunication de l'ITU) permettant une
+description des types des données susceptibles d'être échangées au
+cours d'une transaction entre applications. La solution apportée à
+l'hétérogénéité est donc symétrique: tous les participants partagent
+un ensemble de modules ASN.1, constituant la composante «~données~» du
+protocole, indépendamment de leur architecture locale, matérielle ou
+logicielle, ce qui justifie l'appellation anglaise \emph{abstract
+  notation}. À cet ensemble partagé par les pairs communicants est
+adjoint l'emploi commun d'un codage des valeurs dont les types sont
+définis par le protocole ASN.1, appelé \emph{Encoding Rules} en
+anglais. L'ISO et l'ITU-T publient donc plusieurs codages possibles
+pour les valeurs de type ASN.1: les \emph{Basic Encoding Rules}, ou
+BER~\citep{X.690}, et les \emph{Packed Encoding Rules}, ou
+PER~\citep{X.691}. Ces codages sont eux aussi indépendants des
+architectures des entités communicantes et spécifient la sérialisation
+de valeurs ASN.1, c'est-à-dire de la transformation de valeurs ASN.1
+en suites de bits.
+
+Chaque pair communicant soumet le protocole ASN.1 commun à un
+compilateur dédié à son environnement local. Les paramètres de cet
+environnement sont typiquement le langage servant à programmer
+l'application, les contraintes matérielles (comme l'architecture de la
+mémoire) et le système d'exploitation ---~les paramètres globaux de la
+communication étant le protocole ASN.1 et le codage. À partir de ces
+paramètres, chaque compilateur produit, d'une part, la meilleure
+approximation dans le langage de programmation des définitions de
+types ASN.1, et, d'autre part, un ensemble de couples de fonctions de
+codage et décodage associés à chaque type dont une valeur au moins est
+susceptible d'être échangée. Ces définitions vernaculaires sont
+finalement introduites dans la chaîne de compilation de
+l'application. Le fait que les définitions de type produites dans le
+langage de programmation de l'application soient des approximations
+est inévitable car les langages de programmation ne possèdent pas de
+langage de type aussi riche qu'ASN.1. Cela tient essentiellement au
+fait que les langages de programmation possèdent des fonctions, donc
+une bonne partie du programme est exprimée via celles-ci, et non à
+travers les types. Dans le cas d'ASN.1, le but est d'exprimer le plus
+possible sans fonctions, donc les fonctions de codage produites par le
+compilateur ASN.1 pour chaque type doivent effectuer des contrôles
+dynamiques sur les valeurs pour combler ce manque d'expressivité au
+niveau des types du langage de programmation.
+
+Les codages sont spécifiés à partir de la syntaxe des valeurs ASN.1,
+mais en général les valeurs échangées n'existent jamais sous forme
+ASN.1 car elles sont dynamiquement créées par les applications,
+directement dans l'environnement d'exécution local, c'est-à-dire que
+ce sont des valeurs des types du langage de programmation et non de
+spécification. Ainsi, bien qu'ASN.1 permette la spécification de
+valeurs, celles-ci ne sont pas généralement codées et servent
+essentiellement au sous-typage ainsi qu'à définir des constantes du
+protocole, comme des valeurs par défaut.
+
+Les compilateurs ASN.1 souffrent de non-conformité chronique par
+rapport à la norme X.680~\citep{ASN94} lors de la phase d'analyse du
+protocole. Notre thèse est qu'une approche formelle, fondée sur des
+méthodes en usage en théorie de la programmation, permet de clarifier
+totalement X.680 et de dériver de cette recherche un analyseur de
+spécifications conforme à notre spécification formelle.
+
+Les outils théoriques que nous avons employés sont ceux de la
+sémantique opérationnelle structurée (dite aussi sémantique
+naturelle), et du formalisme de preuve associé. Un des intérêts est
+alors que nous pouvons exprimer dans le même langage les
+spécifications et les algorithmes, et de fournir un cadre théorique
+bien connu dans lequel des preuves permettent de prouver l'équivalence
+de ces spécifications et de ces algorithmes (correction et
+complétude).
+
+Pour réaliser notre tâche, nous avons d'abord étudié la norme
+ASN.1 X.680~\citep{ASN94} avec l'aide experte de Bancroft
+Scott, éditeur à l'ISO concernant ASN.1. À partir de cette
+compréhension empirique nous avons alors bâti une spécification en
+sémantique opérationnelle structurée d'ASN.1, que nous
+appellerons formalisation par la suite. Nous avons intégrés tous les
+aspects de X.680: types, valeurs et sous-types, la syntaxe et la
+sémantique.
+
+La grammaire d'ASN.1 que nous avons étudiée est celle de
+X.208~\citep{ASN90}, car c'était la seule disponible lorsque nous
+avions entrepris cette tâche. La grammaire normalisée d'ASN.1 a pour
+but de suggérer fortement la sémantique de ses constructions, car
+c'est sur elle que s'appuie les explications de
+X.208. Malheureusement, le souci didactique rend très difficile le
+traitement automatique de la grammaire pour construire un analyseur
+syntaxique pour le langage. En effet, si l'on soumet cette grammaire
+au générateur d'analyseurs syntaxiques Yacc, nous obtenons des
+milliers de conflits décaler/réduire et réduire/réduire, ce qui
+implique, en faisant l'hypothèse de la correction de Yacc, que cette
+grammaire n'est pas LALR(1). Nous avons alors décidé de rechercher une
+grammaire équivalente à la première, c'est-à-dire que le langage
+qu'elle engendre est exactement le même, et qui soit adaptée à
+l'analyse syntaxique au sein même du langage OCaml (à l'aide d'un type
+de donnée spécial, appelé \emph{flux}). La contrainte que nous nous
+sommes imposée est très forte: nous voulions une grammaire LL(1), même
+si OCaml permet la reconnaissance de langages engendrés par des
+grammaires algébriques. D'autre part, nous savions qu'il n'est pas
+décidable de déterminer si, étant donné deux grammaires non
+algébriques, les deux langages engendrés sont les mêmes ou
+non~\citep{AhoUllman}. Nous savions d'autre part qu'il n'est pas
+décidable non plus de déterminer si, étant donné une grammaire non
+contextuelle, il existe une grammaire LL(1) équivalente ou non. Aussi
+nous avons entrepris de transformer la grammaire initiale à l'aide de
+pas élémentaires réversibles et bien définis, pour obtenir un
+grammaire dont nous prouvons qu'elle est LL(1). Chaque transformation
+est décrite en fonction d'opérations rationnelles (union, produit et
+étoile) garantissant l'invariance du langage engendré par la grammaire
+résultante. Les macros ASN.1 sont traitées mais pas dans toute leur
+généralité, étant donné que cela est irréalisable (il est indécidable
+de déterminer si une grammaire non algébrique est ambigüe ou non). Les
+restrictions apportées permettent de réaliser en OCaml un analyseur
+syntaxique complet, correct et mono-passe.
+
+Notre description étant purement syntaxique, nous l'avons alors
+complétée par la contrepartie sémantique de X.680 qui capture
+l'essence des processus de codage et de décodage, sans pour autant
+constituer à part entière la description de la partie finale d'un
+compilateur ASN.1. Pour ce faire nous avons défini un codage de
+référence à partir des BER~\citep{X.690}, et l'ensemble des codes des
+valeurs ASN.1 (appelés ici \emph{valeurs sémantiques}, par opposition
+aux \emph{valeurs syntaxiques} que sont les valeurs ASN.1).
+
+L'étape suivante à été la restructuration de la formalisation de façon
+à dégager un noyau d'ASN.1, c'est-à-dire un sous-ensemble de X.680,
+entièrement couvert par la sémantique, car la complexité de la norme
+ne permettait raisonnablement pas de d'étendre la sémantique à toutes
+les spécifications possibles. Le noyau d'ASN.1 est ainsi défini de
+façon opérationnelle au moyen d'une suite de réécritures à partir de
+X.680. Le but fondamental de ces réécritures est de réduire les très
+nombreuses constructions de X.680 et d'obtenir des spécifications plus
+simples.
+
+Nous avons ensuite formalisé le contrôle syntaxique des types du noyau
+d'ASN.1, c'est-à-dire, étant donné une valeur et un type, déterminer
+s'ils sont compatibles (si la valeur est bien typée). Nous énonçons
+alors et prouvons le théorème suivant: si l'on impose aux types une
+contrainte supplémentaire et normalisée dans X.680, à savoir que les
+noms des champs des types structurés doivent être tous distincts entre
+eux, alors notre spécification du contrôle des types est non-ambigüe,
+ou, en termes de l'algorithme associé: ce dernier est
+déterministe. Cela signifie que le contrôle des types, s'il réussi, ne
+peut le faire que d'une seule façon. Cela implique aussi que l'analyse
+par cas de notre spécification peut être reprise telle quelle pour
+écrire l'algorithme de contrôle syntaxique des types.
+
+Toujours en restant au niveau syntaxique, nous avons complété le
+contrôle des types par le contrôle des sous-types, c'est-à-dire, étant
+donné un type T et une contrainte de sous-typage $\sigma$, déterminer
+s'ils sont compatibles, c'est-à-dire si le sous-type résultant possède
+au moins une valeur. Supposons la donnée d'une déclaration de valeur
+d'un sous-type. Nous commençons par réduire la spécification pour
+l'amener dans le noyau d'ASN.1, en effectuant un certain nombre de
+contrôles. Ensuite, nous ignorons les contraintes de sous-typage et
+nous appliquons le contrôle des types que nous venons juste
+d'esquisser. La dernière étape est de s'assurer, sachant que la valeur
+$v$~est de type~T, si le type~T contraint par $\sigma$~et~$v$, est un
+sous-type non vide. La raison de ce procédé en deux temps (type, puis
+sous-type plus valeur) est la grande dépendance entre types, valeurs
+et contraintes de sous-typage, qui rend improbable l'existence d'un
+traitement global compréhensible et correct si le contrôle des
+sous-types a une contre-partie sémantique. Le principe du contrôle des
+sous-types est fondé sur une série de réécritures qui sont censées
+laisser invariante la sémantique. Les contraintes complexes sont
+réduites en des contraintes élémentaires, comme X.680 est réduit vers
+le noyau d'ASN.1.
+
+Nous définissons ensuite la sémantique du noyau. Cette partie est
+constituée d'abord de la définition des codes et d'un codage de
+référence pour les valeurs ASN.1. Puis nous définissons un contrôle
+sémantique des types, c'est-à-dire, étant donné un code et un type du
+noyau, déterminer s'ils sont compatibles (si le code est bien typé). À
+partir de ces relations, nous énonçons et prouvons un théorème de
+correction sémantique du codage de référence dans le noyau: soient une
+valeur~$v$ de type~T (contrôle syntaxique des types) et~$c$ le code
+de~$v$ en supposant que $v$~est de type~T (codage de référence), alors
+le code $c$ est de type T (contrôle sémantique des
+types). L'interprétation informelle de ce résultat de correction de la
+transmission est d'établir formellement que le type des valeurs ASN.1
+dans le noyau est conservé par le codage de référence, ce qui
+constitue la quintessence des BER. Le chapitre consacré à la
+sémantique du noyau est complété par un théorème supplémentaire ayant
+trait à la non-ambigüité de la transmission. Nous énonçons et
+démontrons qu'en imposant aux types une contrainte supplémentaire et
+normalisée par X.680, portant sur les étiquettes des champs des types
+structurés, nous pouvons prouver que notre spécification du contrôle
+sémantique des types est non-ambigüe, ou, en termes de l'algorithme
+associé, que ce dernier est déterministe. Cela signifie que le
+contrôle sémantique des types, s'il réussi, ne peut le faire que d'une
+seule façon. En d'autres termes encore, cela implique qu'un éventuel
+décodage fondé sur ce contrôle s'exécutera sans rebroussements, donc
+efficacement. Cela implique aussi que l'analyse par cas de notre
+spécification formelle peut être reprise telle quelle pour écrire
+l'algorithme de contrôle sémantique des types.
+
+En regroupant tous nos théorèmes, nous pouvant dire que nous avons
+établi, pour le noyau d'ASN.1 dont les types structurés sont
+contraints sur les noms et les étiquettes de leurs champs, le résultat
+global suivant. Soit~$c$ le code d'une valeur~$v$ de type~T. Alors un
+décodage de~$c$, fondé sur notre contrôle sémantique des types,
+produirait une valeur ASN.1 identique (soit syntaxiquement égale)
+à~$v$. En d'autres termes, la composition du codage et du décodage est
+l'identité. Dans la pratique toute fois, le décodage ne produit jamais
+de valeurs ASN.1, car celles-ci n'existent que statiquement, mais
+exprimer ainsi notre résultat en montre mieux la portée.
+
+Rappelons que la réduction de X.680 vers le noyau et le contrôle des
+sous-types sont des étapes purement syntaxiques et non couvertes par
+la sémantique, à cause de la très grande complexité de X.680 qui
+aurait rendu probablement impossible l'établissement des preuves par
+un humain (combinatoire astronomique des cas).
+
+Le plan de ce document est le suivant. En annexe se trouvent la
+formalisation complète, les preuves de nos théorèmes ainsi que l'étude
+de la syntaxe d'ASN.1. Cette annexe intéressera les théoriciens des
+langages qui y trouveront des définitions rigoureuses et précises des
+concepts, formalismes, spécifications et algorithmes en jeu. Les
+chapitres qui suivent présentent de façon informelle notre thèse à
+l'aide de nombreux exemples en syntaxe ASN.1, et sont destinés aussi
+bien aux télécommunicants qu'aux amateurs de logique formelle. Tout
+d'abord le chapitre~\vref{noyau_ASN.1} est consacré à l'obtention d'un
+noyau de X.680. Le chapitre~\vref{controle_des_types_informel}
+présente le contrôle syntaxique des types. Le
+chapitre~\vref{semantique_informelle} traite de la sémantique. Pour
+finir, le chapitre~\vref{controle_des_sous-types_informel} présente le
+contrôle des sous-types.

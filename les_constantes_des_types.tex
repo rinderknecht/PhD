@@ -1,0 +1,84 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \{(\textrm{T}, \sigma)\})\\
+  \domain{\mathcal{B}} \Delta \bouchon{29} \textrm{T} \rightarrow
+  (\overline{\textrm{T}}, \domain{\mathcal{B}_0} \Delta_0)\\
+  \domain{\mathcal{B}_0} \Delta_0 \bouchon{2} \domain{\mathcal{A}}
+  \Gamma \rightarrow (\domain{\overline{\mathcal{A}}} \overline\Gamma,
+  \domain{\mathcal{B}_1} \Delta_1)\\
+  \domain{\overline{\mathcal{A}}_0} \overline\Gamma_0 \triangleq
+  \domain{\overline{\mathcal{A}}} \overline\Gamma \oplus x \mapsto (\alpha,
+  \tau, \{(\overline{\textrm{T}}, \sigma)\})}
+%-----
+{\domain{\mathcal{B}} \Delta \bouchon{2} \domain{\{x\} \uplus
+    \mathcal{A}} \Gamma \rightarrow (\domain{\overline{\mathcal{A}}_0}
+  \overline\Gamma_0, \domain{\mathcal{B}_1} \Delta_1)}
+
+\inferrule
+  {}
+  {\domain{\mathcal{B}} \Delta \bouchon{2} \domain{\varnothing} \Gamma
+    \rightarrow (\domain{\varnothing} \Gamma, \domain{\mathcal{B}}
+    \Delta)}
+
+% INTEGER
+%
+\inferrule
+  {y \not\in \mathcal{B}\\
+  \domain{\mathcal{B}_0} \Delta_0 \triangleq \domain{\mathcal{B}} \Delta
+  \oplus y \mapsto (\emptyL\!, \textsf{TRef} \, \INTEGER, \{\}, v)\\ 
+  \domain{\mathcal{B}_0} \Delta_0 \bouchon{29} \textsf{INTEGER} \,\,
+  \mathcal{C} \rightarrow (\textsf{INTEGER} \,\, \overline{\mathcal{C}},
+  \domain{\mathcal{B}_1} \Delta_1)\\
+  \overline{\textrm{T}} \triangleq \textsf{INTEGER} \,\, ((c,
+  \textsf{VRef} \, y ) \Cons \overline{\mathcal{C}})}
+%-----
+  {\domain{\mathcal{B}} \Delta \bouchon{29} \textsf{INTEGER} \,\, ((c,
+    v) \Cons \mathcal{C}) \rightarrow (\overline{\textrm{T}},
+    \domain{\mathcal{B}_1} \Delta_1)}
+
+% ENUMERATED
+%
+\inferrule
+  {y \not\in \mathcal{B}\\
+  \domain{\mathcal{B}_0} \Delta_0 \triangleq \domain{\mathcal{B}}
+  \Delta \oplus y \mapsto (\emptyL\!, \textsf{TRef} \, \INTEGER, \{\},
+  v)\\
+  \domain{\mathcal{B}_0} \Delta_0 \bouchon{29} \textsf{ENUMERATED}
+  \,\, \mathcal{C} \rightarrow (\textsf{ENUMERATED} \,\,
+  \overline{\mathcal{C}}, \domain{\mathcal{B}_1} \Delta_1)\\
+  \overline{\textrm{T}} \triangleq \textsf{ENUMERATED} \,\, ((c,
+  \textsf{VRef} \, y ) \Cons \overline{\mathcal{C}})}
+%-----
+  {\domain{\mathcal{B}} \Delta \bouchon{29} \textsf{ENUMERATED} \,\,
+    ((c, v) \Cons \mathcal{C}) \rightarrow (\overline{\textrm{T}},
+    \domain{\mathcal{B}_1} \Delta_1)}
+
+% BIT STRING
+%
+\inferrule
+  {y \not\in \mathcal{B}\\
+  \domain{\mathcal{B}_0} \Delta_0 \triangleq \domain{\mathcal{B}} \Delta
+  \oplus y \mapsto (\emptyL\!, \textsf{TRef} \, \INTEGER, \{\}, v)\\
+  \domain{\mathcal{B}_0} \Delta_0 \bouchon{29} \textsf{BIT STRING}
+  \,\, \mathcal{C} \rightarrow (\textsf{BIT STRING} \,\,
+  \overline{\mathcal{C}}, \domain{\mathcal{B}_1} \Delta_1)\\
+  \overline{\textrm{T}} \triangleq \textsf{BIT STRING} \,\, ((c,
+  \textsf{VRef} \, y ) \Cons \overline{\mathcal{C}})}
+%-----
+  {\domain{\mathcal{B}} \Delta \bouchon{29} \textsf{BIT STRING} \,\,
+    ((c, v) \Cons \mathcal{C}) \rightarrow (\overline{\textrm{T}},
+    \domain{\mathcal{B}_1} \Delta_1)}
+
+% Others
+%
+\inferrule
+  {\textrm{T} \nlhd \textsf{INTEGER} \, (\wild\!\Cons\wild\!) \mid
+    \textsf{BIT STRING} \, (\wild\!\Cons\wild\!) \mid \textsf{ENUMERATED}
+    \, (\wild\!\Cons\wild\!)}
+%-----
+  {\domain{\mathcal{B}} \Delta \bouchon{29} \textrm{T} \rightarrow
+    (\textrm{T}, \domain{\mathcal{B}} \Delta)}
+
+\end{mathparpagebreakable}

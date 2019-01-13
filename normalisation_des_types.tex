@@ -1,0 +1,36 @@
+%%-*-latex-*-
+
+\subsection{Globalisation des types locaux sans leur étiquetage}
+\label{globalisation_des_types_locaux_sans_leur_etiquetage}
+\input{globalisation_des_types_locaux_sans_leur_etiquetage}
+
+\subsection{Globalisation des types inclus}
+\label{globalisation_des_types_inclus}
+\input{globalisation_des_types_inclus}
+
+\subsection{Dépliage des abréviations et sélections globales}
+\label{depliage_des_abreviations_et_selections_globales}
+\input{depliage_des_abreviations_et_selections_globales}
+
+\subsection{Résolution de \textsf{AUTOMATIC TAGS} et \textsf{COMPONENTS OF}}
+\label{resolution_de_AUTOMATIC_TAGS_et_COMPONENTS_OF}
+\input{resolution_de_AUTOMATIC_TAGS_et_COMPONENTS_OF}
+
+\subsection{Normalisation des types}
+
+\begin{mathpar}
+
+\inferrule
+  {\bouchon{65} \domain{\mathcal{A}} \Gamma \rightarrow
+  \domain{\mathcal{A}_0} \Gamma_0\\
+  \bouchon{0} \domain{\mathcal{A}_0} \Gamma_0 \rightarrow
+  \domain{\mathcal{A}_1} \Gamma_1\\
+  \bouchon{68} \domain{\mathcal{A}_1} \Gamma_1 \rightarrow
+  \domain{\mathcal{A}_2} \Gamma_2\\
+  \bouchon{9} \domain{\mathcal{A}_2} \Gamma_2 \rightarrow
+  \domain{\mathcal{A}_3} \Gamma_3}
+%-----
+  {\bouchon{31} \domain{\mathcal{A}} \Gamma \rightarrow
+    \domain{\mathcal{A}_3} \Gamma_3}
+
+\end{mathpar}

@@ -1,0 +1,196 @@
+%%-*-latex-*-
+
+\begin{framed}
+\begin{mathpar}
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \{(\textrm{T}, \sigma)\}) \\
+   \domain{\mathcal{A}} \Gamma \Vdash \textrm{T} \\
+   \Bouchon{3} \domain{\mathcal{A}} \Gamma}
+%-----
+  {\Bouchon{3} \domain{\{x\} \uplus \mathcal{A}} \Gamma}
+
+\inferrule
+  {}
+  {\Bouchon{3} \domain{\varnothing} \Gamma}
+\end{mathpar}
+\end{framed}
+
+\begin{framed}
+\begin{mathpar}
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \emptyL\!, \emptyL\!, \emptyL
+   \Bouchon{1} \textrm{T}}
+%-----
+  {\domain{\mathcal{A}} \Gamma \Vdash \textrm{T}}
+\end{mathpar}
+\end{framed}
+
+% Correct recursive types
+%
+\begin{framed}
+\begin{mathpar}
+\inferrule
+   {(\textrm{T}, \emptyL\!) \in \textrm{H}_1}
+%-----
+   {\domain{\mathcal{A}} \Gamma, \textrm{H}_1, \textrm{H}_0, \emptyL 
+    \Bouchon{1} \textrm{T}}
+\end{mathpar}
+\end{framed}
+
+\begin{framed}
+\begin{mathpar}
+% Type unfolding 1
+%
+\inferrule
+   {(\textrm{T}, \emptyL\!) \not\in \textrm{H}_0\\   
+   x' \in \mathcal{A}\\
+   \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+   \domain{\mathcal{A}} \Gamma, \textrm{H}_1, (\textrm{T}, \emptyL\!)
+   \Cons \textrm{H}_0, \emptyL \Bouchon{1} \textrm{T}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}_1, \textrm{H}_0, \emptyL
+    \Bouchon{1} \textsf{TRef} \, (x') \AS \textrm{T}}
+
+% Type unfolding 2
+%
+\inferrule
+   {(\textrm{T}, l \Cons\!\wild\!) \not\in \textrm{H}_0\\
+   x' \in \mathcal{A}\\
+   \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+   \domain{\mathcal{A}} \Gamma, \textrm{H}_1, (\textrm{T}, \Lambda) \Cons
+   \textrm{H}_0, \Lambda \Bouchon{1} \textrm{T}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}_1, \textrm{H}_0, (l \Cons
+    \!\wild \AS \Lambda) \Bouchon{1} \textsf{TRef} \, (x') \AS
+    \textrm{T}}
+\end{mathpar}
+\end{framed}
+
+\begin{framed}
+\begin{mathpar}
+% Constraint setting 1
+%
+\inferrule
+  {(\textrm{T}, \emptyL\!) \not\in \textrm{H}_0\\
+   \domain{\mathcal{A}} \Gamma, \textrm{H}_1, (\textrm{T}, \emptyL\!)
+   \Cons \textrm{H}_0, [l'] \Bouchon{1} \textrm{T}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}_1, \textrm{H}_0, \emptyL
+    \Bouchon{1} (l' < \tau' \, \textrm{T}') \AS \textrm{T}}
+
+% Constraint setting 2
+%
+\inferrule
+  {(\textrm{T}, l\Cons\!\wild\!) \not\in \textrm{H}_0\\
+  \domain{\mathcal{A}} \Gamma, \textrm{H}_1, (\textrm{T}, \Lambda) \Cons
+  \textrm{H}_0, l' \Cons \Lambda \Bouchon{1} \textrm{T}'}
+%-----
+ {\domain{\mathcal{A}} \Gamma, \textrm{H}_1, \textrm{H}_0, (l
+   \Cons\!\wild \AS \Lambda) \Bouchon{1} (l' < \tau' \, \textrm{T}')
+   \AS \textrm{T}}
+
+\end{mathpar}
+\end{framed}
+
+\begin{framed}
+\begin{mathpar}
+% Constraint resolution. Elimination in Ho.
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}_1, \textrm{H}_0, \Lambda
+    \Bouchon{1} \textrm{T}}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}_1, (\wild\!, 
+    l\Cons\!\wild\!) \Cons \textrm{H}_0, (l \Cons \!\wild \AS \Lambda)
+    \Bouchon{1} \wildCHOICE \AS \textrm{T}}
+
+% Constraint resolution. Elimination in \Lambda.
+%
+\inferrule
+   {f' \lhd (l, \tau', \textrm{T}', \sigma', s')\\
+   \domain{\mathcal{A}} \Gamma, \textrm{H}_1, \textrm{H}_0, \Lambda
+   \Bouchon{1} \textrm{T}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}_1, \textrm{H}_0, l \Cons
+    \Lambda \Bouchon{1} \textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}')}
+\end{mathpar}
+\end{framed}
+
+\begin{framed}
+\begin{mathpar}
+% CHOICE
+%
+\inferrule
+   {\textrm{T} \lhd \CHOICE{i}{n}\\
+   \forall i \in [1..n].\domain{\mathcal{A}} \Gamma, (\textrm{T},
+   \emptyL\!) \Cons \textrm{H}_0 \Append \textrm{H}_1, \emptyL\!,
+   \emptyL \Bouchon{1} \textrm{T}_i\\
+   \exists j \in  [1..n].\domain{\mathcal{A}} \Gamma, \textrm{H}_1,
+   (\textrm{T}, \emptyL\!) \Cons \textrm{H}_0, \emptyL \Bouchon{1}
+   \textrm{T}_j}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}_1, \textrm{H}_0, \emptyL
+    \Bouchon{1} \textrm{T}}
+
+% SEQUENCE/SET
+%
+\inferrule
+   {\textrm{T} \lhd (\textsf{SEQUENCE $\mid$ SET}) \,
+     \OList{$\varphi_i$}{i}{n}\\
+   (\textrm{T}, \emptyL\!) \not\in \textrm{H}_0\\
+   \forall i \in [1..n].\domain{\mathcal{A}} \Gamma, \textrm{H}_1,
+   (\textrm{T}, \emptyL\!) \Cons \textrm{H}_0, \emptyL \Bouchon{2}
+   \varphi_i}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}_1, \textrm{H}_0, \emptyL
+    \Bouchon{1} \textrm{T}}
+\end{mathpar}
+\end{framed}
+
+\begin{framed}
+\begin{mathpar}
+% Others
+%
+\inferrule
+  {\textrm{T} \lhd \wildINTEGER \mid \wildBITSTRING \mid
+    \wildENUMERATED \\
+  \mid \textsf{BOOLEAN} \mid \textsf{NULL} \mid \textsf{OCTET STRING}
+  \mid \textsf{CharString} \, \wild \\
+  \mid \wildSETOF \mid \wildSEQUENCEOF\\
+  \mid \emptySET \mid \emptySEQUENCE}
+%-----
+ {\domain{\mathcal{A}} \Gamma, \textrm{H}_1, \textrm{H}_0, \emptyL
+   \Bouchon{1} \textrm{T}}
+\end{mathpar}
+\end{framed}
+
+\bigskip
+\bigskip
+
+\begin{framed}
+\begin{mathpar}
+\inferrule
+  {s' \lhd \textsf{Some} \, \textsf{OPTIONAL}}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}_1, \textrm{H}_0, \emptyL
+    \Bouchon{2} \textsf{Field} \, (l', \tau', \textrm{T}', \sigma',
+    s')}
+
+\inferrule
+  {s' \lhd \textsf{Some} \, (\textsf{DEFAULT} \wild\!)\\
+  \domain{\mathcal{A}} \Gamma, \textrm{H}_1, \textrm{H}_0, \emptyL
+  \Bouchon{1} \textrm{T}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}_1, \textrm{H}_0, \emptyL
+    \Bouchon{2} \textsf{Field} \, (l', \tau', \textrm{T}', \sigma',
+    s')}
+
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}_1, \textrm{H}_0, \emptyL
+    \Bouchon{1} \textrm{T}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}_1, \textrm{H}_0, \emptyL
+    \Bouchon{2} \textsf{COMPONENTS OF} \, \tau' \, \textrm{T}' \,
+    \sigma'}
+\end{mathpar}
+\end{framed}

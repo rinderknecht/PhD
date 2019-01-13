@@ -1,0 +1,176 @@
+%%-*-latex-*-
+
+Première étape: réécriture des types et récolte des étiquetages locaux
+avec leur abréviation associée.
+\begin{mathparpagebreakable}
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \{(\textrm{T}, \sigma)\})\\
+  \domain{\mathcal{X}} \Xi \bouchon{3} \textrm{T} \rightarrow
+  (\overline{\textrm{T}}, \domain{\mathcal{X}_0} \Xi_0)\\
+  \domain{\mathcal{X}_0} \Xi_0 \bouchon{49} \domain{\mathcal{A}}
+  \Gamma \rightarrow (\domain{\overline{\mathcal{A}}} \overline\Gamma, \domain{\mathcal{X}_1} \Xi_1)\\
+  \overline\gamma \triangleq x \mapsto (\alpha, \tau, \{(\overline{\textrm{T}}, \sigma)\})}
+%-----
+  {\domain{\mathcal{X}} \Xi \bouchon{49} \domain{\{x\} \uplus
+      \mathcal{A}} \Gamma \rightarrow (\domain{\overline{\mathcal{A}}}
+    \overline\Gamma \oplus \overline\gamma, \domain{\mathcal{X}_1} \Xi_1)}
+
+\inferrule
+  {}
+  {\domain{\mathcal{X}} \Xi \bouchon{49} \domain{\varnothing}
+    \rightarrow (\domain{\varnothing}, \domain{\mathcal{X}} \Xi)}
+
+% SET OF
+%
+\inferrule
+  {\tau' \nlhd \emptyL\\
+  \overline{\textrm{T}} \triangleq \textsf{SET OF} \,\, \emptyL \,
+  (\textsf{TRef} \, x) \, \{\}}
+%-----
+  {\domain{\mathcal{X}} \Xi \bouchon{3} \textsf{SET OF} \, \tau' \,
+    (\textsf{TRef} \, x) \, \{\} \rightarrow (\overline{\textrm{T}},
+    \domain{\mathcal{X}} \Xi \oplus x \mapsto \tau')}
+
+\inferrule
+  {\textrm{T} \lhd \textsf{SET} \, \emptyL \,\, \textrm{T}' \,\, \{\}}
+%-----
+  {\domain{\mathcal{X}} \Xi \bouchon{3} \textrm{T} \rightarrow
+    (\textrm{T}, \domain{\mathcal{X}} \Xi)}
+
+% SEQUENCE OF
+%
+\inferrule
+  {\tau' \nlhd \emptyL\\
+  \overline{\textrm{T}} \triangleq \textsf{SEQUENCE OF} \,\, \emptyL
+  \, (\textsf{TRef} \, x) \, \{\}}
+%-----
+  {\domain{\mathcal{X}} \Xi \bouchon{3} \textsf{SEQUENCE OF} \, \tau'
+    \, (\textsf{TRef} \, x) \, \{\} \rightarrow (\overline{\textrm{T}},
+    \domain{\mathcal{X}} \Xi \oplus x \mapsto \tau')}
+
+\inferrule
+  {\textrm{T} \lhd \textsf{SEQUENCE} \, \emptyL \,\, \textrm{T}' \,\,
+    \{\}}
+%-----
+  {\domain{\mathcal{X}} \Xi \bouchon{3} \textrm{T} \rightarrow
+    (\textrm{T}, \domain{\mathcal{X}} \Xi)}
+
+% CHOICE
+%
+\inferrule
+  {f' \lhd (l', \tau', \textsf{TRef} \, x, \{\}, s')\\
+  \tau' \nlhd \emptyL\\
+  \domain{\mathcal{X}} \Xi \bouchon{3} \textsf{CHOICE} \, \mathcal{F}'
+  \rightarrow (\textsf{CHOICE} \, \overline{\mathcal{F}}', \domain{\mathcal{X}_0} \Xi_0)\\
+  \overline{\textrm{T}} \triangleq \textsf{CHOICE} \, ((l', \emptyL\!,
+  \textsf{TRef} \, x, \{\}, s') \Cons \overline{\mathcal{F}}')}
+%-----
+  {\domain{\mathcal{X}} \Xi \bouchon{3} \textsf{CHOICE} \, (f' \Cons
+    \mathcal{F}') \rightarrow (\overline{\textrm{T}},
+    \domain{\mathcal{X}_0} \Xi_0 \oplus x \mapsto \tau')}
+
+\inferrule
+  {f' \lhd (l', \emptyL\!, \textsf{TRef} \, x, \{\}, s')\\
+  \domain{\mathcal{X}} \Xi \bouchon{3} \textsf{CHOICE} \, \mathcal{F}'
+  \rightarrow (\textsf{CHOICE} \, \overline{\mathcal{F}}',
+  \domain{\mathcal{X}_0} \Xi_0)\\
+  \overline{\textrm{T}} \triangleq \textsf{CHOICE} \, (f' \Cons \overline{\mathcal{F}}')}
+%-----
+  {\domain{\mathcal{X}} \Xi \bouchon{3} \textsf{CHOICE} \, (f' \Cons
+    \mathcal{F}') \rightarrow (\overline{\textrm{T}},
+    \domain{\mathcal{X}_0} \Xi_0)}
+
+% SET
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textsf{TRef} \, x, \{\}, s')\\
+  \tau' \nlhd \emptyL\\
+  \domain{\mathcal{X}} \Xi \bouchon{3} \textsf{SET} \, \Phi'
+  \rightarrow (\textsf{SET} \, \overline\Phi', \domain{\mathcal{X}_0}
+  \Xi_0)\\
+  \overline{\textrm{T}} \triangleq \textsf{SET} \, (\textsf{Field} \,
+  (l', \emptyL\!, \textsf{TRef} \, x, \{\}, s') \Cons \overline\Phi')}
+%-----
+  {\domain{\mathcal{X}} \Xi \bouchon{3} \textsf{SET} \, (\varphi'
+    \Cons \Phi') \rightarrow (\overline{\textrm{T}},
+    \domain{\mathcal{X}_0} \Xi_0 \oplus x \mapsto \tau')}
+
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \emptyL\!, \textsf{TRef} \, x, \{\}, s')\\
+  \domain{\mathcal{X}} \Xi \bouchon{3} \textsf{SET} \, \Phi'
+  \rightarrow (\textsf{SET} \, \overline\Phi', \domain{\mathcal{X}_0}
+  \Xi_0)\\
+  \overline{\textrm{T}} \triangleq \textsf{SET} \, (\varphi' \Cons
+  \overline\Phi')}
+%-----
+  {\domain{\mathcal{X}} \Xi \bouchon{3} \textsf{SET} \, (\varphi'
+    \Cons \Phi') \rightarrow (\overline{\textrm{T}}, \domain{\mathcal{X}_0} \Xi_0)}
+
+% SEQUENCE
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textsf{TRef} \, x, \{\}, s')\\
+  \tau' \nlhd \emptyL\\
+  \domain{\mathcal{X}} \Xi \bouchon{3} \textsf{SEQUENCE} \, \Phi'
+  \rightarrow (\textsf{SEQUENCE} \, \overline\Phi', \domain{\mathcal{X}_0} \Xi_0)\\
+  \overline{\textrm{T}} \triangleq \textsf{SEQUENCE} \,
+  (\textsf{Field} \, (l', \emptyL\!, \textsf{TRef} \, x, \{\}, s')
+  \Cons \overline\Phi')}
+%-----
+  {\domain{\mathcal{X}} \Xi \bouchon{3} \textsf{SEQUENCE} \, (\varphi'
+    \Cons \Phi') \rightarrow (\overline{\textrm{T}},
+    \domain{\mathcal{X}_0} \Xi_0 \oplus x \mapsto \tau')}
+
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \emptyL\!, \textsf{TRef} \, x, \{\}, s')\\
+  \domain{\mathcal{X}} \Xi \bouchon{3} \textsf{SEQUENCE} \, \Phi'
+  \rightarrow (\textsf{SEQUENCE} \, \overline\Phi', \domain{\mathcal{X}_0} \Xi_0)\\
+  \overline{\textrm{T}} \triangleq \textsf{SEQUENCE} \, (\varphi'
+  \Cons \overline\Phi')}
+%-----
+  {\domain{\mathcal{X}} \Xi \bouchon{3} \textsf{SEQUENCE} \, (\varphi'
+    \Cons \Phi') \rightarrow (\overline{\textrm{T}},
+    \domain{\mathcal{X}_0} \Xi_0)}
+
+% Others
+%
+\inferrule
+  {\textrm{T} \nlhd \wildSETOF \mid \wildSEQUENCEOF\\
+   \mid \textsf{CHOICE} \,
+   (\wild\!\Cons\wild\!) \mid \textsf{SET} \,
+   (\wild\!\Cons\wild\!) \mid \textsf{SEQUENCE} \, (\wild\!\Cons\wild\!)}
+%-----
+  {\domain{\mathcal{X}} \Xi \bouchon{3} \textrm{T} \rightarrow
+    (\textrm{T}, \domain{\mathcal{X}} \Xi)}
+\end{mathparpagebreakable}
+
+Seconde étape: on enfile les étiquetages locaux récoltés précédemment,
+sur les types globaux.
+\begin{mathparpagebreakable}
+\inferrule
+  {x \in \mathcal{X}\\
+  \Gamma(x) \lhd (\alpha, \tau, \{(\textrm{T}, \sigma)\})\\
+  \domain{\mathcal{X}} \Xi \bouchon{4} \domain{\mathcal{A}} \Gamma
+  \rightarrow \domain{\overline{\mathcal{A}}} \overline\Gamma\\
+  \overline\gamma \triangleq x \mapsto (\alpha, \Xi(x) \Append \tau, \{(\textrm{T}, \sigma)\})}
+%-----
+  {\domain{\mathcal{X}} \Xi \bouchon{4} \domain{\{x\} \uplus
+      \mathcal{A}} \Gamma \rightarrow \domain{\overline{\mathcal{A}}}
+    \overline\Gamma \oplus \overline\gamma}
+
+\inferrule
+  {x \not\in \mathcal{X}\\
+  \domain{\mathcal{X}} \Xi \bouchon{4} \domain{\mathcal{A}} \Gamma
+  \rightarrow \domain{\overline{\mathcal{A}}} \overline\Gamma\\
+  \overline\gamma \triangleq x \mapsto  \Gamma(x)}
+%-----
+  {\domain{\mathcal{X}} \Xi \bouchon{4} \domain{\{x\} \uplus
+      \mathcal{A}} \Gamma \rightarrow \domain{\overline{\mathcal{A}}}
+    \overline\Gamma \oplus \overline\gamma}
+
+\inferrule
+  {}
+  {\domain{\mathcal{X}} \Xi \bouchon{4} \domain{\varnothing} \Gamma
+    \rightarrow \domain{\varnothing} \Gamma}
+
+\end{mathparpagebreakable}

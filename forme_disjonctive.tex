@@ -1,0 +1,47 @@
+%%-*-latex-*-
+
+\noindent
+\textbf{let} merge = \textbf{function} \\
+\hspace*{1.2mm} $(\textsf{Inter} \, \overline\Sigma_0, \textsf{Inter} \, \overline\Sigma_1)$ $\rightarrow$ $\overline\Sigma_0 \Append \overline\Sigma_1$ \\
+$\mid$ $(\textsf{Inter} \, \overline\Sigma_0, \overline\nu_1)$ $\rightarrow$ $\overline\Sigma_0 \Append [\{\overline\nu_1\}]$ \\
+$\mid$ $(\overline\nu_0, \textsf{Inter} \, \overline\Sigma_1)$ $\rightarrow$ $\{\overline\nu_0\} \Cons \overline\Sigma_1$ \\
+$\mid$ $(\overline\nu_0, \overline\nu_1)$ $\rightarrow$ $[\{\overline\nu_0\}; \{\overline\nu_1\}]$ \\
+
+\noindent 
+\textbf{let rec} distribute\_right = \textbf{function} \\
+\hspace*{1.2mm} $(\overline\nu_0, \{\overline\nu_1\} \uplus \overline\sigma_1)$ $\rightarrow$ $\{\textsf{Inter} \, (\textrm{merge} \, (\overline\nu_0, \overline\nu_1))\} \cup (\textrm{distribute\_right} \, (\overline\nu_0, \overline\sigma_1))$ \\
+$\mid$ \wild \, $\rightarrow$ \{\} \\
+
+\noindent
+\textbf{let rec} distribute\_left = \textbf{function} \\
+\hspace*{1.2mm} $(\{\overline\nu_0\} \uplus \overline\sigma_0, \overline\sigma_1)$ $\rightarrow$ $(\textrm{distribute\_right} \, (\overline\nu_0, \overline\sigma_1)) \cup (\textrm{distribute\_left} \, (\overline\sigma_0, \overline\sigma_1))$ \\
+$\mid$ \wild \, $\rightarrow$ \{\} \\
+
+\noindent
+\textbf{let rec} disjonctive\_intersection  = \textbf{function} \\
+\hspace*{1.2mm} $\sigma \Cons \Sigma$ $\rightarrow$ \textbf{let} $\overline\sigma_0$ = disjonctive\_constraint  $\sigma$ \\
+\hspace*{15mm} \textbf{in} (\textbf{match} disjonctive\_intersection  $\Sigma$ \textbf{with} \\
+\hspace*{23mm} \{\} $\rightarrow$ $\overline\sigma_0$ \\
+\hspace*{21mm} $\mid$ $\overline\sigma_1$ $\rightarrow$ $\textrm{distribute\_left} \, (\overline\sigma_0, \overline\sigma_1)$) \\
+$\mid$ $\emptyL$ $\rightarrow$ \{\} \\
+
+\noindent
+\textbf{and} disjonctive\_constraint  = \textbf{function} \\
+\hspace*{1.2mm} $\{\nu\} \uplus \sigma$ $\rightarrow$ \textbf{let} $\overline\sigma_0$ = disjonctive\_base\_and\_intersection  $\nu$ \textbf{in} \\
+\hspace*{22mm} \textbf{let} $\overline\sigma_1$ = disjonctive\_constraint  $\sigma$ \\
+\hspace*{19mm} \textbf{in} $\overline\sigma_0 \cup \overline\sigma_1$ \\
+$\mid$ \{\} $\rightarrow$ \{\} \\
+
+\noindent
+\textbf{and} disjonctive\_base\_and\_intersection  = \textbf{function} \\
+\hspace*{1.2mm} \textsf{Inter} $\Sigma$ $\rightarrow$ disjonctive\_intersection $\Sigma$ \\
+$\mid$ \textsf{SIZE} $\sigma$ $\rightarrow$ \textbf{let} \SList{$\overline\nu_i$}{i}{n} = disjonctive\_constraint  $\sigma$ \\
+\hspace*{17mm} \textbf{in} $\bigcup_{i=1}^{n}$ \{\textsf{SIZE} \{$\overline\nu_i$\}\} \\
+$\mid$ \textsf{FROM} $\sigma$ $\rightarrow$ \{\textsf{FROM} (disjonctive\_constraint  $\sigma$)\} \\
+$\mid$ \textsf{INCLUDES} $\tau$ $\textrm{T}$ $\sigma$ $\rightarrow$ \{\textsf{INCLUDES} $\tau$ $\textrm{T}$ (disjonctive\_constraint  $\sigma$)\} \\
+$\mid$ \textsf{WITH COMPONENT} $\sigma$ $\rightarrow$\\
+\hspace*{5mm} \{\textsf{WITH COMPONENT} (disjonctive\_constraint
+$\sigma$)\}\\
+$\mid$ \textsf{WITH COMPONENTS} $(m, \OList{$(l_j, \sigma_j,  \hat\pi_j)$}{j}{p})$ $\rightarrow$ \\
+\{\textsf{WITH COMPONENTS} $(m, \OList{$(l_j, \textrm{disjonctive\_constraint} \, (\sigma_j),  \hat\pi_j)$}{j}{p})$\} \\
+$\mid$ $\nu$ $\rightarrow$ \{$\nu$\}

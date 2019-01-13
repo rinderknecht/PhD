@@ -1,0 +1,1307 @@
+%%-*-latex-*-
+
+\section{Macros}
+
+ASN.1 inclut une construction appelée «~macro~» qui permet au
+concepteur de protocoles d'étendre la syntaxe d'ASN.1. Cela signifie
+que l'analyseur syntaxique doit être capable de reconnaître de
+nouvelles notations pour les types et les valeurs, ou, en d'autres
+termes, il doit pouvoir étendre dynamiquement le langage qu'il
+reconnaît. Typiquement, cela rend ASN.1 contextuel, c'est-à-dire que
+l'analyse syntaxique ne peut être menée à bien qu'avec la connaissance
+d'un contexte (ce qui a été défini ailleurs dans la
+spécification). Une définition de macro (où la syntaxe pour les
+nouvelles valeurs et les nouveaux types sont spécifiées) est
+fondamentalement une extension de grammaire sans contrainte, par
+conséquent le spécifieur peut écrire des extensions ambiguës
+---~rappelons qu'il a été prouvé qu'aucun algorithme en pouvait
+s'assurer qu'une grammaire donnée est ambiguë ou non. En plus la
+sémantique donnée dans~\cite{ASN90} est obscure et incomplète.
+
+L'idée pour traiter les macros est d'utiliser la pleine fonctionnalité
+de OCaml, c'est-à-dire que le résultat de l'analyse syntaxique d'une
+définition de macro est une paire d'analyseurs syntaxiques (des
+fonctions): un pour les nouvelles notations de types et un pour les
+nouvelles notations de valeurs. Ils seront utilisés pour analyser
+leurs nouvelles notations correspondantes. En d'autres termes, nous
+calculons des fonctions à l'exécution qui sont elles-mêmes des
+analyseurs syntaxiques dédiés à la reconnaissance des nouvelles
+notations. Donc, dans la mesure où le résultat de l'analyse syntaxique
+d'une définition d'une définition de macro est un analyseur
+syntaxique, notre analyseur syntaxique devra effectuer certaines
+vérifications... sémantiques. Nous définissons ici un sous-ensemble de
+ce que les macros semblent devoir être, mais qui a l'avantage d'être
+intelligible, analysable automatiquement et aussi pas trop limité de
+façon à ce que l'usager ne se sente pas bridé. Pour une courte
+introduction et critique des macros, référez-vous
+à~\cite{Steedman0}. Nous utilisons le même vocabulaire pour les macros
+que pour les grammaires BNF que nous avons présenté à la
+section~\vref{GRAM}, mais avec le préfixe «~macro-~». Par exemple, une
+\emph{macro-règle} est une règle de grammaire définie dans une
+\emph{macro-définition}.
+
+Il y a toujours deux macro-règles spéciales \texttt{TYPE NOTATION} et
+\texttt{VALUE NOTATION} qui sont les points d'entrée de la
+macro-définition: la première définit la nouvelle syntaxe des types,
+et la dernière celle des valeurs. Une nouvelle notation de type
+(c'est-à-dire un type dénoté à l'aide d'une syntaxe définie dans une
+macro) et une notation de valeur (c'est-à-dire une valeur dénotée à
+l'aide d'une syntaxe définie dans une macro) sont respectivement
+appelées dans cette thèse \emph{instance de type} et \emph{instance de
+  valeur}.
+
+Attention! Dans~\citep{ASN90}, le terme «~production~» est utilisé
+dans le sens de «~règle~» que nous avons défini à la
+section~\vref{GRAM}, donc attention en lisant ce qui suit.
+
+\subsection{Contraintes de réalisation}
+\label{ContrReal}
+
+\subsubsection{Intégration incrémentale}
+\label{Incremental}
+
+Nous voulons intégrer le traitement des macros dans l'analyseur
+syntaxique de base d'une façon incrémentale. Par exemple nous voulons
+conserver le c{\oe}ur de notre arbre de syntaxe abstraite comme un
+sous-ensemble strict de notre nouvel arbre étendu pour les macros. Un
+autre point est que nous voulons conserver un analyseur lexical
+inchangé. Cela implique que, bien que le macro-terminal
+«~\texttt{"->"}~» soit licite dans une macro-définition, et accepté,
+l'analyseur syntaxique ne reconnaîtra pas la correspondante
+instance. En effet, l'analyseur lexical génère en fait \emph{deux}
+lexèmes: «~\texttt{-}~» et «~\texttt{$>$}~», car «~\texttt{-}~» n'est
+pas un lexème d'ASN.1. Le spécifieur aurait dû écrire «~\texttt{"-"
+    ">"}~». Pour relacher cette contrainte, nous avons préféré faire
+en sorte que l'analyseur lexical accepte toute sorte de symboles qui
+potentiellement peuvent apparaître lors d'une définition de macro (tel
+que «~$>$~», «~!~», etc.) ---~l'idéal serait un analyseur lexical qui
+soit lui aussi extensible dynamiquement.
+
+À cause de notre intégration incrémentale, nous devons abandonner
+notre convention lexicale pour les identificateurs de valeurs locales
+dans les macro-définitions. En effet, pour des raisons historiques,
+elle suit la même convention que pour les identificateurs de
+types~\citep[\S~A.2.8]{ASN90}, et rend par conséquent impossible la
+réutilisation de notre analyseur syntaxique de base pour la
+reconnaissance des valeurs. Donc nous imposons à l'intérieur des
+macro-définitions la même convention lexicale qu'à l'extérieur. En
+fait, nous identifions le lexème \texttt{local\-value\-reference} avec
+\texttt{value\-reference}, et non plus avec \texttt{type\-reference}
+(Cf.~\vref{Macro1}). Notons aussi que le lexème
+\texttt{macroreference} est un cas particulier de
+\texttt{typereference}: tout ses caractères doivent être des
+majuscules. C'est pourquoi nous ne pouvons détecter les
+identificateurs des macros à l'analyse lexicale, et nous laissons
+cette vérification à l'analyseur sémantique, en identifiant
+temporairement \texttt{macro\-reference} et \texttt{type\-reference}.
+
+\subsubsection{Macro-lexèmes}
+\label{String}
+
+Nous avon décidé de supprimer les macro-lexèmes \texttt{astring} et
+\texttt{"string"}. (Un macro-lexème est un terminal apparaissant dans
+la règle \textsf{SymbolDefn} et dénotant un lexème dans une
+macro-règle.) Ces deux macro-lexèmes sont définis respectivement
+dans~\citep[\S~A.2.7]{ASN90}, \citep[\S~A.3.10]{ASN90}
+et~\citep[\S~A.3.12]{ASN90}, mais leur définition est
+problématique. Pour \texttt{astring}, la difficulté est la même que
+celle montrée à la section~\vref{Incremental}. Pour \texttt{"string"},
+l'exemple suivant met en évidence le problème:
+\begin{sverb}
+MY-MODULE DEFINITIONS ::= BEGIN
+        
+PB MACRO ::= BEGIN
+  TYPE  NOTATION ::= string
+  VALUE NOTATION ::= value (VALUE BOOLEAN)
+END
+
+T     ::= TEST this is a string
+val T ::= TRUE
+ 
+END 
+\end{sverb} 
+L'analyseur syntaxique ne peut déterminer quand il doit s'arrêter de
+consommer des lexèmes (ici, les caractères «~this~», «~is~», «~a~»,
+«~string~») et peut par conséquent manger le début d'une possible
+déclaration de valeur qui suit (ici~\texttt{val}). Le pire cas serait
+quand \texttt{T}~est remplacé par un type selection arbitrairement
+long. Par souci de simplicité, nous proposons alors de supprimer ce
+macro-lexème \texttt{astring} et de modifier la sémantique
+de~\texttt{"string"}: on devra maintenant mettre entre guillemets la
+chaîne dénotée. Dans notre exemple précédent, nous devons écrire:
+\begin{sverb} 
+T     ::= TEST "this is a string" 
+val T ::= TRUE 
+\end{sverb}
+
+\subsubsection{Analyse syntaxique mono-passe}
+\label{Monopasse}
+
+Nous voulons conserver un analyseur syntaxique mono-passe et cela est
+possible grâce aux analyseurs syntaxiques d'ordre supérieurs de
+OCaml. Comme dit auparavant, le résultat d'une analyse syntaxique de
+macro-définition est une paire d'analyseurs dédiés, l'un aux instance
+de type et l'autre aux instances de valeurs. Ils sont stockés dans
+deux différentes tables globales, et quand l'analyseur syntaxique veut
+reconnaître une définition de type ou de valeur, il essaie alors
+d'abord de reconnaître une instance d'une macro en appelant les
+analyseurs disponibles dans ces tables. Si ceux-ci échouent tous, il
+essaie alors d'analyser comme si c'était de la syntaxe de base (sans
+macros). Notons que notre algorithme impose que les macro-définitions
+apparaissent \emph{avant} les instances.
+
+Les macros-définitiosn peuvent utiliser des instances d'une autre
+macro. Nous conservons cette possibilité,mais nous devons interdire
+les définitions mutuellement récursives car nous voulons conserver une
+seule passe. Concrètement nous ne vérifions pas cette sorte de
+dépendances: l'analyse syntaxique de ces macro-définitions échouera
+simplement.
+
+\subsubsection{Les flux pour l'analyse syntaxique des instances}
+\label{AnalyseLL}
+
+Nous voulons user des flux de OCaml pour l'analyse syntaxique des
+instances de macros. Pour relacher cette contrainte, nous ajoutons la
+possibilité de rebroussement limité, c'est-à-dire que si une erreur de
+syntaxe se produit dans un membre droit, alors l'analyseur essaie le
+membre droit suivant au lieu d'abandonner
+l'analyse~\citep{MaunyDDR}. Si nous résumons les contraintes dont il
+faut tenir compte lors de la rédaction d'une macro-définition, nous
+avons:
+\begin{enumerate}
+
+  \item Le spécifieur, comme toujours, doit s'assurer lui-même que sa
+    nouvelle notation n'est pas ambiguë (car cette vérification est en
+    général indécidable). Si le spécifieur veut une définition
+    ambiguë, il doit se souvenir de l'ordre d'évaluation du filtre de
+    flux correspondant (gauche-droite, haut-bas).
+
+  \item Le spécifieur doit s'assurer qu'il n'y a pas de règle
+    récursive à gauche, qui pourrait faire boucler l'analyseur. Ceci
+    est inhérent à notre méthode d'analyse (descendante avec
+    rebroussement limité). Cet aspect pourrait être détecté et résolu
+    automatiquement (avec une transformation d'Arden). Pour le moment,
+    il faut que:
+    \begin{equation*}
+      \forall \textrm{A} \in \mathcal{N}, \neg (\textrm{A}
+      \stackrel{*}{\Longrightarrow} \textrm{A} \alpha)
+    \end{equation*}
+
+  \item \label{epsilon} Le spécifieur doit s'assurer qu'il n'y pas de
+    production inutile, c'est-à-dire de production qui génère le mot
+    vide~$\varepsilon$ et qui n'est pas la dernière de la
+    macro-règle. Ceci pourrait être automatiquement détecté (le
+    problème consistant à savoir si~$\varepsilon$ appartient à un
+    langage donné par une grammaire non contextuelle est décidable),
+    et résolu par certaines transformations des macro-règles. Pour
+    l'instant, il faut:
+    \begin{equation*}
+      \textrm{A} \rightarrow \alpha_{1} \mid \alpha_{2} \mid \ldots
+      \mid \alpha_{n} \quad \models \quad \forall i \in [1,n], \{
+      \varepsilon \} \subseteq \mathcal{P} (\alpha_i) \Longrightarrow
+      i = n
+    \end{equation*}
+    Par exemple, considérons la macro BIND du protocole
+    ROSE~\citep{ROSE}. Le macro-mot vide \texttt{empty} apparaît
+    toujours dans la première macro-production. Ainsi:
+    \begin{sverb}
+Argument ::= empty | "ARGUMENT" Name type(Argument-type)     
+    \end{sverb}
+    De cette façon l'analyseur syntaxique généré reconnaîtra
+    toujours~$\varepsilon$ (\texttt{empty}) et n'essaiera jamais de
+    lire la seconde production. Par conséquent, il faut écrirre
+    plutôt:
+    \begin{sverb}
+Argument ::= "ARGUMENT" Name type(Argument-type) | empty
+    \end{sverb}
+
+\end{enumerate}
+
+\subsubsection{Détection des erreurs de syntaxe}
+
+La méthode d'analyse adoptée au point~\ref{AnalyseLL} de la
+section~\vref{ContrReal} a une répercussion importante sur la
+détection des erreurs de syntaxe dans les définitions de macros. Pour
+intégrer la reconnaissance des instances de macros à l'analyseur de
+base, nous ajouterons un motif en tête des filtres des fonctions
+d'analyse reconnaissant les types et les valeurs ASN.1. En effet, si
+nous le placions en dernier, l'analyseur essaierait d'abord de
+reconnaître un type ou une valeur de base en lieu et place d'une
+instance, et très probablement échouerait ---~sans avoir tenté de lire
+une instance de macro. Si l'analyseur échoue en tentant de lire une
+instance de macro, il croira que c'est peut-être une valeur ou un type
+de base qui est là, et il essaiera les motifs suivants. Si c'était
+bien une instance de macro que le spécifieur avait (mal) écrite, il
+obtiendra par conséquent une notification erreur comme si celle-ci
+s'était produite pour une valeur ou un type de base. C'est ici
+l'inconvénient du rebroussement: nous perdons \emph{a priori} la
+propriété du plus long préfixe valide. Il reste cependant toujours
+possible de mettre au point une gestion d'erreurs syntaxiques plus
+précise, mais elle serait bien plus compliquée.
+
+\subsubsection{Importation de macros}
+\label{MacroImport}
+
+Étant donné que OCaml ne dispose d'aucun moyen direct pour exporter
+des valeurs fonctionnelles et que le résultat de l'analyse d'une
+définition de macro est une paire de fonctions d'analyse (une pour les
+instances de type et une pour celles de valeur), nous préférons
+ignorer les importations de macros.  Pour réaliser une telle
+importation, il faudrait imaginer un codage des fonctions OCaml vers
+un format symbolique, et l'opération réciproque de décodage. Cela
+poserait néanmoins des problèmes d'intégration à cause du
+typage. Néanmoins il existe une façon de simuler cette importation en
+allant analyser dans le module où elle est définie la macro importée,
+puis de poursuivre. La difficulté serait moindre car un tel analyseur
+est déjà disponible (c'est lui-même !) et son adaptation peu
+coûteuse. L'inconvénient étant que ce n'est pas une importation
+\emph{stricto sensu}, donc il faut analyser la définition de macro à
+chaque fois qu'elle est importée.
+  
+\subsection{Transformations de la grammaire des macros}
+
+\subsubsection{Étape 0}
+
+Nous donnons d'abord la forme normalisée, en introduisant la
+structuration en sections et sous-sections, et en ayant supprimé la
+production \texttt{astring} de la règle `SymbolDefn'
+(cf.~\vref{ContrReal}, point~\ref{String}). D'autre part, la note~2
+de~\cite[\S~A.3.19]{ASN90} nous révèle que
+\texttt{localvaluereference} dans la règle `LocalValueassignement'
+peut être VALUE. Or nous avions décidé implicitement depuis le début
+que nous analysions ASN.1 avec des mots-clefs réservés --~dont VALUE
+fait partie. Par conséquent nous avons dû modifier légèrement la règle
+`LocalValueassignment' pour faire apparaître explicitement le mot-clef
+VALUE.
+\begin{center}
+\begin{longtable}{lrl} \\ \hline \\
+\textbf{MacroDefinition} & $\rightarrow$ & \texttt{macroreference} MACRO ``\textsf{::=}'' MacroSubstance \\
+MacroSubstance & $\rightarrow$ & BEGIN MacroBody END \\
+               & $\mid$        & \texttt{macroreference} \\
+               & $\mid$        & Externalmacroreference \\
+MacroBody      & $\rightarrow$ & TypeProduction ValueProduction \\
+               &               & SupportingProductions \\
+Externalmacroreference & $\rightarrow$ & \texttt{modulereference} ``\textsf{.}'' \texttt{macroreference} \\
+
+\\ \hline \\
+
+\emph{TypeProduction} & $\rightarrow$ & TYPE NOTATION ``\textsf{::=}'' MacroAlternativeList \\
+\emph{ValueProduction} & $\rightarrow$ & VALUE NOTATION ``\textsf{::=}'' MacroAlternativeList \\
+
+\\ \hline \\
+
+\emph{SupportingProductions} & $\rightarrow$ & ProductionList \\
+                            & $\mid$        & $\varepsilon$ \\
+ProductionList              & $\rightarrow$ & Production \\
+                            & $\mid$        & ProductionList Production \\
+Production                  & $\rightarrow$ & \texttt{productionreference} ``\textsf{::=}'' MacroAlternativeList \\
+MacroAlternativeList        & $\rightarrow$ & MacroAlternative \\
+                            & $\mid$        & MacroAlternativeList ``$\mid$'' MacroAlternative \\ 
+
+\\ \hline \\
+
+\emph{MacroAlternative}      & $\rightarrow$ & SymbolList \\
+SymbolList                  & $\rightarrow$ & SymbolElement \\
+                            & $\mid$        & SymbolList SymbolElement \\
+SymbolElement               & $\rightarrow$ & SymbolDefn \\
+                            & $\mid$        & EmbeddedDefinitions \\
+SymbolDefn                  & $\rightarrow$ & \texttt{productionreference} \\
+                            & $\mid$        & ``\textsf{string}'' \\
+                            & $\mid$        & ``\textsf{identifier}'' \\
+                            & $\mid$        & ``\textsf{number}'' \\
+                            & $\mid$        & ``\textsf{empty}'' \\
+                            & $\mid$        & ``\textsf{type}'' \\
+                            & $\mid$        & ``\textsf{type}'' ``\textsf{(}'' \texttt{localtypereference} ``\textsf{)}'' \\
+                            & $\mid$        & ``\textsf{value}'' ``\textsf{(}'' MacroType ``\textsf{)}'' \\
+                            & $\mid$        & ``\textsf{value}'' ``\textsf{(}'' \texttt{localvaluereference} MacroType ``\textsf{)}'' \\
+                            & $\mid$        & ``\textsf{value}'' ``\textsf{(}'' VALUE MacroType ``\textsf{)}'' \\
+
+\\ \hline \\
+\emph{EmbeddedDefinitions}   & $\rightarrow$ & ``$<$'' EmbeddedDefinitionList ``$>$'' \\
+EmbeddedDefinitionList      & $\rightarrow$ & EmbeddedDefinition \\
+                            & $\mid$        & EmbeddedDefinitionList EmbeddedDefinition \\
+EmbeddedDefinition          & $\rightarrow$ & LocalTypeassignment \\
+                            & $\mid$        & LocalValueassignment \\
+LocalTypeassignment         & $\rightarrow$ & \texttt{localtypereference} ``\textsf{::=}'' MacroType \\
+LocalValueassignment         & $\rightarrow$ & \texttt{localvaluereference} MacroType ``\textsf{::=}'' MacroValue \\
+                            & $\mid$        & VALUE MacroType ``\textsf{::=}'' MacroValue \\
+
+\\ \hline \\
+
+\emph{MacroType}             & $\rightarrow$ & \texttt{localtypereference} \\
+                            & $\mid$        & Type \\
+\emph{MacroValue}            & $\rightarrow$ & \texttt{localvaluereference} \\ 
+                            & $\mid$        & Value \\
+
+\\ \hline
+\end{longtable}
+\end{center}
+
+\subsubsection{Étape 1}
+\label{Macro1}
+
+Nous tiendrons compte des ambiguïtés lexicales qui nous amènent à
+confondre \texttt{macro\-reference}, \texttt{productionreference},
+\texttt{localtypereference}, avec \texttt{type\-reference}; et
+\texttt{local\-valuereference} avec \texttt{valuereference}. Quand le
+contexte le permettra, nous préciserons si le terminal \texttt{upper}
+dénote un identificateur de macros ou un identificateur de production
+en l'indiçant (respectivement \texttt{upper$_{mac}$} et
+\texttt{upper$_{prod}$}).
+\begin{center}
+\begin{longtable}{lrl} \\ \hline \\
+MacroDefinition & $\rightarrow$ & \texttt{upper$_{mac}$} MACRO ``\textsf{::=}'' MacroSubstance \\
+MacroSubstance & $\rightarrow$ & BEGIN MacroBody END \\
+               & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{mac}$}] \\
+MacroBody      & $\rightarrow$ & TypeProduction ValueProduction [ProductionList] \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion globale de `ExternalMacroreference' puis factorisation préfixe de `MacroSubstance'. \\
+  \scriptsize Option de `SupportingProductions' puis expansion globale. \\
+\hline
+\end{tabular}
+}\\
+
+\\ \hline \\
+
+\emph{TypeProduction} & $\rightarrow$ & TYPE NOTATION ``\textsf{::=}'' MacroAlternativeList \\
+\emph{ValueProduction} & $\rightarrow$ & VALUE NOTATION ``\textsf{::=}'' MacroAlternativeList \\
+
+\\ \hline \\
+
+\emph{ProductionList}        & $\rightarrow$ & Production$^+$ \\
+Production                  & $\rightarrow$ & \texttt{upper$_{prod}$} ``\textsf{::=}'' MacroAlternativeList \\
+MacroAlternativeList        & $\rightarrow$ & \{ MacroAlternative ``\textsf{$\mid$}'' \ldots \}$^+$ \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Arden de `ProductionList'. \\
+  \scriptsize Arden de `MacroAlternativeList'. \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{MacroAlternative}      & $\rightarrow$ & SymbolElement$^+$ \\
+SymbolElement               & $\rightarrow$ & SymbolDefn \\
+                            & $\mid$        & EmbeddedDefinitions \\
+SymbolDefn                  & $\rightarrow$ & \texttt{upper$_{prod}$} \\
+                            & $\mid$        & ``\textsf{string}'' \\
+                            & $\mid$        & ``\textsf{identifier}'' \\
+                            & $\mid$        & ``\textsf{number}'' \\
+                            & $\mid$        & ``\textsf{empty}'' \\
+                            & $\mid$        & ``\textsf{type}'' [``\textsf{(}'' \texttt{upper$_{typ}$} ``\textsf{)}''] \\
+                            & $\mid$        & ``\textsf{value}'' ``\textsf{(}'' Bind ``\textsf{)}'' \\
+Bind                        & $\rightarrow$ & [\texttt{lower$_{val}$}] MacroType \\
+                            & $\mid$        & VALUE MacroType \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Arden de `SymbolList' et expansion globale. \\
+  \scriptsize Factorisation préfixe et bifixe de `SymbolDefn' (Création de `bind'.). \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{EmbeddedDefinitions}   & $\rightarrow$ & ``$<$'' EmbeddedDefinition$^+$ ``$>$'' \\
+EmbeddedDefinition          & $\rightarrow$ & \texttt{upper$_{typ}$} ``\textsf{::=}'' MacroType \\
+                            & $\mid$        & \texttt{lower$_{val}$} MacroType ``\textsf{::=}'' MacroValue \\
+                            & $\mid$        & VALUE MacroType ``\textsf{::=}'' MacroValue \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Arden de `EmbeddedDefinitionList' puis expansion globale. \\
+  \scriptsize Expansion globale de `LocalTypeassignment'. \\
+  \scriptsize Expansion globale de `LocalValueassignment'. \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{MacroType}             & $\rightarrow$ & Type \\
+
+\emph{MacroValue}            & $\rightarrow$ & Value \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Élimination de la variante \texttt{upper$_{typ}$} de la règle \emph{`MacroType'} car Type $\Longrightarrow$ \texttt{upper} \\
+  \scriptsize Élimination de la variante \texttt{lower$_{val}$} de la règle \emph{`MacroValue'} car Value $\Longrightarrow$ \texttt{lower} \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline
+\end{longtable}
+\end{center}
+
+\subsubsection{Étape 2}
+
+\begin{center}
+\begin{longtable}{lrl} \\ \hline \\
+
+MacroDefinition & $\rightarrow$ & \texttt{upper$_{mac}$} MACRO ``\textsf{::=}'' MacroSubstance \\
+MacroSubstance & $\rightarrow$ & BEGIN MacroBody END \\
+               & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{mac}$}] \\
+MacroBody      & $\rightarrow$ & TypeProduction ValueProduction Production$^*$ \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion globale de `ProductionList'. \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{TypeProduction} & $\rightarrow$ & TYPE NOTATION ``\textsf{::=}'' \{ MacroAlternative ``\textsf{$\mid$}'' \ldots \}$^+$ \\
+\emph{ValueProduction} & $\rightarrow$ & VALUE NOTATION ``\textsf{::=}'' \{ MacroAlternative ``\textsf{$\mid$}'' \ldots \}$^+$ \\
+
+\emph{Production}           & $\rightarrow$ & \texttt{upper$_{prod}$} ``\textsf{::=}'' \{ MacroAlternative ``\textsf{$\mid$}'' \ldots \}$^+$ \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion globale de `MacroAlternativeList'. \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{MacroAlternative}      & $\rightarrow$ & SymbolElement$^+$ \\
+SymbolElement               & $\rightarrow$ & \texttt{upper$_{prod}$} \\
+                            & $\mid$        & SymbolDefn \\
+                            & $\mid$        & ``$<$'' EmbeddedDefinition$^+$ ``$>$'' \\
+SymbolDefn                  & $\rightarrow$ & ``\textsf{string}'' \\
+                            & $\mid$        & ``\textsf{identifier}'' \\
+                            & $\mid$        & ``\textsf{number}'' \\
+                            & $\mid$        & ``\textsf{empty}'' \\
+                            & $\mid$        & ``\textsf{type}'' [``\textsf{(}'' \texttt{upper$_{typ}$} ``\textsf{)}''] \\
+                            & $\mid$        & ``\textsf{value}'' ``\textsf{(}'' Bind ``\textsf{)}'' \\
+Bind                        & $\rightarrow$ & [\texttt{lower$_{val}$}] Type \\
+                            & $\mid$        & VALUE Type \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion partielle de la variante \texttt{upper$_{prod}$} de la règle `SymbolDefn' dans la règle `SymbolElement'. \\
+  \scriptsize Expansion globale de `MacroType'. \\
+  \scriptsize Expansion globale de `EmbeddedDefinitions'. \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{EmbeddedDefinition}    & $\rightarrow$ & \texttt{upper$_{typ}$} ``\textsf{::=}'' Type \\
+                            & $\mid$        & \texttt{lower$_{val}$} Type ``\textsf{::=}'' Value \\
+                            & $\mid$        & VALUE Type ``\textsf{::=}'' Value \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion globale de `MacroType' et `MacroValue'. \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline
+\end{longtable}
+\end{center}
+
+\subsubsection{Étape 3}
+
+\begin{center}
+\begin{longtable}{lrl} \\ \hline \\
+MacroDefinition & $\rightarrow$ & \texttt{upper$_{mac}$} MACRO ``\textsf{::=}'' MacroSubstance \\
+MacroSubstance & $\rightarrow$ & BEGIN MacroBody END \\
+               & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{mac}$}] \\
+MacroBody      & $\rightarrow$ & TypeProduction  VALUE NOTATION ``\textsf{::=}'' \\
+               &               & \{ MacroAlternative ``\textsf{$\mid$}'' \ldots \}$^+$ Production$^*$ \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion globale de `ValueProduction'. \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{TypeProduction} & $\rightarrow$ & TYPE NOTATION ``\textsf{::=}'' \{ MacroAlternative ``\textsf{$\mid$}'' \ldots \}$^+$ \\
+
+\emph{Production}     & $\rightarrow$ & \texttt{upper$_{prod}$} ``\textsf{::=}'' \{ MacroAlternative ``\textsf{$\mid$}'' \ldots \}$^+$ \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion globale de `ValueProduction'. \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{MacroAlternative}      & $\rightarrow$ & SymbolElement$^+$ \\
+SymbolElement               & $\rightarrow$ & \texttt{upper$_{prod}$} \\
+                            & $\mid$        & PartElem \\
+PartElem                    & $\rightarrow$ & SymbolDefn \\
+                            & $\mid$        & ``$<$'' EmbeddedDefinition$^+$ ``$>$'' \\
+SymbolDefn                  & $\rightarrow$ & ``\textsf{string}'' \\
+                            & $\mid$        & ``\textsf{identifier}'' \\
+                            & $\mid$        & ``\textsf{number}'' \\
+                            & $\mid$        & ``\textsf{empty}'' \\
+                            & $\mid$        & ``\textsf{type}'' [``\textsf{(}'' \texttt{upper$_{typ}$} ``\textsf{)}''] \\
+                            & $\mid$        & ``\textsf{value}'' ``\textsf{(}'' Bind ``\textsf{)}'' \\
+Bind                        & $\rightarrow$ & NamedType \\
+                            & $\mid$        & VALUE Type \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Réduction dans la règle `SymbolElement' (Création de `PartElem'.) \\
+  \scriptsize Nous savons que NamedType $\Longrightarrow$ [\texttt{lower$_{id}$}] Type \\
+  \scriptsize \ \ \ cf. (\ref{NamedT}). Donc, en réécrivant NamedType $\Longrightarrow$ [\texttt{lower}] Type \\
+  \scriptsize \ \ \ nous pouvons effectuer une expansion totale inverse dans la règle `Bind', \\
+  \scriptsize \ \ \ et y faire apparaître une occurrence de `NamedType'. \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{EmbeddedDefinition}    & $\rightarrow$ & \texttt{upper$_{typ}$} ``\textsf{::=}'' Type \\
+                            & $\mid$        & \texttt{lower$_{val}$} Type ``\textsf{::=}'' Value \\
+                            & $\mid$        & VALUE Type ``\textsf{::=}'' Value \\
+
+\\ \hline
+\end{longtable}
+\end{center}
+
+\subsubsection{Étape 4}
+
+Le lecteur attentif aura remarqué le problème suivant:
+\begin{equation*}
+\mathcal{P}(\textrm{MacroAlternative}) \, \cap \, \mathcal{P}(\textrm{Production}) = \{ \texttt{upper} \}
+\end{equation*}
+empêchant donc la règle `MacroBody' d'être LL(1). Pour éliminer cette
+difficulté, nous allons transformer cette règle et c'est l'objet de
+cette section que d'en présenter les métamorphoses.
+\begin{center}
+\begin{longtable}{lrl} \\ \hline \\
+
+MacroBody      & $\rightarrow$ & TypeProduction  VALUE NOTATION ``\textsf{::=}'' MacroSuf \\
+MacroSuf       & $\rightarrow$ & \{ MacroAlternative ``\textsf{$\mid$}'' \ldots \}$^+$ Production$^*$ \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline 
+  \scriptsize Expansion totale inverse. (Création de la règle `MacroSuf'.) \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+MacroSuf & $\rightarrow$ & MacroAlternative [``\textsf{$\mid$}'' \{ MacroAlternative ``\textsf{$\mid$}'' \ldots \}$^+$] Production$^*$ \\
+
+\\ \hline \hline \\
+
+MacroSuf & $\rightarrow$ & SymbolElement$^+$ [``\textsf{$\mid$}'' \{ MacroAlternative ``\textsf{$\mid$}'' \ldots \}$^+$] Production$^*$ \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline 
+  \scriptsize Expansion totale de `MacroAlternative'. \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+MacroSuf & $\rightarrow$ & SymbolElement Cont \\
+Cont     & $\rightarrow$ & SymbolElement$^*$ [``\textsf{$\mid$}'' \{ MacroAlternative ``\textsf{$\mid$}'' \ldots \}$^+$] Production$^*$ \\
+
+\\ \hline \hline \\
+
+MacroSuf & $\rightarrow$ & SymbolElement [Cont] \\
+Cont     & $\rightarrow$ & SymbolElement$^+$ [``\textsf{$\mid$}'' \{ MacroAlternative ``\textsf{$\mid$}'' \ldots \}$^+$] Production$^*$ \\
+         & $\mid$        & ``\textsf{$\mid$}'' \{ MacroAlternative ``\textsf{$\mid$}'' \ldots \}$^+$ Production$^*$ \\
+         & $\mid$        & Production$^+$ \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline 
+  \scriptsize Option de 'Cont'. \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+MacroSuf & $\rightarrow$ & SymbolElement [Cont] \\
+Cont     & $\rightarrow$ & SymbolElement [Cont] \\
+         & $\mid$        & ``\textsf{$\mid$}'' MacroSuf \\
+         & $\mid$        & Production$^+$ \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline 
+  \scriptsize Nous reconnaissons `Cont' et `MacroSuf'. (Expansions totales inverses.) \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+MacroSuf & $\rightarrow$ & SymbolElement [Cont] \\
+Cont     & $\rightarrow$ & \texttt{upper} [Cont] \\ 
+         & $\mid$        & PartElem [Cont]  \\
+         & $\mid$        & ``\textsf{$\mid$}'' MacroSuf \\
+         & $\mid$        & Production Production$^*$ \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline 
+  \scriptsize Expansion totale de `SymbolElement' dans `Cont'. \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+MacroSuf & $\rightarrow$ & SymbolElement [Cont] \\
+Cont     & $\rightarrow$ & PartElem [Cont] \\ 
+         & $\mid$        & ``\textsf{$\mid$}'' MacroSuf \\
+         & $\mid$        & \texttt{upper} [Cont] \\ 
+         & $\mid$        & \texttt{upper$_{prod}$} ``\textsf{::=}'' \{ MacroAlternative ``\textsf{$\mid$}'' \ldots \}$^+$ Production$^*$ \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline 
+  \scriptsize Expansion totale de `Production' dans `Cont'. \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+MacroSuf & $\rightarrow$ & SymbolElement [Cont] \\
+Cont     & $\rightarrow$ & PartElem [Cont] \\ 
+         & $\mid$        & ``\textsf{$\mid$}'' MacroSuf \\
+         & $\mid$        & \texttt{upper} [ContSuf] \\
+ContSuf  & $\rightarrow$ & Cont \\
+         & $\mid$        & ``\textsf{::=}'' MacroSuf \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline 
+  \scriptsize Factorisation préfixe de `Cont'. (Création de la règle `ContSuf'.) \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline
+\end{longtable}
+\end{center}
+
+
+\subsubsection{Bilan}
+
+\begin{center}
+\begin{longtable}{lrl} \\ \hline \\
+
+\textbf{MacroDefinition} & $\rightarrow$ & \texttt{upper$_{mac}$} MACRO ``\textsf{::=}'' MacroSubstance \\
+MacroSubstance & $\rightarrow$ & BEGIN MacroBody END \\
+               & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{mac}$}] \\
+MacroBody      & $\rightarrow$ & TypeProduction VALUE NOTATION ``\textsf{::=}'' MacroSuf \\
+
+\\ \hline \\
+
+\emph{TypeProduction} & $\rightarrow$ & TYPE NOTATION ``\textsf{::=}'' \{ MacroAlternative ``\textsf{$\mid$}'' \ldots \}$^+$ \\
+MacroAlternative     & $\rightarrow$ & SymbolElement$^+$ \\
+
+\\ \hline \\
+
+\emph{MacroSuf} & $\rightarrow$ & SymbolElement [Cont] \\
+Cont     & $\rightarrow$ & PartElem [Cont] \\ 
+         & $\mid$        & ``\textsf{$\mid$}'' MacroSuf \\
+         & $\mid$        & \texttt{upper} [ContSuf] \\
+ContSuf  & $\rightarrow$ & Cont \\
+         & $\mid$        & ``\textsf{::=}'' MacroSuf \\ 
+
+\\ \hline \\
+
+\emph{SymbolElement}         & $\rightarrow$ & \texttt{upper$_{prod}$} \\
+                            & $\mid$        & PartElem \\
+PartElem                    & $\rightarrow$ & SymbolDefn \\
+                            & $\mid$        & ``$<$'' EmbeddedDefinition$^+$ ``$>$'' \\
+SymbolDefn                  & $\rightarrow$ & ``\textsf{string}'' \\
+                            & $\mid$        & ``\textsf{identifier}'' \\
+                            & $\mid$        & ``\textsf{number}'' \\
+                            & $\mid$        & ``\textsf{empty}'' \\
+                            & $\mid$        & ``\textsf{type}'' [``\textsf{(}'' \texttt{upper$_{typ}$} ``\textsf{)}''] \\
+                            & $\mid$        & ``\textsf{value}'' ``\textsf{(}'' Bind ``\textsf{)}'' \\
+Bind                        & $\rightarrow$ & NamedType \\
+                            & $\mid$        & VALUE Type \\ 
+
+\\ \hline \\
+
+\emph{EmbeddedDefinition}    & $\rightarrow$ & \texttt{upper$_{typ}$} ``\textsf{::=}'' Type \\
+                            & $\mid$        & \texttt{lower$_{val}$} Type ``\textsf{::=}'' Value \\
+                            & $\mid$        & VALUE Type ``\textsf{::=}'' Value \\
+
+\\ \hline
+\end{longtable}
+\end{center}
+
+\subsection{Nouvelle grammaire complète d'ASN.1}
+
+Nous devons greffer cette nouvelle grammaire des macros sur celle de
+base, le document~\cite{ASN90} ne disant pas explicitement comment
+s'effectue cette greffe. En fait il faut intégrer la définition des
+macros parmi les définitions de types et de valeurs de base. À partir
+de la forme initiale, nous obtenons les transformations suivantes:
+\begin{center}
+\begin{longtable}{lrl} \\ \hline \\
+\emph{Assignment} & $\rightarrow$ & \texttt{upper$_{typ}$} ``\textsf{::=}'' Type \\
+                 & $\mid$        & \texttt{lower$_{val}$} Type ``\textsf{::=}'' Value \\
+
+\\ \hline \hline \\
+
+\emph{Assignment} & $\rightarrow$ & \texttt{upper$_{typ}$} ``\textsf{::=}'' Type \\
+                 & $\mid$        & \texttt{lower$_{val}$} Type ``\textsf{::=}'' Value \\
+                 & $\mid$        & MacroDefinition \\
+
+\\ \hline \hline \\
+
+\emph{Assignment} & $\rightarrow$ & \texttt{upper$_{typ}$} ``\textsf{::=}'' Type \\
+                 & $\mid$        & \texttt{lower$_{val}$} Type ``\textsf{::=}'' Value \\
+                 & $\mid$        & \texttt{upper$_{mac}$} MACRO ``\textsf{::=}'' MacroSubstance \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline 
+  \scriptsize Expansion globale de `MacroDefinition'. \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+\emph{Assignment} & $\rightarrow$ & \texttt{upper} AssSuf \\
+                & $\mid$        & \texttt{lower$_{val}$} Type ``\textsf{::=}'' Value \\
+AssSuf          & $\rightarrow$ & MACRO ``\textsf{::=}'' MacroSubstance \\
+                & $\mid$        & ``\textsf{::=}'' Type \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline 
+  \scriptsize Factorisation préfixe de `MacroDefinition'. \\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline
+\end{longtable}
+\end{center}
+Donc finalement, la forme finale de la nouvelle grammaire complète de
+\emph{full}-ASN.1 est:
+\begin{center}
+\begin{longtable}{lrl} \\ \hline \\
+\multicolumn{3}{c}{\begin{tabular}{l} \textbf{MODULES}  \\ \end{tabular}} \\
+
+\\ \hline \\
+
+\textbf{ModuleDefinition} & $\rightarrow$ & ModuleIdentifier \\
+                 &               & DEFINITIONS \\
+                 &               & [TagDefault TAGS] \\
+                 &               & ``\textsf{::=}'' \\
+                 &               & BEGIN \\
+                 &               & [ModuleBody] \\
+                 &               & END \\
+
+\\ \hline \\
+
+\emph{ModuleIdentifier} & $\rightarrow$ & \texttt{upper$_{mod}$} [``\textsf{\{}'' ObjIdComponent$^+$ ``\textsf{\}}''] \\
+\underline{ObjIdComponent} & $\rightarrow$ & \texttt{number} \\
+                   & $\mid$        & \texttt{upper$_{mod}$} ``.'' \texttt{lower$_{val}$} \\
+                   & $\mid$        & \texttt{lower} [``\textsf{(}'' ClassNumber ``\textsf{)}''] \\
+
+\\ \hline \\
+
+\emph{\underline{TagDefault}} & $\rightarrow$ & EXPLICIT \\
+                 & $\mid$        & IMPLICIT \\
+\\ \hline \\
+
+\emph{ModuleBody} & $\rightarrow$ & [Exports] [Imports] Assignment$^+$ \\
+Exports          & $\rightarrow$ & EXPORTS \{Symbol ``\textsf{,}'' \ldots \}$^*$ ``\textsf{;}'' \\
+Imports          & $\rightarrow$ & IMPORTS SymbolsFromModule$^*$ ``\textsf{;}'' \\
+SymbolsFromModule & $\rightarrow$ & \{Symbol ``\textsf{,}'' \ldots \}$^+$ FROM ModuleIdentifier \\
+Symbol     & $\rightarrow$ & \texttt{upper$_{typ}$} \\
+           & $\mid$        & \texttt{lower$_{val}$} \\
+
+\\ \hline \\
+
+\emph{Assignment} & $\rightarrow$ & \texttt{upper} AssSuf \\
+                & $\mid$        & \texttt{lower$_{val}$} Type ``\textsf{::=}'' Value \\
+AssSuf          & $\rightarrow$ & MACRO ``\textsf{::=}'' MacroSubstance \\
+                & $\mid$        & ``\textsf{::=}'' Type \\ \\
+
+\\ \hline \\
+
+\multicolumn{3}{c}{\begin{tabular}{l} \textbf{TYPES}  \\ \end{tabular}} \\
+
+\\ \hline \\
+
+\emph{\underline{Type}} & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{$<$}'' Type \\
+                       & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{typ}$}] SubtypeSpec$^*$ \\
+                       & $\mid$        & NULL SubtypeSpec$^*$ \\
+                       & $\mid$        & AuxType \\
+\underline{AuxType}    & $\rightarrow$ & ``\textsf{[}'' [Class] ClassNumber ``\textsf{]}'' [TagDefault] Type \\
+                       & $\mid$        & BuiltInType SubtypeSpec$^*$ \\
+                       & $\mid$        & SetSeq [TypeSuf] \\
+SetSeq                 & $\rightarrow$ & SET \\
+                       & $\mid$        & SEQUENCE \\
+TypeSuf                & $\rightarrow$ & SubtypeSpec$^+$ \\
+                       & $\mid$        & ``\textsf{\{}'' \{ElementType ``\textsf{,}'' \ldots\}$^*$ ``\textsf{\}}'' SubtypeSpec$^*$ \\
+                       & $\mid$        & [SIZE SubtypeSpec] OF Type \\ 
+
+\\ \hline \\
+
+\emph{BuiltInType}      & $\rightarrow$ & BOOLEAN \\
+                       & $\mid$        & INTEGER [``\textsf{\{}'' \{NamedNumber ``\textsf{,}'' \ldots \}$^+$ ``\textsf{\}}''] \\
+                       & $\mid$        & BIT STRING [``\textsf{\{}'' \{NamedBit ``\textsf{,}'' \ldots \}$^+$ ``\textsf{\}}''] \\
+                       & $\mid$        & OCTET STRING \\
+                       & $\mid$        & CHOICE ``\textsf{\{}'' \{NamedType ``\textsf{,}'' \ldots\}$^+$ ``\textsf{\}}'' \\
+                       & $\mid$        & ANY [DEFINED BY \texttt{lower$_{id}$}] \\
+                       & $\mid$        & OBJECT IDENTIFIER \\
+                       & $\mid$        & ENUMERATED ``\textsf{\{}'' \{NamedNumber ``\textsf{,}'' \ldots\}$^+$ ``\textsf{\}}'' \\
+                       & $\mid$        & REAL \\
+                       & $\mid$        & ``\textsf{NumericString}'' \\
+                       & $\mid$        & ``\textsf{PrintableString}'' \\
+                       & $\mid$        & ``\textsf{TeletexString}'' \\
+                       & $\mid$        & ``\textsf{T61String}'' \\
+                       & $\mid$        & ``\textsf{VideotexString}'' \\
+                       & $\mid$        & ``\textsf{VisibleString}'' \\
+                       & $\mid$        & ``\textsf{ISO646String}'' \\
+                       & $\mid$        & ``\textsf{IA5String}'' \\
+                       & $\mid$        & ``\textsf{GraphicString}'' \\
+                       & $\mid$        & ``\textsf{GeneralString}'' \\
+                       & $\mid$        & EXTERNAL \\
+                       & $\mid$        & ``\textsf{UTCTime}'' \\
+                       & $\mid$        & ``\textsf{GeneralizedTime}'' \\
+                       & $\mid$        & ``\textsf{ObjectDescriptor}'' \\
+
+\\ \hline \\
+
+\emph{NamedType}        & $\rightarrow$ & \texttt{lower} [``\textsf{$<$}''] Type \\
+                       & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{typ}$}] SubtypeSpec$^*$ \\
+                       & $\mid$        & NULL SubtypeSpec$^*$ \\
+                       & $\mid$        & AuxType \\ 
+
+\\ \hline \\
+
+\emph{NamedNumber} & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{(}'' AuxNamedNum ``\textsf{)}'' \\
+AuxNamedNum & $\rightarrow$ & [``\textsf{-}''] \texttt{number} \\
+            & $\mid$        & [\texttt{upper$_{mod}$} ``\textsf{.}''] \texttt{lower$_{val}$} \\
+\\ \hline \\
+
+\emph{NamedBit} & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{(}'' ClassNumber ``\textsf{)}'' \\
+
+\\ \hline \\
+
+\emph{ElementType}      & $\rightarrow$ & NamedType [ElementTypeSuf] \\
+                       & $\mid$        & COMPONENTS OF Type \\
+ElementTypeSuf         & $\rightarrow$ & OPTIONAL \\
+                       & $\mid$        & DEFAULT Value \\
+
+\\ \hline \\
+
+\emph{Class}            & $\rightarrow$ & UNIVERSAL \\   
+                       & $\mid$        & APPLICATION \\
+                       & $\mid$        & PRIVATE \\
+
+\emph{\underline{ClassNumber}} & $\rightarrow$ & \texttt{number} \\
+  & $\mid$        & [\texttt{upper$_{mod}$} ``\textsf{.}''] \texttt{lower$_{val}$} \\ 
+
+\\ \hline \\
+\multicolumn{3}{c}{\begin{tabular}{l} \textbf{VALEURS}  \\ \end{tabular}} \\
+
+\\ \hline \\
+
+\emph{\underline{Value}} & $\rightarrow$ & AuxVal0 \\
+                        & $\mid$        & \texttt{upper} AuxVal1 \\
+                        & $\mid$        & \texttt{lower} [AuxVal2] \\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} \\
+\emph{AuxVal0}           & $\rightarrow$ & BuiltInValue \\
+                        & $\mid$        & AuxType ``\textsf{:}'' Value \\
+                        & $\mid$        & NULL [SpecVal] \\
+AuxVal1                 & $\rightarrow$ & SpecVal \\
+                        & $\mid$        & ``.'' AuxVal11 \\
+
+\emph{AuxVal2}           & $\rightarrow$ & [``\textsf{$<$}'' Type] ``\textsf{:}'' Value \\ 
+AuxVal11          & $\rightarrow$ & \texttt{upper$_{typ}$} SpecVal \\
+                        & $\mid$        & \texttt{lower$_{val}$} \\
+SpecVal                 & $\rightarrow$ & SubtypeSpec$^*$ ``\textsf{:}'' Value \\
+
+
+\\ \hline \\
+
+\emph{\underline{BuiltInValue}} & $\rightarrow$ & TRUE \\
+                          & $\mid$        & FALSE \\
+                          & $\mid$        & PLUS-INFINITY \\
+                          & $\mid$        & MINUS-INFINITY \\
+                          & $\mid$        & \texttt{basednum} \\
+                          & $\mid$        & \texttt{string} \\
+                          & $\mid$        & ``\textsf{\{}'' [BetBraces] ``\textsf{\}}'' \\
+
+\\ \hline \\
+
+\emph{BetBraces}           & $\rightarrow$ & AuxVal0 [AuxNamed] \\
+                          & $\mid$        & ``\textsf{-}'' \texttt{number} [AuxNamed] \\
+                          & $\mid$        & \texttt{lower} [AuxBet1] \\
+                          & $\mid$        & \texttt{upper} AuxBet2 \\
+                          & $\mid$        & \texttt{number} [AuxBet3] \\
+AuxBet1                   & $\rightarrow$ & ``\textsf{(}'' ClassNumber ``\textsf{)}'' ObjIdComponent$^*$ \\
+                          & $\mid$        & AuxNamed \\
+                          & $\mid$        & AuxVal2 [AuxNamed] \\
+                          & $\mid$        & ``\textsf{-}'' \texttt{number} [AuxNamed] \\
+                          & $\mid$        & AuxVal0 [AuxNamed] \\
+                          & $\mid$        & \texttt{lower} [AuxBet11] \\
+                          & $\mid$        & \texttt{number} [AuxBet3] \\
+                          & $\mid$        & \texttt{upper} AuxBet2 \\ 
+AuxBet2                   & $\rightarrow$ & SpecVal [AuxNamed] \\
+                          & $\mid$        & ``.'' AuxBet21 \\ 
+AuxBet3                   & $\rightarrow$ & ObjIdComponent$^+$ \\
+                          & $\mid$        & AuxNamed \\ 
+AuxBet11                  & $\rightarrow$ & ``\textsf{(}'' ClassNumber ``\textsf{)}'' ObjIdComponent$^*$ \\
+                          & $\mid$        & ObjIdComponent$^+$ \\
+                          & $\mid$        & AuxVal2 [AuxNamed] \\
+                          & $\mid$        & AuxNamed \\ 
+AuxBet21                  & $\rightarrow$ & \texttt{upper$_{typ}$} SpecVal [AuxNamed] \\
+                          & $\mid$        & \texttt{lower$_{val}$} [AuxBet3] \\ 
+AuxNamed                  & $\rightarrow$ & ``\textsf{,}'' \{NamedValue ``\textsf{,}'' \ldots\}$^+$ \\
+NamedValue                & $\rightarrow$ & \texttt{lower} [NamedValSuf] \\
+                          & $\mid$        & \texttt{upper} AuxVal1 \\
+                          & $\mid$        & [``\textsf{-}''] \texttt{number} \\
+                          & $\mid$        & AuxVal0 \\
+NamedValSuf               & $\rightarrow$ & Value \\
+                          & $\mid$        & AuxVal2 \\
+
+\\ \hline \\
+
+\multicolumn{3}{c}{\begin{tabular}{l} \textbf{SOUS-TYPES}  \\ \end{tabular}} \\
+
+\\ \hline \\
+
+\emph{\underline{SubtypeSpec}} & $\rightarrow$ & ``\textsf{(}'' \{SubtypeValueSet ``\textsf{$\mid$}'' \ldots\}$^+$ ``\textsf{)}'' \\
+SubtypeValueSet           & $\rightarrow$ & INCLUDES Type \\
+                          & $\mid$        & MIN SubValSetSuf \\ 
+                          & $\mid$        & FROM SubtypeSpec \\
+                          & $\mid$        & SIZE SubtypeSpec \\
+                          & $\mid$        & WITH InnerTypeSuf \\
+                          & $\mid$        & SVSAux \\ 
+
+\\ \hline
+
+\emph{SubValSetSuf}        & $\rightarrow$ & [``\textsf{$<$}''] ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\
+UpperEndValue             & $\rightarrow$ & Value \\
+                          & $\mid$        & MAX \\ \hline \\
+
+\emph{InnerTypeSuf}         & $\rightarrow$ & COMPONENT SubtypeSpec \\ 
+                          & $\mid$        & COMPONENTS MultipleTypeConstraints \\
+MultipleTypeConstraints   & $\rightarrow$ & ``\textsf{\{}'' [``\textsf{\ldots}'' ``\textsf{,}''] \{[NamedConstraint] ``\textsf{,}'' \ldots\} ``\textsf{\}}'' \\
+NamedConstraint           & $\rightarrow$ & \texttt{lower$_{id}$} [SubtypeSpec] [PresenceConstraint] \\
+                          & $\mid$        & SubtypeSpec [PresenceConstraint] \\
+                          & $\mid$        & PresenceConstraint \\
+PresenceConstraint        & $\rightarrow$ & PRESENT \\
+                          & $\mid$        & ABSENT \\
+                          & $\mid$        & OPTIONAL \\ 
+
+\\ \hline \\
+
+\emph{SVSAux}            & $\rightarrow$ & BuiltInValue [SubValSetSuf] \\
+                        & $\mid$        & AuxType ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & NULL [SVSAux3] \\
+                        & $\mid$        & \texttt{upper} SVSAux1 \\
+                        & $\mid$        & \texttt{lower} [SVSAux2] \\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} [SubValSetSuf] \\
+SVSAux1                 & $\rightarrow$ & SubtypeSpec$^*$ ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & ``.'' SVSAux11 \\
+SVSAux2                 & $\rightarrow$ & ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\
+                        & $\mid$        & ``\textsf{$<$}'' SVSAux21 \\
+SVSAux3                 & $\rightarrow$ & SubtypeSpec$^*$ ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & SubValSetSuf \\ 
+SVSAux11                & $\rightarrow$ & \texttt{upper$_{typ}$} SubtypeSpec$^*$ ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & \texttt{lower$_{val}$} [SubValSetSuf] \\
+SVSAux21                & $\rightarrow$ & Type ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\ 
+
+\\ \hline \\
+
+\multicolumn{3}{c}{\begin{tabular}{l} \textbf{MACROS}  \\ \end{tabular}} \\
+
+\\ \hline \\
+
+\underline{MacroSubstance} & $\rightarrow$ & BEGIN MacroBody END \\
+               & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{mac}$}] \\
+MacroBody      & $\rightarrow$ & TypeProduction VALUE NOTATION ``\textsf{::=}'' MacroSuf \\
+
+\\ \hline \\
+
+\emph{TypeProduction} & $\rightarrow$ & TYPE NOTATION ``\textsf{::=}'' \{ MacroAlternative ``\textsf{$\mid$}'' \ldots \}$^+$ \\
+MacroAlternative     & $\rightarrow$ & SymbolElement$^+$ \\
+
+\\ \hline \\
+
+\emph{MacroSuf} & $\rightarrow$ & SymbolElement [Cont] \\
+Cont     & $\rightarrow$ & PartElem [Cont] \\ 
+         & $\mid$        & ``\textsf{$\mid$}'' MacroSuf \\
+         & $\mid$        & \texttt{upper} [ContSuf] \\
+ContSuf  & $\rightarrow$ & Cont \\
+         & $\mid$        & ``\textsf{::=}'' MacroSuf \\ 
+
+\\ \hline \\
+
+\emph{SymbolElement}         & $\rightarrow$ & \texttt{upper$_{prod}$} \\
+                            & $\mid$        & PartElem \\
+PartElem                    & $\rightarrow$ & SymbolDefn \\
+                            & $\mid$        & ``$<$'' EmbeddedDefinition$^+$ ``$>$'' \\
+SymbolDefn                  & $\rightarrow$ & ``\textsf{string}'' \\
+                            & $\mid$        & ``\textsf{identifier}'' \\
+                            & $\mid$        & ``\textsf{number}'' \\
+                            & $\mid$        & ``\textsf{empty}'' \\
+                            & $\mid$        & ``\textsf{type}'' [``\textsf{(}'' \texttt{upper$_{typ}$} ``\textsf{)}''] \\
+                            & $\mid$        & ``\textsf{value}'' ``\textsf{(}'' Bind ``\textsf{)}'' \\
+Bind                        & $\rightarrow$ & NamedType \\
+                            & $\mid$        & VALUE Type \\ 
+
+\\ \hline \\
+
+\emph{EmbeddedDefinition}    & $\rightarrow$ & \texttt{upper$_{typ}$} ``\textsf{::=}'' Type \\
+                            & $\mid$        & \texttt{lower$_{val}$} Type ``\textsf{::=}'' Value \\
+                            & $\mid$        & VALUE Type ``\textsf{::=}'' Value \\
+
+\\ \hline
+\end{longtable}
+\end{center}
+
+\subsection{Preuve de la propriété LL(1) de la grammaire étendue}
+ 
+Nous n'allons pas vérifier la propriété LL(1) de la grammaire étendue
+(avec les macros) \emph{ex nihilo}, mais incrémentalement, à partir
+des résultats donnés en (\vref{LL1}).
+
+\subsubsection{Équation P$_1$}
+ 
+Il est évident de constater que la sous-grammaire des macros
+n'engendre pas de récursivités à gauche.
+
+\subsubsection{Équation P$_2$}
+
+Il est aisé de vérifier que l'intersection des premiers (lexèmes) de
+chaque alternative est vide.
+
+\subsubsection{Équation P$_3$}
+    
+Avant de commencer, notons que la modification de la règle
+\emph{`Assignment'} n'engendre pas de nouvelles contraintes. Pour ce
+qui est de la sous-grammaire des macros, il vient:
+\begin{center}
+\begin{longtable}{|l|l|} \hline
+ \multicolumn{1}{|c|}{Règle} &
+ \multicolumn{1}{c|}{Contraintes} \\ \hline \hline
+MacroSubstance & $\{ \textrm{``\textsf{.}''} \} \cap \mathcal{S}(\textrm{MacroSubstance}) = \emptyset$ \\ \hline
+TypeProduction & $\{ \textrm{``\textsf{$\mid$}''} \} \cap \mathcal{S}(\textrm{TypeProduction}) = \emptyset$ \\ \hline
+MacroAlternative & $\mathcal{P}(\textrm{SymbolElement}) \cap \mathcal{S}(\textrm{MacroAlternative}) = \emptyset$ \\ \hline
+MacroSuf & $\mathcal{P}(\textrm{Cont}) \cap \mathcal{S}(\textrm{MacroSuf}) = \emptyset$ \\ \hline
+Cont     & \begin{tabular}{l}
+            $\mathcal{P}(\textrm{Cont}) \cap \mathcal{S}(\textrm{Cont}) = \emptyset$ \\
+            $\mathcal{P}(\textrm{ContSuf}) \cap \mathcal{S}(\textrm{Cont}) = \emptyset$ \\
+           \end{tabular} \\ \hline
+EmbeddedDefinition & $\mathcal{P}(\textrm{EmbeddedDefinition}) \cap \{ \textrm{``\textsf{$>$}''} \} = \emptyset$ \\ \hline
+SymbolDefn & $\{ \textrm{``\textsf{(}''} \} \cap \mathcal{S}(\textrm{SymbolDefn}) = \emptyset$ \\ \hline
+\end{longtable}
+\end{center}
+
+\bigskip \noindent Soit :
+\begin{center}
+\begin{longtable}{|cl|} \hline 
+  & \\
+  (1) &
+  $\{ \textrm{``\textsf{.}''} \} \cap \mathcal{S}(\textrm{MacroSubstance}) = \emptyset$ \\
+  (2) &
+  $\{ \textrm{``\textsf{$\mid$}''} \} \cap \mathcal{S}(\textrm{TypeProduction}) = \emptyset$ \\
+  (3) &
+  $\mathcal{P}(\textrm{SymbolElement}) \cap \mathcal{S}(\textrm{MacroAlternative}) = \emptyset$ \\
+  (4) &
+  $\mathcal{P}(\textrm{Cont}) \cap \mathcal{S}(\textrm{MacroSuf}) = \emptyset$ \\
+  (5) &
+  $\mathcal{P}(\textrm{Cont}) \cap \mathcal{S}(\textrm{Cont}) = \emptyset$ \\
+  (6) &
+  $\mathcal{P}(\textrm{ContSuf}) \cap \mathcal{S}(\textrm{Cont}) = \emptyset$ \\
+  (7) &
+  $\mathcal{P}(\textrm{EmbeddedDefinition}) \cap \{ \textrm{``\textsf{$>$}''} \} = \emptyset$ \\
+  (8) &
+  $\{ \textrm{``\textsf{(}''} \} \cap \mathcal{S}(\textrm{SymbolDefn}) = \emptyset$ \\
+
+      & \\ \hline
+\end{longtable}
+\end{center}
+
+\noindent Calculons d'abord les premiers:
+\begin{center}
+\begin{longtable}{lcl}
+$\mathcal{P}(\textrm{SymbolElement})$ & = & \{ \texttt{upper}, ``\textsf{$<$}'', ``\texttt{string}'', ``\texttt{identifier}'', ``\texttt{number}'', \\ 
+&& ``\texttt{empty}'', ``\texttt{type}'', ``\texttt{value}'' \} \\ 
+&& \\
+$\mathcal{P}(\textrm{Cont})$ & = & \{ \texttt{upper}, ``\textsf{$<$}'', ``\texttt{string}'', ``\texttt{identifier}'', ``\texttt{number}'', \\ 
+&& ``\texttt{empty}'', ``\texttt{type}'', ``\texttt{value}'', ``\textsf{$\mid$}'' \} \\
+&& \\
+$\mathcal{P}(\textrm{ContSuf})$ & = & \{ \texttt{upper}, ``\textsf{$<$}'', ``\texttt{string}'', ``\texttt{identifier}'', ``\texttt{number}'', \\ 
+&& ``\texttt{empty}'', ``\texttt{type}'', ``\texttt{value}'', ``\textsf{$\mid$}'', ``\textsf{::=}'' \} \\
+&& \\
+$\mathcal{P}(\textrm{EmbeddedDefinition})$ & = & \{ \texttt{upper}, \texttt{lower}, VALUE \} \\
+\end{longtable}
+\end{center}
+
+\bigskip \noindent Puis les suivants:
+\begin{center}
+\begin{longtable}{lcl}
+$\mathcal{S}(\textrm{MacroSubstance})$ & = & $\mathcal{S}(\textrm{AssSuf})$ \\
+                                  & = & $\mathcal{S}(\textrm{Assignment})$ \\
+                                  & = & \{ END, \texttt{upper}, \texttt{lower} \} \\ \\
+
+$\mathcal{S}(\textrm{TypeProduction})$ & = & \{ VALUE \} \\ \\
+
+$\mathcal{S}(\textrm{MacroAlternative})$ & = & $\{ \textrm{``$\mid$''} \} \cup \mathcal{S}(\textrm{TypeProduction})$ \\
+                                  & = & \{ VALUE, ``$\mid$'' \} \\ \\
+
+$\mathcal{S}(\textrm{ContSuf})$        & = & $\mathcal{S}(\textrm{Cont})$ \\ \\
+                                
+$\mathcal{S}(\textrm{MacroSuf})$       & = & $\mathcal{S}(\textrm{MacroBody}) \cup \mathcal{S}(\textrm{Cont}) \cup \mathcal{S}(\textrm{ContSuf})$ \\ 
+                                  & = & $\{ \textrm{END} \} \cup \mathcal{S}(\textrm{Cont}) \cup \mathcal{S}(\textrm{ContSuf})$ \\ 
+                                  & = & $\{ \textrm{END} \} \cup \mathcal{S}(\textrm{Cont})$ \\ \\
+
+$\mathcal{S}(\textrm{Cont})$           & = & $\mathcal{S}(\textrm{MacroSuf}) \cup \mathcal{S}(\textrm{ContSuf})$ \\ 
+                                  & = & $\mathcal{S}(\textrm{MacroSuf}) \cup \mathcal{S}(\textrm{Cont})$ \\ 
+                                  & = & $\mathcal{S}(\textrm{MacroSuf})$ \\ \\
+
+$\mathcal{S}(\textrm{SymbolDefn})$     & = & $\mathcal{S}(\textrm{PartElem})$ \\
+                                  & = & $\mathcal{P}(\textrm{Cont}) \cup \mathcal{S}(\textrm{Cont}) \cup \mathcal{S}(\textrm{SymbolElement})$\\
+                                  & = & $\mathcal{P}(\textrm{Cont}) \cup \mathcal{S}(\textrm{Cont}) \cup \mathcal{S}(\textrm{MacroAlternative}) \cup \mathcal{S}(\textrm{MacroSuf})$ \\
+                                 & = & $\mathcal{S}(\textrm{MacroSuf}) \cup \{ \textrm{VALUE, ``$\mid$'',  \texttt{upper}, ``\textsf{$<$}'', ``\texttt{string}'',}$ \\
+&& ``\texttt{identifier}'', ``\texttt{number}'', ``\texttt{empty}'', ``\texttt{type}'', ``\texttt{value}'' \} \\
+\end{longtable}
+\end{center}
+\noindent D'où:
+\begin{equation*}
+\mathcal{S}(\textrm{MacroSuf}) = \mathcal{S}(\textrm{Cont}) = \mathcal{S}(\textrm{ContSuf}) = \{ \textrm{END} \}
+\end{equation*}
+\noindent Et
+\begin{center}
+\begin{tabular}{lcl}
+$\mathcal{S}(\textrm{SymbolDefn})$ &  = & \{ END, VALUE, ``$\mid$'',  \texttt{upper}, ``\textsf{$<$}'', ``\texttt{string}'', \\
+&& ``\texttt{identifier}'', ``\texttt{number}'', ``\texttt{empty}'', ``\texttt{type}'', ``\texttt{value}'' \} \\
+\end{tabular}
+\end{center}
+
+\bigskip \noindent Donc le système (1)-(8) est vérifié.
+
+Il reste à s'assurer que les non-terminaux apparaissant dans la
+sous-grammaire des macros \emph{et} dans la grammaire de base
+n'induisent pas des ensembles~$\mathcal{S}$ qui invalideraient la
+propriété LL(1) de la grammaire de base. Les non-terminaux dans ce cas
+à examiner sont `NamedType', `Type' et `Value'.
+
+Nous avions : $\mathcal{S}(\textrm{NamedType})$ = \{ ``\textsf{,}'',
+``\textsf{\}}'', OPTIONAL, DEFAULT \}. Maintenant:
+\begin{center}
+\begin{tabular}{lcl}
+$\mathcal{S}(\textrm{NamedType})$ & = & $\mathcal{S}(\textrm{Bind}) \cup \{ \textrm{``\textsf{,}'', ``\textsf{\}}'', OPTIONAL, DEFAULT} \}$ \\
+& = & \{ ``\textsf{)}'', ``\textsf{,}'', ``\textsf{\}}'', OPTIONAL, DEFAULT \} \\
+\end{tabular}
+\end{center}
+Considérons maintenant où est utilisé
+$\mathcal{S}(\textrm{NamedType})$. Il est utilisé d'une part pour
+vérifier les équations (18)~et~(19) données à la section~\vref{P3}, et
+d'autre part pour calculer $\mathcal{S}(\textrm{AuxType})$, qui sert
+lui-même uniquement à calculer $\mathcal{S}(\textrm{Type})$. Les
+équations (18)~et~(19) sont toujours vérifiées et pour ce qui est de
+$\mathcal{S}(\textrm{Type})$, celui-ci reste invariant car il
+contenait déjà ``\textsf{)}''.
+
+Les occurrences de `Type' et `Value' dans la sous-grammaire des macros
+introduisent dans $\mathcal{S}(\textrm{Type})$ et
+$\mathcal{S}(\textrm{Value})$ le symbole terminal~``\textsf{$>$}''. Or
+celui-ci n'existe pas dans la grammaire de base, donc il ne peut
+interférer dans les calculs de~(\ref{P3}).
+
+\bigskip \noindent \textbf{Conclusion}: La grammaire étendue est
+LL(1).
+
+\subsection{Extension de l'arbre de syntaxe abstraite}
+
+Nous allons expliquer pourquoi il est nécessaire d'étendre l'arbre de
+syntaxe abstraite de base pour pouvoir traiter les macros et comment
+le faire simplement et incrémentalement. Le problème se divise en deux
+parties disjointes : le cas des instances de type et celui des
+instances de valeur.
+
+\subsubsection{Instances de types}
+
+Le sixième paragraphe de~\cite[\S~A.1]{ASN90} nous apprend qu'une
+instance de type peut dépendre d'une instance de valeur. Considérons
+l'exemple suivant :
+\begin{sverb}
+SAMPLE DEFINITIONS ::= BEGIN
+
+TEST MACRO ::= BEGIN
+  TYPE  NOTATION ::= empty
+  VALUE NOTATION ::= value (VALUE BOOLEAN) | value (VALUE INTEGER)
+END
+
+T ::= TEST
+ 
+END
+\end{sverb}
+Quel est donc le type de~\texttt{T}?  Réponse: cela dépend. Si une
+instance de valeur apparaissait dans le module, alors
+\texttt{T}~pourrait être soit booléen, soit entier. En l'absence d'une
+telle instance de valeur, nous devons le rejeter comme étant
+incorrectement défini... (Attention: \texttt{T}~n'est même pas le type
+non spécifié NULL.) C'est là qu'arrive au galop la fin de ce sixième
+paragraphe qui nous apprend qu'en fait nous devons considérer une
+instance de type comme un type choix `ChoiceType' («~\emph{[...] the
+    use of the new type notation is similar to a CHOICE
+    [...].}). Ainsi dans notre exemple, cela nous amène à penser que
+  \texttt{T}~serait équivalent, dans un sens qui resterait à définir,
+  à:
+\begin{sverb}
+ T ::= CHOICE { field-0 BOOLEAN,
+                field-1 INTEGER }
+\end{sverb}
+Toutefois, les types possibles pour une instance de macro
+(c'est-à-dire les champs du type choix associé) peuvent contenir des
+identificateurs locaux à la macro. Par exemple:
+\begin{sverb}
+MACRO-INSIDE DEFINITIONS ::= BEGIN
+
+PAIR MACRO ::= BEGIN
+  TYPE NOTATION ::= "TYPEX" "=" type(LT1) "TYPEY" "=" type(LT2) 
+
+  VALUE NOTATION ::= "(" "X" "=" value(lv1 LT1) ","
+                         "Y" "=" value(lv2 LT2) 
+                      <VALUE SEQUENCE {LT1, LT2} ::= {lv1, lv2}>
+                     ")"
+END
+
+T1 ::= PAIR
+         TYPEX = INTEGER
+         TYPEY = BOOLEAN
+
+END
+\end{sverb}
+Dans ce cas, il faut produire une \emph{fermeture de type},
+c'est-à-dire une paire constituée d'un type (choix) et d'un
+environnement (un ensemble de définitions locales à la macro qui
+contiendrait ici celles de \texttt{LT1} et \texttt{LT2}). Nous
+déciderons donc que toute instance de type sera équivalente à une
+telle fermeture. Nous allons pour ce faire étendre l'arbre de syntaxe
+abstraite en rajoutant un n{\oe}ud «~fermeture de type~», c'est-à-dire
+un constructeur supplémentaire \texttt{TClos} au type OCaml
+\texttt{Desc}:
+
+\noindent \textbf{and} desc = \ldots \\
+\hspace*{2mm} $\mid$ TClos \textbf{of} desc * ctxt \\
+\hspace*{2mm} $\mid$ \ldots \\
+\textbf{and} ctxt = def \textsf{list} \\
+
+\subsubsection{Instances de valeurs}
+
+La section précédente consacrée aux instances de types nous amène
+naturellement à concevoir les instances de valeur comme des fermetures
+de valeurs, c'est-à-dire une paire formée d'une valeur et d'un
+environnement contenant des définitions locales à la macro. Plus
+exactement, ce sont des valeurs choisies `ChoiceValue' implicites,
+couplées à un environnement. Pour réaliser cela, nous devons ajouter
+un n{\oe}ud supplémentaire à l'arbre de syntaxe abstraite,
+c'est-à-dire un constructeur \texttt{VClos} au type OCaml
+\texttt{Value}: \\
+
+\textbf{and} v\_desc = \ldots \\
+\hspace*{2mm} $\mid$ VClos \textbf{of} value * ctxt
+\hspace*{2mm} $\mid$ \ldots \\
+\textbf{and} ctxt = def \textsf{list}

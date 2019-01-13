@@ -1,0 +1,131 @@
+%%-*-latex-*-
+
+Les théorèmes que nous avons établis s'appliquent au noyau d'ASN.1 et
+non pas à tout ASN.1. La raison est que la complexité du langage étant
+telle, la possibilité de la preuve de nos théorèmes semblait illusoire
+(très grande combinatoire de cas), et qu'il valait donc mieux
+envisager de réduire dans un premier temps les spécifications
+initiales vers un sous-ensemble d'ASN.1 plus simple, que nous avons
+nommé \emph{noyau}. Ainsi nous ne pouvons établir formellement la
+correction sémantique de cette réécriture, c'est-à-dire qu'elle laisse
+invariants les codes des valeurs des types réécrits (ainsi que les
+codes des valeurs spécifiées), et étendre alors la portée de nos
+théorèmes à tout le langage. Néanmoins, nous pouvons nous convaincre
+informellement du bien fondé de cette propriété simplement en
+examinant étape par étape notre réécriture, et en la confrontant aux
+règles de codages qui sous-tendent notre codage de référence BER
+\citep{X.690}. L'idée est de montrer que chaque étape laisse
+invariants les codes, donc leur composition aussi. Voyons étape par
+étape ce qu'il en est.
+\begin{enumerate}
+
+  \item L'ajout d'une définition du type \texttt{REAL} n'influe en
+    rien sur les codes.
+
+  \item La vérification de la bonne fondation des types ne constitue
+    pas une étape de réécriture à proprement parlé, mais de
+    vérification pure, donc ne change pas la forme des types, donc pas
+    le codage de leurs valeurs (la bonne fondation assure néanmoins la
+    terminaison du codage, bien que nous ne l'ayons pas prouvé
+    formellement).
+
+  \item Lors du découplage entre les valeurs globales et leur types,
+    nous créons des abréviations de types qui sont transparentes pour
+    le codage (règle d'inférence numéro~[2] \pageref{codage_2}).
+
+  \item Lors du découplage entre les contraintes de sous-typage et les
+    types, nous créons des abréviations de types qui sont
+    transparentes pour le codage (règle d'inférence numéro~[2]
+    \pageref{codage_2}).
+
+  \item La réécriture des types structurés de telle sorte que ces
+    derniers ne contiennent plus que des abréviations de type non
+    contraintes créé des abréviations, et donc n'influe pas sur le
+    codage (règle d'inférence numéro~[2] \pageref{codage_2}).
+
+  \item Le dépliage des abréviations de type et des sélections
+    globales n'influe en rien sur le codage (comme l'opération inverse
+    que constitue l'abréviation).
+
+  \item Le traitement des clauses \texttt{COMPONENTS OF} et du mode
+    d'étiquetage par défaut ajoute les étiquettes qui doivent
+    l'être. Le codage tel qu'il est défini dans X.690 \citep{X.690}
+    prévoit cette tâche: nous n'avons fait qu'avancer au niveau
+    syntaxique cette opération sémantique.
+
+  \item Le découplage entre valeurs et types peut créer des
+    abréviations de valeurs, qui sont sans conséquence sur le codage
+    (comme celle des types).
+
+  \item Le découplage entre valeurs et contraintes de sous-typage peut
+    créer des abréviations de valeurs, qui sont sans conséquence sur
+    le codage (comme celle des types).
+
+  \item La résolution de l'ambigüité du lexème~\texttt{0} (tantôt de
+    type \texttt{INTEGER}, tantôt de type \texttt{REAL}, selon le
+    contexte) ne fait que simplifier la tâche au codage qui aurait dû
+    sinon la faire.
+
+  \item Le dépliage des valeurs est sans conséquence sur le
+    codage. L'interdiction des valeurs récursives est purement de la
+    vérification, et non une réécriture, et n'influe donc pas sur les
+    codes.
+
+  \item Le dépliage des constantes dans les types \texttt{ENUMERATED},
+    \texttt{INTEGER} et \texttt{BIT STRING} est sans effet sur les
+    codes.
+
+  \item L'unicité des constantes définies par le type \texttt{INTEGER}
+    est de la vérification, et non de la réécriture, donc implique
+    l'invariance des codes.
+
+  \item Le fait de remonter les étiquetages des champs des types
+    structurés au niveau des déclarations laisse invariant les codes
+    des valeurs de ces types structurés car les champs sont des
+    abréviations. D'autre part, les codes de ces abréviations changent
+    \emph{mais} puisque ces abréviations ont été créés lors d'une
+    étape précédente, elles ne font pas partie du PDU, c'est-à-dire
+    qu'aucune valeur des types qu'elles dénotent ne sera codée et
+    envoyée directement. Par exemple, soit:
+\begin{sverb}
+A  ::= SET {
+         a [0] #1,
+         b [1] #2
+       }
+#1 ::= SET OF [2] #3
+#2 ::= INTEGER (0|1)
+#3 ::= REAL
+\end{sverb}
+    Les abréviations~\texttt{\#1}, \texttt{\#2} et \texttt{\#3} sont
+    \emph{par construction} uniquement accessibles à travers le
+    type~\texttt{A}. Elles ne dénotent pas des types du PDU, alors
+    que~\texttt{A} oui. Autrement dit, seul le type~\texttt{A} est
+    exporté par le module et aucun des usagers du protocole ne
+    s'attend à échanger directement des valeurs des
+    types~\texttt{\#1}, \texttt{\#2}~et~\texttt{\#3}. Cette étape de
+    réécriture donne:
+\begin{sverb}
+A  ::= SET {
+         a #1,
+         b #2
+       }
+#1 ::= [0] SET OF #3
+#2 ::= [1] INTEGER (0|1)
+#3 ::= [2] REAL
+\end{sverb}
+        Les codes des valeurs du type~\texttt{A} ne changent pas,
+        contrairement à ceux des valeurs des types~\texttt{\#1},
+        \texttt{\#2}~et~\texttt{\#3}. Mais puisque ces derniers ne
+        sont pas dans le PDU, cela ne change pas le protocole de
+        communication.
+
+  \item L'introduction explicite des étiquettes \texttt{UNIVERSAL} des
+    types prédéfinis ne fait que devancer ce que fera le codage.
+
+  \item La réduction des étiquetages ne fait que devancer ce que fera
+    le codage.
+
+\end{enumerate}
+En conclusion, la phase de réduction vers le noyau laisse invariants
+les codes des types de la spécification, ainsi que ceux des valeurs
+qu'elle contient.

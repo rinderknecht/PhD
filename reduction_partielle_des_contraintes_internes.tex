@@ -1,0 +1,40 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \SList{$(\textrm{T}_k,
+      \{\nu_k\})$}{k}{q})\\
+   \forall k \in [1..q].x \bouchon{58} (\textrm{T}_k, \nu_k)
+   \rightarrow (\overline{\textrm{T}}_k, \overline\sigma_k)\\
+   \bouchon{14} \domain{\mathcal{A}} \Gamma \rightarrow
+   \domain{\overline{\mathcal{A}}} \overline\Gamma\\
+   \overline\gamma \triangleq x \mapsto (\alpha, \tau,
+   \SList{$(\overline{\textrm{T}}_k, \overline\sigma_k)$}{k}{q})}
+   %-----
+  {\bouchon{14} \domain{\{x\} \uplus \mathcal{A}} \Gamma \rightarrow
+    \domain{\overline{\mathcal{A}}} \overline\Gamma \oplus
+    \overline\gamma}
+
+\inferrule
+  {}
+  {\bouchon{14} \domain{\varnothing} \Gamma \rightarrow
+    \domain{\varnothing} \Gamma}
+
+\inferrule
+  {x, \textrm{T} \bouchon{86} \nu \rightarrow \nu_0\\
+   \bouchon{13} (\textrm{T}, \nu_0) \rightarrow r}
+  %-----
+  {x, \bouchon{58} (\textrm{T}, \nu) \rightarrow r}
+
+\end{mathparpagebreakable}
+
+
+\subsubsection{Contraintes internes des contraintes par valeurs}
+\label{contraintes_internes_des_contraintes_par_valeurs}
+\input{contraintes_internes_des_contraintes_par_valeurs}
+
+
+\subsubsection{Réduction des contraintes internes}
+\label{reduction_des_contraintes_internes}
+\input{reduction_des_contraintes_internes}
+\input{reduction_d_une_contrainte_interne}

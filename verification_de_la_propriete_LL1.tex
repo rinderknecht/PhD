@@ -1,0 +1,1223 @@
+%%-*-latex-*-
+
+\section{Vérification de la propriété LL(1)}
+\label{LL1}
+
+Nous apportons ici la preuve que la grammaire précédente obtenue après
+moult transformations est LL(1).  Nous rappelons préalablement la
+définition exacte de la propriété LL(1).
+
+\subsection{Définition de la propriété LL(1)}
+
+Les grammaires LL(1) sont les grammaires analysables de façon
+descendante avec un lexème de prévision, sans reprise arrière
+(\emph{\underline{L}eft to right scanning of the input, building a
+  \underline{L}eftmost derivation with \underline{one} token of
+  look-ahead}).  Pour les définir formellement, il est nécessaire
+d'introduire au préalable deux fonctions.  Nous noterons~$N$
+l'ensemble des non-terminaux et~$\mathcal{S}$ l'ensemble des
+terminaux.
+
+\subsubsection{La fonction \emph{Premiers}}
+
+La fonction~$\mathcal{P}$ (premiers) est la suivante:
+\begin{equation*}
+  \forall \textrm{A} \in N.\mathcal{P}(\textrm{A}) = \{x \in \mathcal{S} \cup
+  \{\varepsilon\} \mid \textrm{A} \stackrel{*}{\Longrightarrow} x \alpha
+  \quad \textrm{et} \quad
+  x \not= \varepsilon \quad \textrm{ou} \quad \textrm{A}
+  \stackrel{*}{\Longrightarrow} x\}
+\end{equation*}
+
+\subsubsection{La fonction \emph{Suivants}}
+
+La fonction~$\mathcal{S}$ (suivants) est définie par:
+\begin{equation*}
+  \forall \textrm{A} \in N.\mathcal{S}(\textrm{A}) = \{x \in \mathcal{S} \mid \exists
+  \textrm{B} \in N, \textrm{B} \stackrel{*}{\Longrightarrow} \alpha \textrm{A}
+  x \beta \quad \textrm{ou} \quad \textrm{B} \stackrel{*}{\Longrightarrow} \alpha
+  \textrm{A} x\}
+\end{equation*}
+
+\subsubsection{Définition LL(1)}
+
+Nous notons ici l'implication par~$\models$, pour éviter toute
+confusion avec la relation~$\Longrightarrow$.  Une grammaire est LL(1)
+si et seulement si elle vérifie les propriétés suivantes:
+\begin{gather*}
+  \forall \textrm{A} \in N.\neg (\textrm{A}
+  \stackrel{*}{\Longrightarrow} \textrm{A} \alpha)
+  \tag{\textrm{P}$_1$}\\
+  \textrm{A} \rightarrow \alpha_{1} \mid \alpha_{2} \mid \ldots \mid
+  \alpha_{n} \quad \models \quad \bigcap_{i=1}^{n}
+  \mathcal{P}(\alpha_{i}) =
+  \varnothing \tag{\textrm{P}$_2$}\\
+  \textrm{A} \rightarrow \alpha_{1} \mid \alpha_{2} \mid \ldots \mid
+  \alpha_{n} \quad \textrm{et} \quad \alpha_{1}
+  \stackrel{*}{\Longrightarrow} \varepsilon \quad \models \quad
+  \forall i \in [1,n].\mathcal{P}(\alpha_{i}) \cap
+  \mathcal{S}(\textrm{A}) = \varnothing \tag{\textrm{P}$_3$}
+\end{gather*}
+
+\subsubsection{Extension aux opérateurs rationnels}
+\label{EXTRAT}
+
+Nous avons vu au chapitre~\vref{OPRAT} la définition des opérateurs
+rationnels utilisés dans cette grammaire ASN.1. Nous indiquions que
+nous pouvions considérer les expressions rationnelles comme étant
+produites par une règle spécifique.  Nous allons étendre ici les
+fonctions~$\mathcal{P}$ et~$\mathcal{S}$ à ces expressions et en
+donner une définition récursive et algorithmique. Nouvelle définition
+de~$\mathcal{P}$:
+\begin{align*}
+ \mathcal{P}(\varepsilon) &= \{ \varepsilon \}\\
+ \mathcal{P}(x \gamma) &= \{ x \} \\
+ \mathcal{P}(\textrm{B} \gamma) &= \mathcal{P}(\textrm{B}) \\
+ \mathcal{P}([\beta] \gamma) &= \mathcal{P}(\beta) \cup
+ \mathcal{P}(\gamma)\\
+ \mathcal{P}(\{\textrm{B} \, \textrm{b} \ldots\}^* \gamma) &=
+ \mathcal{P}(\textrm{B}) \cup \mathcal{P}(\gamma) \\
+ \mathcal{P}(\{\textrm{B} \, \textrm{b} \ldots\}^+ \gamma) &=
+ \mathcal{P}(\textrm{B}) \\
+ \mathcal{P}(\beta^* \gamma) &= \mathcal{P}(\beta) \cup
+ \mathcal{P}(\gamma) \\
+ \mathcal{P}(\beta^+ \gamma) &= \mathcal{P}(\beta) \\
+ \mathcal{P}(\textrm{A}) &= \bigcup_{i=1}^{n} \mathcal{P}(\alpha_{i}),
+ \; \textrm{si} \; \textrm{A} \rightarrow \alpha_{1} \mid \alpha_{2}
+ \mid \ldots \mid \alpha_{n}
+\end{align*}
+Nous signalons que, pour faciliter la définition, nous avons
+étendu~$\mathcal{P}$ à~$\varepsilon$ (bien que~$\varepsilon$
+n'apparaisse jamais explicitement dans la grammaire) et $\gamma$~peut
+valoir~$\varepsilon$. Nouvelle définition de~$\mathcal{S}$:
+\begin{itemize}
+
+  \item X $\rightarrow \ldots \mid \alpha \textrm{A} \textrm{B}
+    \beta$\\
+    $\mathcal{S}(\textrm{A}) = \mathcal{P}(\textrm{B})$
+
+  \item X $\rightarrow \ldots \mid \alpha \textrm{A} \{\textrm{B} \,
+    \textrm{b} \ldots\}^+ \beta$\\
+    \emph{Idem.}
+
+  \item X $\rightarrow \ldots \mid \alpha \textrm{A} [\beta]
+    \gamma$\\
+    $\mathcal{S}(\textrm{A}) = 
+    \left\{
+    \begin{tabular}{ll}
+      si $\gamma \stackrel{*}{\Longrightarrow} \varepsilon$ &
+      alors $\mathcal{P}(\beta) \cup (\mathcal{P}(\gamma) \backslash
+      \{\varepsilon\}) \cup \mathcal{S}(\textrm{X})$ \\
+      & sinon $\mathcal{P}(\beta) \cup \mathcal{P}(\gamma)$
+    \end{tabular} 
+    \right.$
+
+  \item X $\rightarrow \ldots \mid \alpha \textrm{A} \beta^* \gamma$\\
+    \emph{Idem.}
+
+  \item X $\rightarrow \ldots \mid \alpha \textrm{A}$\\
+    $\mathcal{S}(\textrm{A}) = \mathcal{S}(\textrm{X})$
+
+  \item X $\rightarrow \ldots \mid \alpha \textrm{A} x \beta$\\
+    $\mathcal{S}(\textrm{A}) = \{ x \}$
+
+  \item X $\rightarrow \ldots \mid \alpha \textrm{A} \beta^+ \gamma$\\
+    $\mathcal{S}(\textrm{A}) = \mathcal{P}(\beta)$
+
+  \item X $\rightarrow \ldots \mid \alpha \textrm{A} \{\textrm{B}
+    \textrm{b} \ldots\}^* \beta$\\
+    $\mathcal{S}(\textrm{A}) = 
+    \left\{
+    \begin{tabular}{ll}
+      si $\beta \stackrel{*}{\Longrightarrow} \varepsilon$ &
+      alors $\mathcal{P}(\textrm{B}) \cup (\mathcal{P}(\beta) \backslash
+      \{\varepsilon\}) \cup \mathcal{S}(\textrm{X})$ \\
+      & sinon $\mathcal{P}(\textrm{B}) \cup \mathcal{P}(\beta)$ \\
+    \end{tabular} 
+    \right.$
+
+  \item X $\rightarrow \ldots \mid \alpha \{ \textrm{A} \textrm{a}
+    \ldots\}^* \beta$\\
+    $\mathcal{S}(\textrm{A}) = 
+    \left\{
+    \begin{tabular}{ll}
+      si $\beta \stackrel{*}{\Longrightarrow} \varepsilon$ &
+      alors $\{\textrm{a}\} \cup (\mathcal{P}(\beta) \backslash
+      \{\varepsilon\}) \cup \mathcal{S}(\textrm{X})$ \\
+      & sinon $\{\textrm{a}\} \cup \mathcal{P}(\beta)$ \\
+    \end{tabular} 
+    \right.$
+
+    \item X $\rightarrow \ldots \mid \alpha \{ \textrm{A} \textrm{a}
+      \ldots\}^+ \beta$\\
+      \emph{Idem.}
+
+\end{itemize}
+Partout où cela est autorisé, nous pouvons lire le tableau précédent
+en remplaçant~A par~[A], A$^*$ ou~A$^+$. Ceci était la définition
+générale, mais dans cette étude les grammaires ne possèdent pas de
+productions vides explicites (cf.~\vref{OPTION}). Nous pouvons alors
+remplacer l'équation~P$_3$ par l'algorithme suivant: à chaque
+occurrence des expressions rationnelles $\alpha^*$, $\alpha^+$,
+[$\alpha$], \{A a \ldots\}$^*$, et \{A a \ldots\}$^+$, les considérer
+comme étant produites par une règle dédiée (sans partage) et vérifier
+les contraintes associées suivantes:
+\begin{center}
+        \begin{tabular}{|l|l|} \hline
+ \multicolumn{1}{|c|}{Règle rationnelle} &
+ \multicolumn{1}{c|}{Contrainte} \\ \hline \hline
+
+ X $\rightarrow \alpha^*$
+ &
+ $\mathcal{P}(\alpha) \cap \mathcal{S}(X) = \varnothing$ \\ \hline
+
+ X $\rightarrow \alpha^+$
+ &
+ $\mathcal{P}(\alpha) \cap \mathcal{S}(X) = \varnothing$ \\ \hline
+
+ X $\rightarrow$ [$\alpha$]
+ &
+ $\mathcal{P}(\alpha) \cap \mathcal{S}(X) = \varnothing$ \\ \hline
+
+ X $\rightarrow$ \{A a \ldots\}$^*$
+ &
+ $(\mathcal{P}(A) \cup \{a\}) \cap \mathcal{S}(X) = \varnothing$ \\ \hline
+
+ X $\rightarrow$ \{A a \ldots\}$^+$
+ &
+ $\{a\} \cap \mathcal{S}(X) = \varnothing$ \\ \hline
+\end{tabular} 
+\end{center}
+Le fait de ne pas considérer de partage facilite le travail s'il est
+réalisé «~à la main~»: le coût est identique, mais la tâche aura été
+plus localisée à chaque étape.  Un programme pourrait se passer de ce
+choix, bien entendu.
+
+\subsection{Une grammaire LL(1) d'\mbox{ASN.1:1990}}
+
+\subsubsection{Équation P$_1$}
+
+Nous présentons dans le tableau ci-dessous les non-terminaux qui sont
+produits en tête de chaque production.  Nous vérifions aisément, par
+fermeture transitive, qu'il n'y a pas de récursivité gauche qui
+apparaît.
+\begin{center}
+\begin{longtable}{|l|l|} \hline
+ \multicolumn{1}{|c|}{Règle} &
+ \multicolumn{1}{c|}{Tête} \\ \hline \hline
+ModuleDefinition & ModuleIdentifier \\
+ModuleIdentifier & \\
+ObjIdComponent & \\
+TagDefault & \\ 
+ModuleBody & Exports, Imports, Assignment \\
+Exports & \\
+Imports & \\
+SymbolsFromModule & Symbol \\
+Symbol & \\
+Assignment & \\
+\hline
+Type & AuxType \\
+AuxType & BuiltInType, SetSeq \\
+SetSeq & \\
+TypeSuf & SubtypeSpec \\
+BuiltInType & \\
+NamedType & AuxType \\
+NamedNumber & \\
+AuxNamedNum & \\
+NamedBit & \\
+ElementType & NamedType \\
+ElementTypeSuf & \\
+Class & \\
+ClassNumber & \\
+\hline
+Value & AuxVal0 \\
+AuxVal0 & BuiltInValue, AuxType \\
+AuxVal1 & SpecVal \\
+AuxVal2 & \\
+AuxVal11 & \\
+SpecVal & SubtypeSpec \\
+BuiltInValue & \\
+BetBraces & AuxVal0 \\
+AuxBet1 & AuxNamed, AuxVal2, AuxVal0 \\
+AuxBet2 & SpecVal \\
+AuxBet3 & ObjIdComponent, AuxNamed \\
+AuxBet11 & ObjIdComponent, AuxVal2, AuxNamed \\
+AuxBet21 & \\
+AuxNamed & \\
+NamedValue & AuxVal0 \\
+NamedValSuf & Value, AuxVal2 \\
+\hline
+SubtypeSpec & \\
+SubtypeValueSet & SVSAux \\
+SubValSetSuf & \\
+UpperEndValue & Value \\
+InnerTypeSuf & \\
+MultipleTypeConstraints &  \\
+NamedConstraint & SubtypeSpec, PresenceConstraint \\
+PresenceConstraint & \\
+SVSAux & BuiltInValue, AuxType \\
+SVSAux1 & SubtypeSpec \\ 
+SVSAux2 & \\ 
+SVSAux3 & SubtypeSpec, SubValSetSuf \\
+SVSAux11 & \\
+SVSAux21 & Type \\
+\hline
+\end{longtable}
+\end{center}
+
+
+\subsubsection{Équation P$_2$}
+\label{EQU2}
+
+Pour toutes les règles nous écrivons la contrainte imposée par
+l'équation~P$_2$, puis calculons les ensembles
+$\mathcal{P}(\alpha_{i})$ nécessaires pour les résoudre.  Pour
+faciliter la lecture nous ne ferons pas figurer la contrainte si tous
+les~$\alpha_{i}$ sont des terminaux (trivial).  De même, nous
+réduirons directement les $\mathcal{P}(\alpha_{i})$, où $\alpha_{i}$
+est une expression rationnelle spéciale, à leur forme sans opérateur
+(Cf. \vref{EXTRAT}).
+\begin{center}
+\begin{longtable}{@{}|l|l|@{}} \hline
+ \multicolumn{1}{|c|}{Règle} &
+ \multicolumn{1}{c|}{Contrainte} \\ \hline \hline
+ModuleDefinition & \\
+ModuleIdentifier & \\
+ObjIdComponent & \\
+TagDefault & \\
+ModuleBody & \\
+Exports & \\
+Imports & \\
+SymbolsFromModule & \\
+Symbol & \\
+Assignment & \\
+Type & $\{ \texttt{lower}, \texttt{upper}, \textsc{null} \}$\\
+     & $\quad \cap \, \mathcal{P}(\textrm{AuxType}) = \varnothing$ \\
+AuxType & $\{ \textrm{``\textsf{[}''} \} \cap \mathcal{P}(\textrm{BuiltInType}) \cap \mathcal{P}(\textrm{SetSeq}) = \varnothing $ \\
+SetSeq & \\
+TypeSuf & $\mathcal{P}(\textrm{SubtypeSpec}) \cap \{
+\textrm{``\textsf{\{}'', \textsc{size}, \textsc{of}} \} =
+\varnothing$\\
+BuiltInType & \\
+NamedType & $\{ \texttt{lower}, \texttt{upper}, \textsc{null} \}$\\
+          & $\quad \cap \,\mathcal{P}(\textrm{AuxType}) =
+\varnothing$\\
+NamedNumber & \\
+AuxNamedNum & \\
+NamedBit & \\
+ElementType & $\mathcal{P}(\textrm{NamedType}) \cap \{\textsc{components}\} = \varnothing$ \\
+ElementTypeSuf & \\
+Class & \\
+ClassNumber & \\
+\hline
+Value & $\mathcal{P}(\textrm{AuxVal0})$\\
+      & $\quad \cap \, \{\texttt{upper}, \texttt{lower},
+        \textrm{``\textsf{-}''}, \texttt{number} \} =
+        \varnothing$\\
+AuxVal0 & $\mathcal{P}(\textrm{BuiltInValue})$\\
+        & $\quad \cap \, \mathcal{P}(\textrm{AuxType}) \cap
+           \{\textsc{null}\} = \varnothing$ \\
+AuxVal1 & $\mathcal{P}(\textrm{SpecVal}) \cap \{\textrm{``\textsf{.}''} \} = \varnothing$ \\
+AuxVal2 & \\
+AuxVal11 & \\
+SpecVal & \\
+BuiltInValue & \\
+BetBraces & $\mathcal{P}(\textrm{AuxVal0})$\\
+          & $\quad \cap \, \{ \textrm{``\textsf{-}''}, \texttt{lower},
+\texttt{upper}, \texttt{number} \} = \varnothing $ \\
+AuxBet1 & $\mathcal{P}(\textrm{AuxNamed}) \cap
+\mathcal{P}(\textrm{AuxVal2})$\\
+        & $\quad \cap \, \mathcal{P}(\textrm{AuxVal0})$ \\
+        & $\quad \cap \, \{ \textrm{``\textsf{(}'', ``\textsf{-}''},
+          \texttt{lower}, \texttt{upper}, \texttt{number} \} = \varnothing$ \\
+AuxBet2 & $\mathcal{P}(\textrm{SpecVal}) \cap \{ \textrm{``\textsf{.}''} \} = \varnothing $\\
+AuxBet3 & $\mathcal{P}(\textrm{ObjIdComponent})$\\
+        & $\quad \cap \, \mathcal{P}(\textrm{AuxNamed}) = \varnothing$ \\
+AuxBet11 & $\{ \textrm{``\textsf{(}''} \} \cap
+            \mathcal{P}(\textrm{ObjIdComponent})$\\
+         & $\quad \cap \, \mathcal{P}(\textrm{AuxVal2})
+             \cap \mathcal{P}(\textrm{AuxNamed}) = \varnothing$ \\
+AuxBet21 & \\
+AuxNamed & \\
+NamedValue & $\mathcal{P}(\textrm{AuxVal0})$\\
+           & $\quad \cap \, \{ \textrm{``\textsf{-}''},
+             \texttt{lower}, \texttt{upper}, \texttt{number} \} = \varnothing $ \\
+NamedValSuf & $\mathcal{P}(\textrm{Value}) \cap \mathcal{P}(\textrm{AuxVal2}) = \varnothing$ \\ \hline
+SubtypeSpec & \\
+SubtypeValueSet & $\{ \textsc{includes}, \textsc{min}, \textsc{from},
+                   \textsc{size}, \textsc{with} \}$ \\
+                & $\quad \cap \, \mathcal{P}(\textrm{SVSAux}) = \varnothing$ \\
+SubValSetSuf & \\
+UpperEndValue & $\mathcal{P}(\textrm{Value}) \cap \{ \textsc{max} \} =
+\varnothing $ \\
+InnerTypeSuf & \\
+MultipleTypeConstraints &  \\
+NamedConstraint & $ \{ \texttt{lower} \} \cap \mathcal{P}(\textrm{SubtypeSpec})$ \\
+                & $\quad \cap \,
+                   \mathcal{P}(\textrm{PresenceConstraint}) = \varnothing $\\
+PresenceConstraint & \\
+SVSAux & $\mathcal{P}(\textrm{BuiltInValue}) \cap \mathcal{P}(\textrm{AuxType})$ \\
+       & $\quad \cap \, \{\textsc{null}, \texttt{upper}\}$\\
+       & $\quad \cap \, \{\texttt{lower}, \textrm{``\textsf{-}''},
+          \texttt{number} \} = \varnothing $ \\
+SVSAux1 & $\mathcal{P}(\textrm{SubtypeSpec}) \cap \{\textrm{``\textsf{.}'', ``\textsf{:}''}\} = \varnothing $ \\
+SVSAux2 & \\
+SVSAux3 & $\mathcal{P}(\textrm{SubtypeSpec}) \cap
+           \{\textrm{``\textsf{:}''}\}$\\
+        & $\quad \cap \, \mathcal{P}(\textrm{SubValSetSuf}) =
+           \varnothing$ \\
+SVSAux11 & \\
+SVSAux21 & $\mathcal{P}(\textrm{Type}) \cap \{ \textrm{``\textsf{..}''} \} = \varnothing $ \\
+\hline
+\end{longtable}
+\end{center}
+Finalement, après simplification, le système d'équations suivant doit être satisfait:
+\begin{center}
+ \begin{longtable}{cl}
+  (1) &
+  $\{ \textrm{``\textsf{[}''} \} \cap \mathcal{P}(\textrm{BuiltInType}) \cap \mathcal{P}(\textrm{SetSeq}) = \varnothing$ \\
+  (2) & 
+  $\mathcal{P}(\textrm{SubtypeSpec}) \cap \{ \textrm{``\textsf{\{}'', ``\textsf{.}'', ``\textsf{:}'', \textsc{size}, \textsc{of}} \} = \varnothing$ \\
+  (3) &
+  $\mathcal{P}(\textrm{NamedType}) \cap \{\textsc{components}\} = \varnothing$ \\
+  (4) &
+  $\mathcal{P}(\textrm{SpecVal}) \cap \{\textrm{``\textsf{.}''} \} = \varnothing$ \\
+  (5) &
+  $\mathcal{P}(\textrm{AuxNamed}) \cap \mathcal{P}(\textrm{AuxVal2}) \cap \mathcal{P}(\textrm{AuxVal0})$ \\
+      & $\quad\cap \, \{ \textrm{``\textsf{(}'', ``\textsf{-}''}, \texttt{lower}, \texttt{upper}, \texttt{number} \} = \varnothing$ \\
+  (6) &
+  $\{ \textrm{``\textsf{(}''} \} \cap
+     \mathcal{P}(\textrm{ObjIdComponent}) \cap
+     \mathcal{P}(\textrm{AuxVal2})$\\
+      & $\quad \cap \,\mathcal{P}(\textrm{AuxNamed}) = \varnothing$ \\
+  (7) &
+  $\mathcal{P}(\textrm{Value}) \cap \mathcal{P}(\textrm{AuxVal2}) = \varnothing$ \\
+  (8) &
+  $\mathcal{P}(\textrm{Value}) \cap \{ \textsc{max} \} = \varnothing$ \\
+  (9) &
+  $\{ \textsc{includes}, \textsc{min}, \textsc{from}, \textsc{size},
+     \textsc{with} \} \cap \mathcal{P}(\textrm{SVSAux}) = \varnothing$ \\
+  (10) &
+  $\{ \texttt{lower} \} \cap \mathcal{P}(\textrm{SubtypeSpec}) \cap \mathcal{P}(\textrm{PresenceConstraint}) = \varnothing$ \\
+  (11) &
+  $\mathcal{P}(\textrm{BuiltInValue}) \cap \mathcal{P}(\textrm{AuxType})$ \\
+       & $\cap \{\textsc{null}, \texttt{upper}, \texttt{lower}, \textrm{``\textsf{-}''}, \texttt{number} \} = \varnothing$ \\
+  (12) &
+  $\mathcal{P}(\textrm{SubtypeSpec}) \cap \{\textrm{``\textsf{:}''}\} \cap \mathcal{P}(\textrm{SubValSetSuf}) = \varnothing$ \\
+  (13) &
+  $\mathcal{P}(\textrm{Type}) \cap \{ \textrm{``\textsf{..}''} \} = \varnothing$ \\
+\end{longtable}
+\end{center}
+\emph{Or}:\\
+
+\begin{tabular}{lcl}
+$\mathcal{P}(\textrm{BuiltInType})$ & = & \{ BOOLEAN, INTEGER, BIT, OCTET, CHOICE, \\
+&& ANY, OBJECT, ENUMERATED, REAL, \\
+&& EXTERNAL, \\ 
+&& ``NumericString'', ``PrintableString'', ``TeletexString'', \\
+&& ``T61String'', ``VideotexString'', ``VisibleString'', \\ 
+&& ``ISO646String'', ``IA5String'', ``GraphicString'', \\ 
+&& ``GeneralString'', ``UTCTime'', ``GeneralizedTime'', \\
+&& ``ObjectDescriptor'' \} \\
+$\mathcal{P}(\textrm{SetSeq})$ & = & \{ SET, SEQUENCE \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (1) est vérifiée.}
+\begin{equation*}
+\mathcal{P}(\textrm{SubtypeSpec}) = \{ \textrm{``\textsf{(}''} \}
+\end{equation*}
+\noindent \emph{Donc l'équation (2) est vérifiée.}\\ \\
+
+\begin{tabular}{lcl}
+$\mathcal{P}(\textrm{NamedType})$ & = & $\{ \texttt{lower}, \texttt{upper}, \textrm{NULL} \} \cup \mathcal{P}(\textrm{AuxType})$ \\
+$\mathcal{P}(\textrm{AuxType})$ & = & $\{ \textrm{``\textsf{[}''} \} \cup \mathcal{P}(\textrm{BuiltInType}) \cup \mathcal{P}(\textrm{SetSeq})$ \\
+& = & \{ ``\textsf{[}'', SET, SEQUENCE, BOOLEAN, INTEGER, \\
+&& BIT, OCTET, CHOICE, ANY, OBJECT, \\
+&& ENUMERATED, REAL, \\ 
+&& EXTERNAL, ``NumericString'', ``PrintableString'', \\
+&& ``TeletexString'', ``T61String'', ``VideotexString'', \\
+&& ``VisibleString'', ``ISO646String'', ``IA5String'', \\
+&& ``GraphicString'', ``GeneralString'', ``UTCTime'', \\
+&& ``GeneralizedTime'', ``ObjectDescriptor'' \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (3) est vérifiée.}\\ \\
+
+\begin{tabular}{lcl}
+$\mathcal{P}(\textrm{SpecVal})$ & = & $\mathcal{P}(\textrm{SubtypeSpec}) \cup \{ \textrm{``\textsf{:}''} \}$\\
+& = & \{ ``\textsf{(}'', ``\textsf{:}'' \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (4) est vérifiée.}\\ \\
+
+\begin{tabular}{lcl}
+$\mathcal{P}(\textrm{AuxNamed})$ & = & \{ ``\textsf{,}'' \} \\
+$\mathcal{P}(\textrm{AuxVal2})$ & = & \{ ``\textsf{$<$}'', ``\textsf{:}'' \} \\
+$\mathcal{P}(\textrm{BuiltInValue})$ & = & \{ TRUE, FALSE, PLUS-INFINITY, MINUS-INFINITY, \\
+& & \texttt{basednum}, \texttt{string}, ``\textsf{\{}'' \}\\
+$\mathcal{P}(\textrm{AuxVal0})$ & = & $\mathcal{P}(\textrm{BuiltInValue}) \cup \mathcal{P}(\textrm{AuxType}) \cup \{ \textrm{NULL} \}$ \\
+& = & \{ TRUE, FALSE, PLUS-INFINITY, MINUS-INFINITY, \\
+&   & \texttt{basednum}, \texttt{string}, ``\textsf{\{}'', NULL, ``\textsf{[}'', SET, SEQUENCE, \\ 
+&& BOOLEAN, INTEGER, BIT, OCTET, CHOICE, ANY, \\ 
+&& OBJECT, ENUMERATED, REAL, EXTERNAL, \\
+&& ``NumericString'', ``PrintableString'', ``TeletexString'', \\ 
+&& ``T61String'', ``VideotexString'', ``VisibleString'', \\
+&& ``ISO646String'', ``IA5String'', ``GraphicString'', \\
+&& ``GeneralString'', ``UTCTime'', ``GeneralizedTime'', \\
+&& ``ObjectDescriptor'' \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc les équations (5) et (11) sont vérifiées.}\\ \\
+
+$\mathcal{P}(\textrm{ObjIdComponent}) = \{ \texttt{number}, \texttt{upper}, \texttt{lower} \}$ \\
+
+\noindent \emph{Donc l'équation (6) est vérifiée.}\\ \\
+
+\begin{tabular}{lcl}
+$\mathcal{P}(\textrm{Value})$ & = & $\mathcal{P}(\textrm{AuxVal0}) \cup \{ \texttt{upper}, \texttt{lower}, \texttt{number}, \textrm{``\textsf{-}''} \}$ \\
+& = & \{ TRUE, FALSE, PLUS-INFINITY, \\
+&   & MINUS-INFINITY, \texttt{basednum}, \\ 
+&& \texttt{string}, ``\textsf{\{}'', NULL, ``\textsf{[}'', SET, SEQUENCE, BOOLEAN, \\ 
+&& INTEGER, BIT, OCTET, CHOICE, ANY, OBJECT, \\
+&& ENUMERATED, REAL, EXTERNAL, \\
+&& ``NumericString'', ``PrintableString'', ``TeletexString'', \\
+&& ``T61String'', ``VideotexString'', ``VisibleString'', \\ 
+&& ``ISO646String'', ``IA5String'', ``GraphicString'', \\ 
+&& ``GeneralString'', ``UTCTime'', ``GeneralizedTime'', \\
+&& ``ObjectDescriptor'', \texttt{upper}, \texttt{lower}, \texttt{number}, ``\textsf{-}'' \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc les équations (7) et (8) sont vérifiées.}\\ \\
+
+\begin{tabular}{lcl}
+$\mathcal{P}(\textrm{SVSAux})$ & = & $\mathcal{P}(\textrm{BuiltInValue}) \cup \mathcal{P}(\textrm{Auxtype})$ \\ 
+&   & $\cup$ \ \{ NULL, \texttt{upper}, \texttt{lower}, \texttt{number}, ``\textsf{-}'' \} \\
+& = & \{ TRUE, FALSE, PLUS-INFINITY, MINUS-INFINITY, \\
+
+&& \texttt{basednum}, \texttt{string}, ``\textsf{\{}'', ``\textsf{[}'', SET, SEQUENCE, BOOLEAN, \\
+&& INTEGER, BIT, OCTET, CHOICE, ANY, OBJECT, \\
+&& ENUMERATED, REAL, EXTERNAL, ``NumericString'', \\
+&& ``PrintableString'', ``TeletexString'', ``T61String'', \\
+&& ``VideotexString'', ``VisibleString'', ``ISO646String'', \\
+&& ``IA5String'', ``GraphicString'', ``GeneralString'', \\
+&& ``UTCTime'', ``GeneralizedTime'',``ObjectDescriptor'', \\
+&& NULL, \texttt{upper}, \texttt{lower}, \texttt{number}, ``\textsf{-}'' \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (9) est vérifiée.}\\ \\
+
+$\mathcal{P}(\textrm{PresenceConstraint}) = \{ \textrm{PRESENT, ABSENT, OPTIONAL} \}$ \\
+
+\noindent \emph{Donc l'équation (10) est vérifiée.}\\ \\
+
+$\mathcal{P}(\textrm{SubValSetSuf}) = \{ \textrm{``\textsf{$<$}'', ``\textsf{..}''} \}$ \\
+
+\noindent \emph{Donc l'équation (12) est vérifiée.}\\ \\
+
+\begin{tabular}{lcl}
+$\mathcal{P}(\textrm{Type})$ & = & $\{ \textrm{\texttt{lower}, \texttt{upper}, NULL} \} \cup \mathcal{P}(\textrm{AuxType})$ \\
+& = & \{ \texttt{lower}, \texttt{upper}, NULL, \\
+&& ``\textsf{[}'', SET, SEQUENCE, BOOLEAN, INTEGER, BIT, \\
+&& OCTET, CHOICE, ANY, OBJECT, \\
+&& ENUMERATED, REAL, EXTERNAL, \\
+&& ``NumericString'', ``PrintableString'', ``TeletexString'', \\
+&& ``T61String'', ``VideotexString'', ``VisibleString'', \\
+&& ``ISO646String'', ``IA5String'',``GraphicString'', \\
+&& ``GeneralString'', ``UTCTime'', ``GeneralizedTime'', \\
+&& ``ObjectDescriptor'' \} \\
+\end{tabular} \\ 
+
+\noindent \emph{Donc l'équation (13) est vérifiée.} 
+
+
+\subsubsection{Équation P$_3$}
+\label{P3}
+
+Nous donnons ici pour chaque production de chaque règle les
+contraintes imposées par l'équation~P$_3$ (cf.~\vref{EXTRAT}).  Pour
+ne pas charger inutilement le tableau, les équations redondantes au
+sein d'une même règle et les équations triviales n'apparaîtront
+pas. Nous simplifierons de même ce qui peut l'être localement.
+\begin{center}
+\begin{longtable}{|l|l|} \hline
+ \multicolumn{1}{|c|}{Règle} &
+ \multicolumn{1}{c|}{Contraintes} \\ \hline \hline
+ModuleDefinition & \begin{tabular}{l}
+                    $\mathcal{P}(\textrm{TagDefault}) \cap \{ \textrm{``\textsf{::=}''} \} = \varnothing$ \\
+                    $\mathcal{P}(\textrm{ModuleBody}) \cap \{ \textrm{END} \} = \varnothing$ \\
+                   \end{tabular} \\ \hline
+ModuleIdentifier & $\{ \textrm{``\textsf{\{}''} \} \cap \mathcal{S}(\textrm{ModuleIdentifier}) = \varnothing$ \\ \hline
+ObjIdComponent & $\{ \textrm{``\textsf{(}''} \} \cap \mathcal{S}(\textrm{ObjIdComponent}) = \varnothing$ \\ \hline
+TagDefault & \\ \hline
+ModuleBody & \begin{tabular}{l}
+             $\mathcal{P}(\textrm{Exports}) \cap (\mathcal{P}(\textrm{Imports}) \cup \mathcal{P}(\textrm{Assignment})) = \varnothing$ \\
+             $\mathcal{P}(\textrm{Imports}) \cap \mathcal{P}(\textrm{Assignment}) = \varnothing$ \\
+             \end{tabular} \\ \hline
+Exports & $(\mathcal{P}(\textrm{Symbol}) \cup \{ \textrm{``\textsf{,}''} \}) \cap \{ \textrm{``\textsf{;}''} \} = \varnothing$ \\ \hline
+Imports & $\mathcal{P}(\textrm{SymbolsFromModule}) \cap \{ \textrm{``\textsf{;}''} \} = \varnothing$ \\ \hline
+SymbolsFromModule & \\ \hline
+Symbol & \\ \hline
+Assignment & \\ \hline \hline
+Type & \begin{tabular}{l}
+        $\{\textrm{``\textsf{.}''} \} \cap (\mathcal{P}(\textrm{SubtypeSpec}) \cup \mathcal{S}(\textrm{Type})) = \varnothing$ \\
+       $\mathcal{P}(\textrm{SubtypeSpec}) \cap \mathcal{S}(\textrm{Type}) = \varnothing$ \\
+       \end{tabular} \\ \hline
+AuxType & \begin{tabular}{l}
+          $\mathcal{P}(\textrm{Class}) \cap \mathcal{P}(\textrm{ClassNumber}) = \varnothing$ \\
+          $\mathcal{P}(\textrm{TagDefault}) \cap \mathcal{P}(\textrm{Type}) = \varnothing$ \\
+         $\mathcal{P}(\textrm{TypeSuf}) \cap \mathcal{S}(\textrm{AuxType}) = \varnothing$\\
+          \end{tabular} \\ \hline
+SetSeq & \\ \hline
+TypeSuf & \begin{tabular}{l}
+          $\mathcal{P}(\textrm{SubtypeSpec}) \cap \mathcal{S}(\textrm{TypeSuf}) = \varnothing$ \\
+          $(\mathcal{P}(\textrm{ElementType}) \cup \{\textrm{``\textsf{,}''}\}) \cap \{\textrm{``\textsf{\}}''}\} = \varnothing$ \\
+          \end{tabular} \\ \hline
+BuiltInType & \begin{tabular}{l}
+               $\{\textrm{``\textsf{\{}''} \} \cap \mathcal{S}(\textrm{BuiltInType}) = \varnothing$ \\
+              $\{\textrm{DEFINED}\} \cap \mathcal{S}(\textrm{BuiltInType}) = \varnothing$ \\
+              \end{tabular} \\ \hline
+NamedType & \begin{tabular}{l}
+             $\{\textrm{``\textsf{$<$}''} \} \cap \mathcal{P}(\textrm{Type}) = \varnothing$ \\
+             $\{\textrm{``\textsf{.}''} \} \cap (\mathcal{P}(\textrm{SubtypeSpec}) \cup \mathcal{S}(\textrm{NamedType})) = \varnothing$ \\
+             $\mathcal{P}(\textrm{SubtypeSpec}) \cap \mathcal{S}(\textrm{NamedType}) = \varnothing$ \\
+            \end{tabular} \\ \hline
+NamedNumber & \\ \hline
+AuxNamedNum & \\ \hline
+NamedBit & \\ \hline
+ElementType & $\mathcal{P}(\textrm{ElementTypeSuf}) \cap \mathcal{S}(\textrm{ElementType}) = \varnothing$ \\ \hline
+ElementTypeSuf & \\ \hline
+Class & \\ \hline
+ClassNumber & \\ \hline
+Value & $\mathcal{P}(\textrm{AuxVal2}) \cap \mathcal{S}(\textrm{Value}) = \varnothing$ \\ \hline
+AuxVal0 & $\mathcal{P}(\textrm{SpecVal}) \cap \mathcal{S}(\textrm{AuxVal0}) = \varnothing$ \\ \hline
+AuxVal1 & \\ \hline
+AuxVal2 & \\ \hline
+AuxVal11 & \\ \hline
+SpecVal & $\mathcal{P}(\textrm{SubtypeSpec}) \cap \{ \textrm{``\textsf{:}''} \} = \varnothing$  \\ \hline
+BuiltInValue & \\ \hline
+BetBraces & \begin{tabular}{l}
+             $\mathcal{P}(\textrm{AuxNamed}) \cap \mathcal{S}(\textrm{BetBraces}) = \varnothing$ \\
+             $\mathcal{P}(\textrm{AuxBet1}) \cap \mathcal{S}(\textrm{BetBraces}) = \varnothing$ \\
+             $\mathcal{P}(\textrm{AuxBet3}) \cap \mathcal{S}(\textrm{BetBraces}) = \varnothing$ \\
+            \end{tabular} \\ \hline
+AuxBet1 & \begin{tabular}{l}
+            $\mathcal{P}(\textrm{ObjIdComponent}) \cap \mathcal{S}(\textrm{AuxBet1}) = \varnothing$ \\
+            $\mathcal{P}(\textrm{AuxNamed}) \cap \mathcal{S}(\textrm{AuxBet1}) = \varnothing$ \\
+            $\mathcal{P}(\textrm{AuxBet11}) \cap \mathcal{S}(\textrm{AuxBet1}) = \varnothing$ \\
+            $\mathcal{P}(\textrm{AuxBet3}) \cap \mathcal{S}(\textrm{AuxBet1}) = \varnothing$ \\
+          \end{tabular} \\ \hline
+AuxBet2 & $\mathcal{P}(\textrm{AuxNamed}) \cap \mathcal{S}(\textrm{AuxBet2}) = \varnothing$\\ \hline
+AuxBet3 & $\mathcal{P}(\textrm{ObjIdComponent}) \cap \mathcal{S}(\textrm{AuxBet3}) = \varnothing$ \\ \hline
+AuxBet11 & \begin{tabular}{l}
+            $\mathcal{P}(\textrm{ObjIdComponent}) \cap \mathcal{S}(\textrm{AuxBet11}) = \varnothing$ \\
+            $\mathcal{P}(\textrm{AuxNamed}) \cap \mathcal{S}(\textrm{AuxBet11}) = \varnothing$ \\
+           \end{tabular} \\ \hline
+AuxBet21 & \begin{tabular}{l}
+             $\mathcal{P}(\textrm{AuxNamed}) \cap \mathcal{S}(\textrm{AuxBet21}) = \varnothing$ \\
+             $\mathcal{P}(\textrm{AuxBet3}) \cap \mathcal{S}(\textrm{AuxBet21}) = \varnothing$ \\
+           \end{tabular} \\ \hline
+AuxNamed & $\{ \textrm{``\textsf{,}''} \} \cap \mathcal{S}(\textrm{AuxNamed}) = \varnothing$\\ \hline
+NamedValue & $\mathcal{P}(\textrm{NamedValSuf}) \cap \mathcal{S}(\textrm{NamedValue}) = \varnothing$ \\ \hline
+NamedValSuf & \\ \hline \hline
+SubtypeSpec & \\ \hline
+SubtypeValueSet & \\ \hline
+SubValSetSuf & $\{ \textrm{``\textsf{$<$}''} \} \cap \mathcal{P}(\textrm{UpperEndValue}) = \varnothing$ \\ \hline
+UpperEndValue & \\ \hline
+InnerTypeSuf & \\ \hline
+MultipleTypeConstraints & $\{ \textrm{``\ldots'', ``\textsf{\}}''} \} \cap \mathcal{P}(\textrm{NamedConstraint}) = \varnothing$ \\ \hline
+NamedConstraint & \begin{tabular}{l}
+                   $\mathcal{P}(\textrm{SubtypeSpec}) \cap (\mathcal{P}(\textrm{PresenceConstraint})$ \\
+                   \ \ \ $\cup \ \mathcal{S}(\textrm{NamedConstraint})) = \varnothing$ \\
+                   $\mathcal{P}(\textrm{PresenceConstraint}) \cap \mathcal{S}(\textrm{NamedConstraint}) = \varnothing$ \\
+                  \end{tabular} \\ \hline
+PresenceConstraint & \\ \hline
+SVSAux & \begin{tabular}{l}
+          $\mathcal{P}(\textrm{SubValSetSuf}) \cap \mathcal{S}(\textrm{SVSAux}) = \varnothing$\\
+          $\mathcal{P}(\textrm{SVSAux3}) \cap \mathcal{S}(\textrm{SVSAux}) = \varnothing$\\
+          $\mathcal{P}(\textrm{SVSAux2}) \cap \mathcal{S}(\textrm{SVSAux}) = \varnothing$\\
+         \end{tabular} \\ \hline
+SVSAux1 & $\mathcal{P}(\textrm{SubtypeSpec}) \cap \{ \textrm{``\textsf{:}''} \} = \varnothing$ \\ \hline
+SVSAux2 & $\{ \textrm{``\textsf{$<$}''} \} \cap \mathcal{P}(\textrm{UpperEndValue}) = \varnothing$ \\ \hline
+SVSAux3 & $\mathcal{P}(\textrm{SubtypeSpec}) \cap \{ \textrm{``\textsf{:}''} \} = \varnothing$ \\ \hline
+SVSAux11 & \begin{tabular}{l}
+             $\mathcal{P}(\textrm{SubtypeSpec}) \cap \{ \textrm{``\textsf{:}''} \} = \varnothing$ \\
+             $\mathcal{P}(\textrm{SubValSetSuf}) \cap \mathcal{S}(\textrm{SVSAux11}) = \varnothing$\\
+           \end{tabular} \\ \hline
+SVSAux21 & $\{ \textrm{``\textsf{$<$}''} \} \cap \mathcal{P}(\textrm{UpperEndValue}) = \varnothing$ \\ 
+\hline
+\end{longtable}
+\end{center}
+Finalement, après simplifications, le système d'équations suivant doit être satisfait:
+\begin{center}
+\begin{longtable}{|cl|} \hline 
+  & \\
+  (1) &
+  $\mathcal{P}(\textrm{TagDefault}) \cap \{ \textrm{``\textsf{::=}''} \} = \varnothing$ \\
+  (2) &
+  $\mathcal{P}(\textrm{ModuleBody}) \cap \{ \textrm{END} \} = \varnothing$ \\
+  (3) &
+  $\{\textrm{``\textsf{\{}''} \} \cap \mathcal{S}(\textrm{ModuleIdentifier}) = \varnothing$ \\
+  (4) &
+  $\{\textrm{``\textsf{(}''} \} \cap \mathcal{S}(\textrm{ObjIdComponent}) = \varnothing$ \\
+  (5) &
+  $\mathcal{P}(\textrm{Exports}) \cap \mathcal{P}(\textrm{Imports}) = \varnothing$ \\
+  (6) &
+  $\mathcal{P}(\textrm{Exports}) \cap \mathcal{P}(\textrm{Assignment}) = \varnothing$ \\
+  (7) &
+  $\mathcal{P}(\textrm{Imports}) \cap \mathcal{P}(\textrm{Assignment}) = \varnothing$ \\
+  (8) &
+  $\mathcal{P}(\textrm{TypeSuf}) \cap \mathcal{S}(\textrm{AuxType}) = \varnothing$ \\
+  (9) &
+  $\mathcal{P}(\textrm{SymbolsFromModule}) \cap \{ \textrm{``\textsf{;}''} \} = \varnothing$ \\
+  (10) &
+  $\mathcal{P}(\textrm{SubtypeSpec}) \cap \{ \textrm{``\textsf{.}'', ``\textsf{:}''} \} = \varnothing$ \\
+  (11) &
+  $\mathcal{S}(\textrm{Type}) \cap \{ \textrm{``\textsf{.}''} \} = \varnothing$ \\
+  (12) &
+  $\mathcal{P}(\textrm{Class}) \cap \mathcal{P}(\textrm{ClassNumber}) = \varnothing$ \\
+  (13) &
+  $\mathcal{P}(\textrm{TagDefault}) \cap \mathcal{P}(\textrm{Type}) = \varnothing$ \\
+  (14) &
+  $\mathcal{P}(\textrm{Type}) \cap \{ \textrm{``\textsf{$<$}''} \} = \varnothing$ \\
+  (15) &
+  $\mathcal{P}(\textrm{SubtypeSpec}) \cap \mathcal{S}(\textrm{TypeSuf}) = \varnothing$ \\
+  (16) &
+  $\mathcal{P}(\textrm{ElementType}) \cap \{ \textrm{``\textsf{\}}''} \} = \varnothing$ \\
+  (17) &
+  $\{ \textrm{``\textsf{\{}'', DEFINED} \} \cap \mathcal{S}(\textrm{BuiltInType}) = \varnothing$ \\
+  (18) &
+  $\{ \textrm{``\textsf{.}''} \} \cap \mathcal{S}(\textrm{NamedType}) = \varnothing$ \\
+  (19) &
+  $\mathcal{P}(\textrm{SubtypeSpec}) \cap \mathcal{S}(\textrm{NamedType}) = \varnothing$ \\
+  (20) &
+  $\mathcal{P}(\textrm{ElementTypeSuf}) \cap \mathcal{S}(\textrm{ElementType}) = \varnothing$ \\
+  (21) &
+  $\mathcal{P}(\textrm{AuxVal2}) \cap \mathcal{S}(\textrm{Value}) = \varnothing$ \\
+  (22) &
+  $\mathcal{P}(\textrm{SpecVal}) \cap \mathcal{S}(\textrm{AuxVal0}) = \varnothing$ \\
+  (23) &
+  $\mathcal{P}(\textrm{AuxNamed}) \cap \mathcal{S}(\textrm{BetBraces}) = \varnothing$ \\
+  (24) &
+  $\mathcal{P}(\textrm{AuxBet1}) \cap \mathcal{S}(\textrm{BetBraces}) = \varnothing$ \\
+  (25) &
+   $\mathcal{P}(\textrm{AuxBet3}) \cap \mathcal{S}(\textrm{BetBraces}) = \varnothing$ \\
+  & \\
+\hline
+& \\
+  (26) &
+  $\mathcal{P}(\textrm{ObjIdComponent}) \cap \mathcal{S}(\textrm{AuxBet1}) = \varnothing$ \\
+  (27) &
+  $\mathcal{P}(\textrm{AuxNamed}) \cap \mathcal{S}(\textrm{AuxBet1}) = \varnothing$ \\
+  (28) &
+  $\mathcal{P}(\textrm{AuxBet11}) \cap \mathcal{S}(\textrm{AuxBet1}) = \varnothing$ \\
+  (29) &
+   $\mathcal{P}(\textrm{AuxBet3}) \cap \mathcal{S}(\textrm{AuxBet1}) = \varnothing$ \\
+  (30) &
+  $\mathcal{P}(\textrm{AuxNamed}) \cap \mathcal{S}(\textrm{AuxBet2}) = \varnothing$ \\
+  (31) &
+  $\mathcal{P}(\textrm{ObjIdComponent}) \cap \mathcal{S}(\textrm{AuxBet3}) = \varnothing$ \\
+  (32) &
+  $\mathcal{P}(\textrm{ObjIdComponent}) \cap \mathcal{S}(\textrm{AuxBet11}) = \varnothing$ \\
+  (33) &
+  $\mathcal{P}(\textrm{AuxNamed}) \cap \mathcal{S}(\textrm{AuxBet11}) = \varnothing$ \\
+  (34) &
+  $\mathcal{P}(\textrm{AuxNamed}) \cap \mathcal{S}(\textrm{AuxBet21}) = \varnothing$ \\
+  (35) &
+  $\mathcal{P}(\textrm{AuxBet3}) \cap \mathcal{S}(\textrm{AuxBet21}) = \varnothing$ \\
+  (36) &
+  $\{ \textrm{``\textsf{,}''} \} \cap \mathcal{S}(\textrm{AuxNamed}) = \varnothing$ \\
+  (37) &
+  $\mathcal{P}(\textrm{NamedValSuf}) \cap \mathcal{S}(\textrm{NamedValue}) = \varnothing$ \\
+  (38) &
+  $\{ \textrm{``\textsf{$<$}''} \} \cap \mathcal{P}(\textrm{UpperEndValue}) = \varnothing$ \\
+  (39) &
+  $\{ \textrm{``\ldots'', ``\textsf{\}}''} \} \cap \mathcal{P}(\textrm{NamedConstraint}) = \varnothing$ \\
+  (40) &
+  $\mathcal{P}(\textrm{SubtypeSpec}) \cap \mathcal{P}(\textrm{PresenceConstraint}) = \varnothing$ \\
+  (41) &
+  $\mathcal{P}(\textrm{SubtypeSpec}) \cap \mathcal{S}(\textrm{NamedConstraint}) = \varnothing$ \\
+  (42) &
+  $\mathcal{P}(\textrm{PresenceConstraint}) \cap \mathcal{S}(\textrm{NamedConstraint}) = \varnothing$ \\
+  (43) &
+  $\mathcal{P}(\textrm{SubValSetSuf}) \cap \mathcal{S}(\textrm{SVSAux}) = \varnothing$ \\
+  (44) & 
+  $\mathcal{P}(\textrm{SVSAux3}) \cap \mathcal{S}(\textrm{SVSAux}) = \varnothing$ \\
+  (45) &
+  $\mathcal{P}(\textrm{SVSAux2}) \cap \mathcal{S}(\textrm{SVSAux}) = \varnothing$ \\
+  (46) &
+  $\mathcal{P}(\textrm{SubValSetSuf}) \cap \mathcal{S}(\textrm{SVSAux11}) = \varnothing$ \\
+  (47) &
+  $\mathcal{P}(\textrm{SubtypeSpec}) \cap \mathcal{S}(\textrm{Type}) = \varnothing$ \\
+  & \\
+\hline
+\end{longtable}
+\end{center}
+Les équations~(10), (14) et~(40) sont immédiatement vérifiées à l'aide
+des ensembles~$\mathcal{P}$ précédemment calculés (cf.~\vref{EQU2}).
+Nous calculons alors les ensembles~$\mathcal{P}$ manquant:\\
+
+\begin{tabular}{l}
+$\mathcal{P}(\textrm{TagDefault}) = \{ \textrm{EXPLICIT, IMPLICIT} \}$ \\
+\end{tabular} \\
+
+\noindent \emph{Donc les équations (1) et (13) sont vérifiées.} \\
+
+\begin{tabular}{l}
+$\mathcal{P}(\textrm{Exports}) = \{ \textrm{EXPORTS} \}$ \\
+$\mathcal{P}(\textrm{Imports}) = \{ \textrm{IMPORTS} \}$  \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (5) est vérifiée.} \\
+
+\begin{tabular}{l}
+$\mathcal{P}(\textrm{Assignment}) = \{ \textrm {\texttt{upper}, \texttt{lower}} \}$ \\
+\end{tabular} \\
+
+\noindent \emph{Donc les équations (6) et (7) sont vérifiées.} \\
+
+\begin{tabular}{lcl}
+$\mathcal{P}(\textrm{ModuleBody})$ & = & $\mathcal{P}(\textrm{Exports}) \cup \mathcal{P}(\textrm{Imports}) \cup \mathcal{P}(\textrm{Assignment})$ \\
+& = & $\{ \textrm{EXPORTS, IMPORTS, \texttt{upper}, \texttt{lower}} \}$ \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (2) est vérifiée.} \\
+
+\begin{tabular}{lcl}
+$\mathcal{P}(\textrm{Symbol})$ &  = & \{ \texttt{upper}, \texttt{lower} \} \\
+$\mathcal{P}(\textrm{SymbolsFromModule})$ & = & $\mathcal{P}(\textrm{Symbol}) \cup \{ \textrm{``\textsf{;}''} \}$ \\
+& = & \{ \texttt{upper}, \texttt{lower}, ``\textsf{;}'' \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (9) est vérifiée.} \\
+
+\begin{tabular}{lcl}
+$\mathcal{P}(\textrm{Class})$ & = & \{ UNIVERSAL, APPLICATION, PRIVATE \} \\
+$\mathcal{P}(\textrm{ClassNumber})$ & = & \{ \texttt{number}, \texttt{upper}, \texttt{lower} \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (12) est vérifiée.} \\
+
+\begin{tabular}{l}
+$\mathcal{P}(\textrm{ElementType}) = \mathcal{P}(\textrm{NamedType}) \cup \{ \textrm{COMPONENTS} \}$ \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (16) est vérifiée.} \\
+
+\begin{tabular}{l}
+$\mathcal{P}(\textrm{UpperEndValue}) = \mathcal{P}(\textrm{Value}) \cup \{ MAX \}$ \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (38) est vérifiée.} \\
+
+\begin{tabular}{lcl}
+$\mathcal{P}(\textrm{SubtypeSpec})$ & = & \{ ``\textsf{(}'' \} \\
+$\mathcal{P}(\textrm{NamedConstraint})$ & = & $\{ \texttt{lower} \} \cup \mathcal{P}(\textrm{SubtypeSpec}) \cup \mathcal{P}(\textrm{PresenceConstraint})$ \\
+& = & \{ \texttt{lower}, ``\textsf{(}'', PRESENT, ABSENT, OPTIONAL \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (39) est vérifiée.} \\
+
+\noindent \emph{De plus:} \\
+
+\begin{tabular}{lcl}
+$\mathcal{P}(\textrm{TypeSuf})$ & = & $\mathcal{P}(\textrm{SubtypeSpec}) \cup \{ \textrm{``\textsf{\{}'', SIZE, OF} \}$ \\
+& = & \{ ``\textsf{(}'', ``\textsf{\{}'', SIZE, OF \} \\ \\
+$\mathcal{P}(\textrm{ElementTypeSuf})$ & = & \{ OPTIONAL, DEFAULT \} \\ \\
+
+$\mathcal{P}(\textrm{AuxVal2})$ & = & \{ ``\textsf{$<$}'', ``\textsf{:}'' \} \\ \\
+
+$\mathcal{P}(\textrm{SpecVal})$ & = & $\mathcal{P}(\textrm{SubtypeSpec}) \cup \{ \textrm{``\textsf{:}''} \}$ \\
+& = & \{ ``\textsf{(}'', ``\textsf{:}'' \} \\ \\
+
+$\mathcal{P}(\textrm{AuxBet1})$ & = & $\{ \textrm{``\textsf{(}'', ``\textsf{-}''}, \texttt{upper}, \texttt{lower}, \texttt{number} \} \cup \mathcal{P}(\textrm{AuxNamed})$ \\
+& & $\cup \ \mathcal{P}(\textrm{AuxVal2}) \cup \mathcal{P}(\textrm{AuxVal0})$ \\
+& = & \{ ``\textsf{(}'', ``\textsf{-}'', \texttt{upper}, \texttt{lower}, \texttt{number}, ``\textsf{,}'', ``\textsf{$<$}'', ``\textsf{:}'', \\
+&& TRUE, FALSE, PLUS-INFINITY, MINUS-INFINITY, \\
+&& \texttt{basednum}, \texttt{string}, ``\textsf{\{}'', NULL, ``\textsf{[}'', SET, SEQUENCE, \\
+&& BOOLEAN, INTEGER, BIT, OCTET, CHOICE, \\
+&& ANY, OBJECT, ENUMERATED, REAL, EXTERNAL, \\
+&& ``NumericString'', ``PrintableString'', ``TeletexString'', \\
+&& ``T61String'', ``VideotexString'', ``VisibleString'', \\
+&& ``ISO646String'', ``IA5String'', ``GraphicString'', \\
+&& ``GeneralString'', ``UTCTime'', ``GeneralizedTime'', \\
+&& ``ObjectDescriptor'' \} \\
+\end{tabular}
+
+\begin{tabular}{lcl}
+$\mathcal{P}(\textrm{AuxBet3})$ & = & $\mathcal{P}(\textrm{ObjIdComponent}) \cup \mathcal{P}(\textrm{AuxNamed})$ \\
+& = & \{ \texttt{number}, \texttt{upper}, \texttt{lower}, ``\textsf{,}'' \} \\ \\
+
+$\mathcal{P}(\textrm{NamedValSuf})$ & = & $\mathcal{P}(\textrm{Value}) \cup \mathcal{P}(\textrm{AuxVal2})$ \\
+& = & \{ TRUE, FALSE, PLUS-INFINITY, MINUS-INFINITY, \\
+&& \texttt{basednum}, \texttt{string}, ``\textsf{\{}'', NULL, ``\textsf{[}'', SET, SEQUENCE, \\
+&& BOOLEAN, INTEGER, BIT, OCTET, CHOICE, \\
+&& ANY, OBJECT, ENUMERATED, REAL, EXTERNAL, \\
+&& ``NumericString'', ``PrintableString'', ``TeletexString'', \\
+&& ``T61String'', ``VideotexString'', ``VisibleString'', \\
+&& ``ISO646String'', ``IA5String'', ``GraphicString'', \\
+&& ``GeneralString'', ``UTCTime'', ``GeneralizedTime'', \\
+&& ``ObjectDescriptor'', \texttt{upper}, \texttt{lower}, \texttt{number}, ``\textsf{-}'', ``\textsf{$<$}'', ``\textsf{:}'' \} \\ \\
+\end{tabular} \\
+
+\begin{tabular}{lcl}
+$\mathcal{P}(\textrm{AuxBet11})$ & = & $\{ \textrm{``\textsf{(}''} \} \cup \mathcal{P}(\textrm{ObjIdComponent}) \cup \mathcal{P}(\textrm{AuxVal2})$ \\
+&& $\cup \, \mathcal{P}(\textrm{AuxNamed})$ \\
+& = & \{ ``\textsf{(}'', \texttt{number}, \texttt{upper}, \texttt{lower}, ``\textsf{$<$}'', ``\textsf{:}'', ``\textsf{,}'' \} \\ \\
+
+$\mathcal{P}(\textrm{SubValSetSuf})$ & = & \{ ``\textsf{$<$}'', ``\textsf{..}'' \} \\ \\
+
+$\mathcal{P}(\textrm{SVSAux3})$ & = & $\mathcal{P}(\textrm{SubtypeSpec}) \cup \mathcal{P}(\textrm{SubValSetSuf}) \cup \{ \textrm{``\textsf{:}''} \}$ \\
+& = & \{ ``\textsf{(}'', ``\textsf{$<$}'', ``\textsf{..}'', ``\textsf{:}'' \} \\ \\
+
+$\mathcal{P}(\textrm{SVSAux2})$ & = & \{ ``\textsf{:}'', ``\textsf{..}'', ``\textsf{$<$}'' \} \\
+\end{tabular} \\ \\
+
+\noindent \emph{Donc \ \ } $\mathcal{P}(\textrm{SubValSetSuf}) \subset \mathcal{P}(\textrm{SVSAux2}) \subset \mathcal{P}(\textrm{SVSAux3})$, \\
+\emph{ce qui permet de supprimer les équations (43) et (45), qui sont impliquées par (44).} \\
+
+\noindent De plus, il est pertinent de noter ici:\\
+
+\begin{tabular}{lcl}
+$\mathcal{S}(\textrm{SVSAux11})$ & = & $\mathcal{S}(\textrm{SVSAux1})$ \\
+$\mathcal{S}(\textrm{SVSAux1}) $ & = & $\mathcal{S}(\textrm{SVSAux})$ \\
+\end{tabular} \\
+
+\noindent \emph{Donc nous pouvons supprimer l'équation (46) car elle est impliquée par (44).} \\ \\
+
+\noindent Nous calculons maintenant quelques ensembles~$\mathcal{S}$
+qui, à l'aide des ensembles~$\mathcal{P}$ précédemment calculés, nous
+permettent de conclure en une étape. \\
+
+\begin{tabular}{lcl}
+$\mathcal{S}(\textrm{SymbolsFromModule})$ & = & $\mathcal{P}(\textrm{SymbolsFromModule}) \cup \{ \textrm{``\textsf{;}''} \}$ \\
+& = & \{ \texttt{upper}, \texttt{lower}, ``\textsf{;}'' \} \\
+$\mathcal{S}(\textrm{ModuleIdentifier})$ & = & $\{ \textrm{DEFINITIONS} \} \cup \mathcal{S}(\textrm{SymbolsFromModule})$ \\
+& = & \{ DEFINITIONS, \texttt{upper}, \texttt{lower}, ``\textsf{;}'' \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (3) est vérifiée.} \\
+
+\begin{tabular}{l}
+$\mathcal{S}(\textrm{ElementType}) = \{ \textrm{``\textsf{,}'', ``\textsf{\}}''} \}$ \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (20) est vérifiée.} \\
+
+\begin{tabular}{lcl}
+$\mathcal{S}(\textrm{NamedType})$ & = & $\{ \textrm{``\textsf{,}'', ``\textsf{\}}''} \} \cup \mathcal{P}(\textrm{ElementTypeSuf}) \cup \mathcal{S}(\textrm{ElementType})$ \\
+& = & \{ ``\textsf{,}'', ``\textsf{\}}'', OPTIONAL, DEFAULT \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc les équations (18) et (19) sont vérifiées.} \\
+
+\begin{tabular}{l}
+$\mathcal{S}(\textrm{BetBraces}) = \{ \textrm{``\textsf{\}}''} \}$ \\
+\end{tabular} \\
+
+\noindent \emph{Donc les équations (23), (24) et (25) sont vérifiées} \\
+
+\begin{tabular}{lcl}
+$\mathcal{S}(\textrm{AuxBet1})$ & = & $\mathcal{S}(\textrm{BetBraces})$ \\
+& = & \{ ``\textsf{\}}'' \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc les équations (26), (27), (28), et (29) sont vérifiées.} \\
+
+\begin{tabular}{lcl}
+$\mathcal{S}(\textrm{AuxBet11})$ & = & $\mathcal{S}(\textrm{AuxBet1})$ \\
+& = & \{ ``\textsf{\}}'' \} \\
+\end{tabular} \\ 
+
+\noindent \emph{Donc les équations (32) et (33) sont vérifiées.} \\
+
+\begin{tabular}{lcl}
+$\mathcal{S}(\textrm{AuxBet2})$ & = & $\mathcal{S}(\textrm{BetBraces}) \cup \mathcal{S}(\textrm{AuxBet1})$ \\
+& = & \{ ``\textsf{\}}'' \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (30) est vérifiée.} \\
+
+\begin{tabular}{lcl}
+$\mathcal{S}(\textrm{AuxBet21})$ & = & $\mathcal{S}(\textrm{AuxBet2})$ \\
+& = & \{ ``\textsf{\}}'' \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc les équations (34) et (35) sont vérifiées.} \\
+
+\begin{tabular}{lcl}
+$\mathcal{S}(\textrm{AuxBet3})$ & = & $\mathcal{S}(\textrm{BetBraces}) \cup \mathcal{S}(\textrm{AuxBet1}) \cup \mathcal{S}(\textrm{AuxBet21})$ \\
+& = & \{ ``\textsf{\}}'' \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (31) est vérifiée.} \bigskip
+
+\begin{tabular}{l}
+$\mathcal{S}(\textrm{NamedConstraint}) = \{ \textrm{``\textsf{,}'', ``\textsf{\}}''} \}$ 
+\end{tabular} \\
+
+\noindent \emph{Donc les équations (41) et (42) sont vérifiées.} \bigskip
+
+\begin{tabular}{lcl}
+  $\mathcal{S}(\textrm{AuxNamed})$ & = & $\mathcal{S}(\textrm{BetBraces}) \cup \mathcal{S}(\textrm{AuxBet1}) \cup \mathcal{S}(\textrm{AuxBet2})$ \\
+&& \ \ $\cup \ \mathcal{S}(\textrm{AuxBet3}) \cup \mathcal{S}(\textrm{AuxBet11}) \cup \mathcal{S}(\textrm{AuxBet21})$ \\
+& = & \{ ``\textsf{\}}'' \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (36) est vérifiée.} \\
+
+\begin{tabular}{lcl}
+ $\mathcal{S}(\textrm{NamedValue})$ & = & $\{ \textrm{``\textsf{,}''} \} \cup \mathcal{S}(\textrm{AuxNamed})$ \\
+& = & \{ ``\textsf{,}'', ``\textsf{\}}'' \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (37) est vérifiée.} \\
+
+\begin{tabular}{lcl}
+  $\mathcal{P}(\textrm{ObjIdComponent})$ & = & \{ \texttt{number}, \texttt{upper}, \texttt{lower} \} \\
+  $\mathcal{S}(\textrm{ObjIdComponent})$ & = & $\mathcal{P}(\textrm{ObjIdComponent}) \cup \{ \textrm{``\textsf{\}}''} \} \cup \mathcal{S}(\textrm{AuxBet1})$ \\
+&& \ \ $\cup \, \mathcal{S}(\textrm{AuxBet3}) \, \cup \, \mathcal{S}(\textrm{AuxBet11})$ \\ 
+  & = & \{ \texttt{number}, \texttt{upper}, \texttt{lower}, ``\textsf{\}}'' \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (4) est vérifiée.} \bigskip \bigskip
+
+\noindent Il reste maintenant à vérifier le système suivant (nous
+avons remplacé par leur valeur les ensembles $\mathcal{P}$, sauf
+$\mathcal{P}(\textrm{NamedValSuf})$):
+\begin{center}
+ \begin{longtable}{|cl|} \hline
+  & \\
+  (8) &
+  $\{ \textrm{``\textsf{(}'', ``\textsf{\{}'', SIZE, OF} \} \cap \mathcal{S}(\textrm{AuxType}) = \varnothing$ \\
+  (11) &
+  $\mathcal{S}(\textrm{Type}) \cap \{ \textrm{``\textsf{.}''} \} = \varnothing$ \\
+  (15) &
+  $\{ \textrm{``\textsf{(}''} \} \cap \mathcal{S}(\textrm{TypeSuf}) = \varnothing$ \\
+  (17) &
+  $\{ \textrm{``\textsf{\{}'', DEFINED} \} \cap \mathcal{S}(\textrm{BuiltInType}) = \varnothing$ \\
+  (21) &
+  $\{ \textrm{``\textsf{$<$}'', ``\textsf{:}''} \} \cap \mathcal{S}(\textrm{Value}) = \varnothing$ \\
+  (22) &
+  $\{ \textrm{``\textsf{(}'', ``\textsf{:}''} \} \cap \mathcal{S}(\textrm{AuxVal0}) = \varnothing$ \\
+  (44) & 
+  $\{ \textrm{``\textsf{(}'', ``\textsf{$<$}'', ``\textsf{..}'', ``\textsf{:}''} \}  \cap \mathcal{S}(\textrm{SVSAux}) = \varnothing$ \\
+  (47) &
+  $\{ \textrm{``\textsf{(}''} \} \cap \mathcal{S}(\textrm{Type}) = \varnothing$ \\
+& \\
+\hline
+\end{longtable}
+\end{center}
+\emph{Remarquons que} \quad $\left\{
+\begin{array}{lcl}
+ \mathcal{S}(\textrm{AuxType}) & \subseteq & \mathcal{S}(\textrm{Type}) \\
+ \mathcal{S}(\textrm{Type})    & \subseteq & \mathcal{S}(\textrm{AuxType}) \\
+\end{array}
+\right.$ \\
+
+\noindent \emph{Donc : \ } $\mathcal{S}(\textrm{AuxType}) = \mathcal{S}(\textrm{Type})$ \\
+
+\noindent \emph{De plus : \ }  $\left\{
+\begin{tabular}{lcl}
+ $\mathcal{S}(\textrm{BuiltInType})$ & = & $\{ \textrm{``\textsf{(}''} \} \cup \mathcal{S}(\textrm{AuxType})$ \\
+ $\mathcal{S}(\textrm{TypeSuf})$ & = & $\mathcal{S}(\textrm{AuxType})$ \\
+\end{tabular} 
+\right. $ \\ \\ 
+
+\noindent \emph{Nous pouvons alors regrouper les équations (8), (11), (15), (17) et
+(47) en une seule, et le système est équivalent à:} \\
+
+\begin{center}
+\begin{tabular} {|cl|} \hline
+ & \\
+  (X) &
+  $\{ \textrm{``\textsf{.}'', ``\textsf{(}'', ``\textsf{\{}'', DEFINED, SIZE, OF} \} \cap \mathcal{S}(\textrm{Type}) = \varnothing$ \\
+  (21) &
+  $\{ \textrm{``\textsf{$<$}'', ``\textsf{:}''} \} \cap \mathcal{S}(\textrm{Value}) = \varnothing$ \\
+  (22) &
+  $\{ \textrm{``\textsf{(}'', ``\textsf{:}''} \} \cap \mathcal{S}(\textrm{AuxVal0}) = \varnothing$ \\
+  (44) & 
+  $\{ \textrm{``\textsf{(}'', ``\textsf{$<$}'', ``\textsf{..}'', ``\textsf{:}''} \}  \cap \mathcal{S}(\textrm{SVSAux}) = \varnothing$ \\
+& \\
+\hline
+\end{tabular} 
+\end{center} \bigskip
+
+\noindent \emph{Nous avons:} \\
+
+\begin{tabular}{lcl}
+  $\mathcal{S}(\textrm{AuxType})$ & = & $\mathcal{S}(\textrm{Type}) \cup \mathcal{S}(\textrm{NamedType}) \cup \{ \textrm{``\textsf{:}''} \}$ \\
+& = & $\mathcal{S}(\textrm{Type}) \cup \{ \textrm{``\textsf{,}'', ``\textsf{\}}'', OPTIONAL, DEFAULT, ``\textsf{:}''} \}$ \\
+
+$\mathcal{S}(\textrm{Type})$ & = & $\mathcal{S}(\textrm{Assignment}) \cup \{ \textrm{``{\sf::=}''} \} \cup \mathcal{S}(\textrm{AuxType}) \cup \mathcal{S}(\textrm{TypeSuf})$ \\
+&& \ \ $\cup \ \mathcal{S}(\textrm{NamedType}) \cup \mathcal{S}(\textrm{ElementType}) \cup \{ \textrm{``\textsf{:}''} \}$\\
+&& \ \ $\cup \ \mathcal{S}(\textrm{SubtypeValueSet})$ \\
+\end{tabular} \bigskip
+
+\noindent \emph{Et il vient, en remarquant que \ } $\mathcal{S}(\textrm{ElementType}) \subset \mathcal{S}(\textrm{NamedType}) \subset \mathcal{S}(\textrm{AuxType})$ : \\ 
+
+\begin{tabular}{lcl}
+$\mathcal{S}(\textrm{Type})$ & = & $\{ \textrm{``{\sf::=}'', ``\textsf{:}''} \} \cup \mathcal{S}(\textrm{Assignment}) \cup \mathcal{S}(\textrm{SubtypeValueSet}) \cup \mathcal{S}(\textrm{AuxType})$ \\
+& = & $\{ \textrm{``{\sf::=}'', ``\textsf{:}''} \} \cup \mathcal{S}(\textrm{Assignment}) \cup \mathcal{S}(\textrm{SubtypeValueSet}) \cup \mathcal{S}(\textrm{Type})$ \\
+&& $\ \ \cup \ \{ \textrm{``\textsf{,}'', ``\textsf{\}}'', OPTIONAL, DEFAULT, ``\textsf{:}''} \}$ \\
+& = & $\{ \textrm{``{\sf::=}'', ``\textsf{:}'', ``\textsf{,}'', ``\textsf{\}}'', OPTIONAL, DEFAULT} \} \cup \mathcal{S}(\textrm{Assignment})$\\
+&& \ \ $\cup \ \mathcal{S}(\textrm{SubtypeValueSet})$ \\
+\end{tabular} \\
+
+\noindent \emph{D'autre part:} \\
+
+\begin{tabular}{lcl}
+$\mathcal{S}(\textrm{ModuleBody})$ & = & \{ END \} \\
+$\mathcal{S}(\textrm{Assignment})$ & = & $\mathcal{S}(\textrm{ModuleBody}) \cup \mathcal{P}(\textrm{Assignment})$ \\
+& = & \{ END, \texttt{upper}, \texttt{lower} \} \\
+
+$\mathcal{S}(\textrm{SubtypeValueSet})$ & = & \{ ``\textsf{$\mid$}'', ``\textsf{)}'' \} \\
+\end{tabular} \\ \\
+
+\noindent \emph{Et finalement:} \\
+
+\begin{tabular}{lcl}
+$\mathcal{S}(\textrm{Type})$ & = & \{ ``{\sf::=}'', ``\textsf{:}'', ``\textsf{,}'', ``\textsf{\}}'', ``\textsf{$\mid$}'', ``\textsf{)}'', OPTIONAL, DEFAULT, END, \\
+&& \texttt{upper}, \texttt{lower} \} \\ 
+\end{tabular} \\ 
+
+\noindent \emph{Donc l'équation (X) est satisfaite.} \\ \\
+
+\noindent \emph{Remarquons que \ } $\left\{
+  \begin{tabular}{lcl}
+   $\mathcal{S}(\textrm{Value})$ & $\subseteq$ & $\mathcal{S}(\textrm{AuxVal0})$ \\
+   $\mathcal{S}(\textrm{AuxVal0})$ & $\subseteq$ & $\mathcal{S}(\textrm{Value})$ \\
+  \end{tabular}
+ \right.$ \\
+
+\noindent \emph{Donc : \ } $\mathcal{S}(\textrm{AuxVal0}) = \mathcal{S}(\textrm{Value})$ \\
+
+\noindent \emph{Nous pouvons subséquemment fusionner les équations (21) et (22),
+et le système est équivalent à: } \\
+\begin{center}
+\begin{tabular} {|cl|} \hline
+ & \\
+  (Y) &
+  $\{ \textrm{``\textsf{$<$}'', ``\textsf{:}'', ``\textsf{(}''} \} \cap \mathcal{S}(\textrm{Value}) = \varnothing$ \\
+  (44) & 
+  $\{ \textrm{``\textsf{(}'', ``\textsf{$<$}'', ``\textsf{..}'', ``\textsf{:}''} \}  \cap \mathcal{S}(\textrm{SVSAux}) = \varnothing$ \\
+& \\
+\hline
+\end{tabular} 
+\end{center}
+
+\noindent \emph{De plus:} \\
+
+\begin{tabular}{lcl}
+  $\mathcal{S}(\textrm{SVSAux})$ & = & $\mathcal{S}(\textrm{SubtypeValueSet}) \cup \mathcal{S}(\textrm{SVSAux1}) \cup \mathcal{S}(\textrm{SVSAux2})$ \\
+&& \ \ $\cup \ \mathcal{S}(\textrm{SVSAux3}) \cup \mathcal{S}(\textrm{SVSAux11}) \cup \mathcal{S}(\textrm{SVSAux21})$ \\
+\end{tabular} \\
+
+\noindent \emph{Or:} \\
+
+\begin{tabular}{lcl}
+$\mathcal{S}(\textrm{SVSAux11})$ & = & $\mathcal{S}(\textrm{SVSAux1})$ \\
+$\mathcal{S}(\textrm{SVSAux1}) $ & = & $\mathcal{S}(\textrm{SVSAux})$ \\
+$\mathcal{S}(\textrm{SVSAux2}) $ & = & $\mathcal{S}(\textrm{SVSAux})$ \\
+$\mathcal{S}(\textrm{SVSAux3}) $ & = & $\mathcal{S}(\textrm{SVSAux})$ \\
+$\mathcal{S}(\textrm{SVSAux21})$ & = & $\mathcal{S}(\textrm{SVSAux2})$ \\
+\end{tabular} \\
+
+\noindent \emph{Donc \ } $\mathcal{S}(\textrm{SVSAux}) = \{ \textrm{``\textsf{$\mid$}'', ``\textsf{)}''} \}$ \ \emph{et par conséquent l'équation (44) est vérifiée.} \\
+
+\noindent \emph{Maintenant, il reste à calculer: }\\
+
+\begin{tabular}{lcl}
+ $\mathcal{S}(\textrm{Value})$ & = & $\mathcal{S}(\textrm{Assignment}) \cup \mathcal{S}(\textrm{ElementTypeSuf}) \cup \mathcal{S}(\textrm{AuxVal0})$ \\
+&& \ \ $\cup \mathcal{S}(\textrm{AuxVal2})$\\
+&& \ \ $\cup \ \mathcal{S}(\textrm{SpecVal}) \cup \mathcal{S}(\textrm{NamedValSuf}) \cup \mathcal{S}(\textrm{UpperEndValue})$ \\
+& = & $\{ \textrm{END, upper, lower} \} \cup \mathcal{S}(\textrm{ElementTypeSuf}) \cup \mathcal{S}(\textrm{AuxVal2})$ \\
+&& \ \ $\cup \mathcal{S}(\textrm{SpecVal})$ \\
+&& \ \ $\cup \ \mathcal{S}(\textrm{NamedValSuf}) \cup \mathcal{S}(\textrm{UpperEndValue})$ \\
+\end{tabular} \bigskip
+
+\noindent \emph{Or:} \\
+
+\begin{tabular}{lcl}
+ $\mathcal{S}(\textrm{ElementTypeSuf})$ & = & $\mathcal{S}(\textrm{ElementType})$ \\
+ $\mathcal{S}(\textrm{NamedValSuf})$ & = & $\mathcal{S}(\textrm{NamedValue})$ \\
+\end{tabular} \bigskip
+
+\noindent \emph{D'où} \\
+
+\begin{tabular}{lcl}
+ $\mathcal{S}(\textrm{Value})$ & = & $\{ \textrm{END, upper, lower, ``\textsf{,}'', ``\textsf{\}}''} \} \cup \mathcal{S}(\textrm{AuxVal2}) \cup \mathcal{S}(\textrm{SpecVal})$ \\
+&& \ \ $\cup \ \mathcal{S}(\textrm{UpperEndValue})$ \\
+\end{tabular} \\
+
+\noindent \emph{De plus:} \\
+
+\begin{tabular}{lcl}
+ $\mathcal{P}(\textrm{AuxNamed})$ & = & \{ ``\textsf{,}'' \} \\
+ $\mathcal{S}(\textrm{AuxVal2})$ & = & $\mathcal{S}(\textrm{Value}) \cup \mathcal{P}(\textrm{AuxNamed}) \cup \mathcal{S}(\textrm{AuxBet1})$ \\
+&& \ \ $\cup \ \mathcal{S}(\textrm{AuxBet11}) \cup \mathcal{S}(\textrm{NamedValSuf})$ \\
+& = & $\mathcal{S}(\textrm{Value}) \cup \{ \textrm{``\textsf{,}'', ``\textsf{\}}''} \}$ \\
+\end{tabular} \\ 
+
+\noindent \emph{Il vient :} \\
+
+\begin{tabular}{lcl}
+ $\mathcal{S}(\textrm{Value})$ & = & $\{ \textrm{END, upper, lower, ``\textsf{,}'', ``\textsf{\}}''} \} \cup \mathcal{S}(\textrm{SpecVal})$ \\
+&& \ \ $\cup \, \mathcal{S}(\textrm{UpperEndValue})$ \\
+\end{tabular} \\
+
+\noindent \emph{D'autre part:} \\
+
+\begin{tabular}{lcl}
+ $\mathcal{S}(\textrm{SpecVal})$ & = & $\mathcal{S}(\textrm{AuxVal0}) \cup \mathcal{S}(\textrm{AuxVal1}) \cup \mathcal{S}(\textrm{AuxVal11})$ \\
+&& \ \ $\cup \, \mathcal{P}(\textrm{AuxNamed})$ \\
+&& \ \ $\cup \ \mathcal{S}(\textrm{AuxBet2}) \cup \mathcal{S}(\textrm{AuxBet21})$ \\
+& = & $\mathcal{S}(\textrm{Value}) \cup \mathcal{S}(\textrm{AuxVal1}) \cup \mathcal{S}(\textrm{AuxVal11}) \cup \{ \textrm{``\textsf{,}'', ``\textsf{\}}''} \}$ \\
+\end{tabular} \\
+
+\noindent \emph{Or} \\
+
+\begin{tabular}{lcl}
+ $\mathcal{S}(\textrm{AuxVal11})$ & = & $\mathcal{S}(\textrm{AuxVal1})$ \\
+ $\mathcal{S}(\textrm{AuxVal1})$ & = & $\mathcal{S}(\textrm{Value}) \cup \mathcal{S}(\textrm{NamedValue})$ \\
+& = & $\mathcal{S}(\textrm{Value}) \cup \{ \textrm{``\textsf{,}'', ``\textsf{\}}''} \}$ \\
+\end{tabular} \\
+
+\noindent \emph{D'où} \\
+
+\begin{tabular}{lcl}
+ $\mathcal{S}(\textrm{SpecVal})$ & = & $\mathcal{S}(\textrm{Value}) \cup \{ \textrm{``\textsf{,}'', ``\textsf{\}}''} \}$ \\
+\end{tabular} \\
+
+\noindent \emph{Par conséquent:} \\
+
+\begin{tabular}{lcl}
+ $\mathcal{S}(\textrm{Value})$ & = & $\{ \textrm{END, upper, lower, ``\textsf{,}'', ``\textsf{\}}''} \} \cup \mathcal{S}(\textrm{UpperEndValue})$ \\
+\end{tabular} \\
+
+\noindent \emph{Et enfin:} \\
+
+\begin{tabular}{lcl}
+ $\mathcal{S}(\textrm{SubValSetSuf})$ & = & $\mathcal{S}(\textrm{SubtypeValueSet}) \cup \mathcal{S}(\textrm{SVSAux}) \cup \mathcal{S}(\textrm{SVSAux3})$\\
+&& \ \ \ $\cup \ \mathcal{S}(\textrm{SVSAux11})$ \\
+& = & \{ ``\textsf{$\mid$}'', ``\textsf{)}'' \} \\
+ $\mathcal{S}(\textrm{UpperEndValue})$ & = & $\mathcal{S}(\textrm{SubValSetSuf}) \cup \mathcal{S}(\textrm{SVSAux2}) \cup \mathcal{S}(\textrm{SVSAux21})$ \\
+& = & $\mathcal{S}(\textrm{SubValSetSuf}) \cup \{ \textrm{``\textsf{$\mid$}'', ``\textsf{)}''} \}$ \\
+& = & \{ ``\textsf{$\mid$}'', ``\textsf{)}'' \} \\
+\end{tabular} \\
+
+\noindent \emph{D'où} \\
+
+\begin{tabular}{lcl}
+ $\mathcal{S}(\textrm{Value})$ & = & \{ END, upper, lower, ``\textsf{,}'', ``\textsf{\}}'', ``\textsf{$\mid$}'', ``\textsf{)}'' \} \\
+\end{tabular} \\
+
+\noindent \emph{Donc l'équation (Y) est vérifiée.} \bigskip \bigskip
+
+\begin{center}
+\begin{tabular}{|l|} \hline \\
+\textbf{Conclusion} \ \ Le système d'équations est entièrement vérifié, \\
+c'est-à-dire que la nouvelle grammaire ASN.1 est LL(1). \\ 
+\\ \hline
+\end{tabular} 
+\end{center}
+

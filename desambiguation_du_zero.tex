@@ -1,0 +1,143 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\Delta(y) \lhd (\tau, \textrm{T}, \sigma, v)\\
+  \domain{\mathcal{A}} \Gamma, \emptyL\!, \emptyStr \bouchon{83} v :
+  \textrm{T} \rightarrow \overline{v}\\
+  \domain{\mathcal{A}} \Gamma \bouchon{84} \domain{\mathcal{B}} \Delta
+  \rightarrow \domain{\overline{\mathcal{B}}} \overline\Delta}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{84} \domain{\{y\} \uplus
+      \mathcal{B}} \Delta \rightarrow \domain{\overline{\mathcal{B}}}
+    \overline\Delta \oplus y \mapsto (\tau, \textrm{T}, \sigma,
+    \overline{v})}
+
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma \bouchon{84} \domain{\varnothing}
+    \Delta \rightarrow \domain{\varnothing} \Delta}
+
+% |- v : (TRef _)
+%
+\inferrule
+  {x' \in \mathcal{A}\\
+  \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+  \domain{\mathcal{A}} \Gamma, \textrm{H}, x' \bouchon{83} v : \textrm{T}'
+  \rightarrow \overline{v}}
+%------
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}, x \bouchon{83} v :
+    (\textsf{TRef} \, x') \rightarrow \overline{v}}
+
+% |- 0 : REAL
+%
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}, \REAL \bouchon{83} \textsf{Zero}
+    : \textrm{T} \rightarrow \textsf{0.0}}
+
+% |- 0 : INTEGER
+%
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}, x \bouchon{83} \textsf{Zero} :
+    \wildINTEGER \rightarrow \textsf{Int} \, (0)}
+
+% |- v : (SET OF _ _ _ | SEQUENCE OF _ _ _)
+%
+\inferrule
+  {\textrm{T} \lhd (\textsf{SEQUENCE OF} \mid \textsf{SET OF}) \, \tau' \,
+    \textrm{T}' \, \sigma'\\
+  v \not\in \textrm{H}\\
+  \domain{\mathcal{A}} \Gamma, v \Cons \textrm{H}, \emptyStr \bouchon{83}
+  v' : \textrm{T}' \rightarrow \overline{v}'\\
+  \domain{\mathcal{A}} \Gamma, \textrm{H}, x \bouchon{83} \bob V \bcb
+  : \textrm{T} \rightarrow \bob \overline{V} \bcb}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}, x \bouchon{83} (\bob
+    (\textsf{None}, v') \Cons V \bcb \AS v) : \textrm{T}
+    \rightarrow \bob (\textsf{None}, \overline{v}')\Cons \overline{V}
+    \bcb}
+
+% |- v : (CHOICE _)
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{CHOICE} \, ((l', \tau', \textrm{T}',
+    \sigma', s') \Cons \mathcal{F}')\\
+  x' = l'\\
+  v \not\in \textrm{H}\\
+  \domain{\mathcal{A}} \Gamma, v \Cons \textrm{H}, \emptyStr
+  \bouchon{83} v' : \textrm{T}' \rightarrow \overline{v}'}
+%------
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}, x \bouchon{83} ((x' : v')
+    \AS v) : \textrm{T} \rightarrow x' : \overline{v}'}
+
+\inferrule
+  {\textrm{T} \lhd \textsf{CHOICE} \, ((l', \tau', \textrm{T}',
+    \sigma', s') \Cons \mathcal{F}')\\
+  x' \neq l'\\
+  \domain{\mathcal{A}} \Gamma, \textrm{H}, x \bouchon{1} (x' : v') :
+  \textsf{CHOICE} \, \mathcal{F}' \rightarrow \overline{v}}
+%------
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}, x \bouchon{83} (x' : v') : \textrm{T} \rightarrow \overline{v}}
+
+% |- v : (SET _)
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+  V \lhd [(\textsf{Some} \, l', v')] \sqcup V'\\
+  v \not\in \textrm{H}\\
+  \domain{\mathcal{A}} \Gamma, \textrm{H}, x \bouchon{1} \bob V' \bcb
+  : \textsf{SET} \, \Phi' \rightarrow \bob \overline{V}' \bcb\\
+  \domain{\mathcal{A}} \Gamma, v \Cons \textrm{H}, \emptyStr
+  \bouchon{83} v' : \textrm{T}' \rightarrow \overline{v}'\\ 
+  \overline{V} \triangleq [(\textsf{Some} \, l', \overline{v}')] \listunion \overline{V}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}, x \bouchon{83} (\bob V
+    \bcb \AS v) : \textsf{SET} \, (\varphi'\Cons\Phi') \rightarrow
+    \bob \overline{V} \bcb}
+
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+  \forall \hat{v} \listin V.(\hat{v} \lhd (\textsf{Some} \, x', v') \AND x' \neq l')\\
+  \domain{\mathcal{A}} \Gamma, \textrm{H}, x \bouchon{83} \bob V \bcb
+  : \textsf{SET} \, \Phi' \rightarrow \overline{v}}
+%------
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}, x \bouchon{83} \bob V \bcb
+    : \textsf{SET} \, (\varphi'\Cons\Phi') \rightarrow \overline{v}}
+
+% |- v : (SEQUENCE _)
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+  V \lhd (\textsf{Some} \, x', v') \Cons V'\\
+  x' = l'\\
+  v \not\in \textrm{H}\\
+  \domain{\mathcal{A}} \Gamma, \textrm{H}, x \bouchon{1} \bob V' \bcb
+  : \textsf{SEQUENCE} \, \Phi' \rightarrow \bob \overline{V}' \bcb\\
+  \domain{\mathcal{A}} \Gamma, v \Cons \textrm{H}, \emptyStr
+  \bouchon{83} v' : \textrm{T}' \rightarrow \overline{v}'\\
+  \overline{V} \triangleq (\textsf{Some} \, x', \overline{v}') \Cons \overline{V}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}, x \bouchon{83} (\bob V
+    \bcb \AS v) : \textsf{SEQUENCE} \, (\varphi'\Cons\Phi')
+    \rightarrow \bob \overline{V} \bcb}
+
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+  V \lhd (\textsf{Some} \, x', v') \Cons V'\\
+  x' \neq l'\\
+  \domain{\mathcal{A}} \Gamma, \textrm{H}, x \bouchon{83} \bob V \bcb
+  : \textsf{SEQUENCE} \, \Phi' \rightarrow \overline{v}}
+%------
+  {\Gamma, \textrm{H}, x \bouchon{83} \bob V \bcb : \textsf{SEQUENCE}
+    \, (\varphi'\Cons\Phi')  \rightarrow \overline{v}}
+
+% |- v : T
+% 
+\inferrule
+  {\noother}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H}, x  \bouchon{83} v : \textrm{T} \rightarrow v}
+
+\end{mathparpagebreakable}

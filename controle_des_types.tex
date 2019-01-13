@@ -1,0 +1,421 @@
+%%-*-latex-*-
+
+\section{Définition}
+
+Nous présentons ici le prédicat de contrôle des types qui, étant donné
+une valeur canonique, un environnement de types canoniques et un type
+de cet environnement, décide si la valeur est du
+type donné dans l'environnement.
+
+Pour suivre la présentation il n'est pas nécessaire d'avoir compris ni
+lu entièrement le chapitre consacré à l'obtention des environnements
+canoniques: nous supposerons, comme Leibniz, que nous vivons dans le
+meilleur des environnements possibles, et pour les ironiques Zadig
+nous indiquerons à chaque fois ce qui est implicitement supposé.
+
+Le prédicat a la forme: $\domain{\mathcal{A}} \Gamma, x \vdash v :
+\textrm{T}$ Notons la présence dans le contexte d'un champ~$x$. Il a
+pour type string. Il désigne le nom du type~T dans l'environnement
+$\domain{\mathcal{A}} \Gamma$ (c'est-à-dire $x \in \mathcal{A}$). Il
+est nécessaire à cause du type \textsf{REAL} (voir
+section~\vref{ajout_REAL_INTEGER}). En effet celui-ci est défini dans
+cette thèse de la façon suivante:
+\begin{sverb}
+REAL ::= SEQUENCE {
+           mantissa INTEGER,
+           base     INTEGER (2 | 10),
+           exponent INTEGER
+         }
+\end{sverb}
+Nous évitons ainsi l'écueil de la relation d'association, non
+spécifiée mais employée dans \cite[\S~18.5]{ASN94}. \textsf{REAL}
+reste un mot-clé. Trois valeurs de ce type ne sont cependant pas
+exprimables à l'aide de la définition ci-dessus: \textsf{0.0},
+\textsf{MINUS-INFINITY} et \textsf{PLUS-INFINITY}
+\citep[\S~18.6]{ASN94}. Rappelons que \textsf{0.0} est l'arbre de
+syntaxe abstraite canonique mis pour l'extrait de syntaxe
+concrète~\texttt{0} qui est ambigu car il peut être interprété à la
+fois comme relevant du type \textsf{REAL} et \textsf{INTEGER}. En ce
+sens la canonisation, et en particulier à la
+section~\vref{desambiguation_du_zero}, a déjà effectué une
+partie du contrôle des types.
+
+Le champ contextuel~$x$ de la relation de contrôle des types sert
+alors à traiter spécialement les cas des valeurs spéciales du type
+\textsf{REAL}: \textsf{0.0}, \textsf{MINUS-INFINITY} et
+\textsf{PLUS-INFINITY}.
+\begin{mathpar}
+% Type unfolding
+%
+\inferrule
+   {x' \in \mathcal{A}\\
+   \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+   \domain{\mathcal{A}} \Gamma, x' \vdash v : \textrm{T}'}
+%-----
+   {\domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{TRef} \, (x')}
+\;\TirName{[1]}
+\label{controle_des_types_1}
+\end{mathpar}
+C'est la règle de dépliage du type. Si celui-ci est une abréviation
+(donc de la forme $\textsf{TRef} \, (x')$) valide (c'est-à-dire que
+$x'$~est le nom d'un type dans l'environnement: $x' \in \mathcal{A}$),
+alors on extrait de l'environnement l'entrée référencée ($\Gamma(x')
+\lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})$) et on produit un
+nouveau jugement avec le nouveau type, soit, $\domain{\mathcal{A}}
+\Gamma, x' \vdash v : \textrm{T}'$.
+\begin{mathpar}
+% Axioms
+%
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, x  \vdash (\textsf{FALSE} \mid
+      \textsf{TRUE}) : \textsf{BOOLEAN}}
+\;\TirName{[2]}
+\label{controle_des_types_2}
+\end{mathpar}
+Les seules valeurs de type \textsf{BOOLEAN} sont \textsf{FALSE} et
+\textsf{TRUE}.
+\begin{mathpar}
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, x \vdash \textsf{NULL} : \textsf{NULL}}
+\;\TirName{[3]}
+\label{controle_des_types_3}
+\end{mathpar}
+C'est le cas du type \textsf{NULL} dont l'unique valeur est
+\textsf{NULL}. Attention! Dans la syntaxe abstraite, \textsf{NULL}
+apparaît à la fois comme valeur et type ASN.1
+(sections~\vref{ast_types} et~\vref{ast_valeurs}), pour refléter la
+surcharge de la norme \citep[\S~21]{ASN94}.
+\begin{mathpar}
+\inferrule
+   {v \lhd \textsf{MINUS-INFINITY} \mid \textsf{PLUS-INFINITY}}
+%-----
+   {\domain{\mathcal{A}} \Gamma, \textrm{"REAL"} \vdash v :
+     \textrm{T}}
+\;\TirName{[4]}
+\label{controle_des_types_4}
+\end{mathpar}
+Nous traitons ici le cas de deux des trois valeurs spéciales du type
+\textsf{REAL}. On notera l'usage du champ~$x$ au lieu de~T qui vaut
+\textsf{SEQUENCE} \ldots
+\begin{mathpar}
+\inferrule
+   {\textrm{String.length} \, (s) \equiv 0 \,\, [\textrm{modulo} \,\, 8]}
+%-----
+   {\domain{\mathcal{A}} \Gamma, x \vdash \textsf{BinStr} \, (s) :
+     \textsf{OCTET STRING}}
+\;\TirName{[5]}
+\label{controle_des_types_5}
+\end{mathpar}
+Les chaînes numériques ont été normalisées lors de la canonisation des
+environnements (section~\vref{valeurs_en_forme_normale}). Elles sont
+toutes sous la forme de chaînes de bits (\textsf{BinStr}). Pour savoir
+si elles sont bien du type \textsf{OCTET STRING} il suffit alors de
+vérifier que leur longueur est un multiple de 8. String.length est la
+fonction OCaml pour calculer la longueur d'une chaîne de caractères.
+\begin{mathpar}
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, x \vdash \textsf{Int} \wild :
+    \wildINTEGER}
+\;\TirName{[6]}
+\label{controle_des_types_6}
+\end{mathpar}
+Cette règle dit que toutes les valeurs syntaxiques de constructeur
+\textsf{Int} sont de type \textsf{INTEGER}. Il est important de noter
+que le cas de l'extrait de syntaxe concrète~\texttt{0} a été réécrit
+en l'arbre de syntaxe abstraite $\textsf{Int} \, (0)$ lors de la
+canonisation.
+\begin{mathpar}
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, \textrm{"REAL"} \vdash \textsf{0.0} :
+    \textrm{T}}
+\;\TirName{[7]}
+\label{controle_des_types_7}
+\end{mathpar}
+Cette règle traite le cas de la valeur spéciale \textsf{0.0} de type
+\textsf{REAL}. À noter que nous ne projetons pas le terme~T, mais le
+champ contextuel~$x$.
+\begin{mathpar}
+% Strings
+%
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, x \vdash \textsf{Str} \wild :
+    \textsf{CharString} \, \wild}
+\;\TirName{[8]} 
+\label{controle_des_types_8}
+\end{mathpar}
+Nous traitons ici le cas de toutes les chaînes de caractères
+(proprement dites). Nous n'effectuons pas les vérifications spécifiées
+en \cite[\S~34]{ASN94}, car celles-ci sont dépourvues de difficulté et
+ne sont d'aucun intérêt dans l'optique de cette thèse.
+\begin{mathpar}
+% BIT STRING
+%
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, x \vdash \textsf{BinStr} \, \wild :
+    \wildBITSTRING}
+\;\TirName{[9]} 
+\label{controle_des_types_9}
+\end{mathpar}
+Cette règle est complémentaire de la règle~\RefTirName{[5]}. Nous
+acceptons toutes les chaînes de bits comme étant de type \textsf{BIT
+  STRING}.
+\begin{mathpar}
+% ENUMERATED
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{ENUMERATED} \,\, ([(y, \wild\!)] \sqcup
+    \mathcal{C}')}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdash \textsf{Enum} \, (y) : \textrm{T}}
+\;\TirName{[10]} 
+\label{controle_des_types_10}
+\end{mathpar}
+Cette règle spécifie qu'une valeur annoncée de constructeur
+\textsf{Enum} doit référencer une des constantes énumératives du type
+\textsf{ENUMERATED} pour être de ce type. À noter que les dés sont un
+peu pipés car le constructeur de valeurs \textsf{Enum} a été introduit
+dans l'arbre de syntaxe abstraite lors de la normalisation de valeurs,
+et non à l'analyse syntaxique
+(section~\vref{valeurs_en_forme_normale}).
+\begin{mathparpagebreakable}
+% SET OF / SEQUENCE OF
+%
+\inferrule
+  {\textrm{T} \lhd (\textsf{SEQUENCE OF} \mid \textsf{SET OF}) \,\,
+    \tau' \, \textrm{T}' \, \sigma'\\
+   \domain{\mathcal{A}} \Gamma, \emptyStr \vdash v' : \textrm{T}'\\
+   \domain{\mathcal{A}} \Gamma, x \vdash \bob V' \bcb : \textrm{T}}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdash \bob [(\textsf{None}, v')]
+    \sqcup V' \bcb : \textrm{T}}
+\;\TirName{[11]}
+\label{controle_des_types_11}
+
+% Empty
+%
+\inferrule
+  {\textrm{T} \lhd (\textsf{SEQUENCE OF} \mid \textsf{SET OF}) \,\,
+    \tau' \, \textrm{T}' \, \sigma'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdash \bob\emptyL\!\bcb : \textrm{T}}
+\;\TirName{[12]}
+\label{controle_des_types_12}
+\end{mathparpagebreakable}
+Ces règles traitent le cas des types \textsf{SET OF} et
+\textsf{SEQUENCE OF}. La règle~\RefTirName{[12]} est appliquée si la
+valeur est $\bob\emptyL\!\bcb$ (en syntaxe concrète:
+\texttt{\{\}}). Considérons la règle~\RefTirName{[11]} en détail. Nous
+avons: $v \lhd \bob [(\textsf{None}, v')] \sqcup V' \bcb$. Le
+symbole~$\sqcup$ dénote la fonction d'union de deux listes
+(l'entrelacement des éléments n'est pas spécifié). Donc ici cela
+spécifie que l'ordre dans lequel sont examinées les valeurs~$v'$ n'est
+pas significatif. La seconde prémisse établit le contrôle du type
+d'une valeur~$v'$. À noter d'ailleurs la valeur~$\emptyStr$ du
+champ~$x$: ceci parce que le type~T est sous forme canonique, et donc
+ses champs sont en fait constitués d'abréviations. Par conséquent la
+règle de dépliage~\RefTirName{[1]} s'appliquera à~$\textrm{T}'$ et
+donnera une valeur pertinente à ce champ. La dernière prémisse
+s'interprète algorithmiquement comme l'appel récursif, pour traiter
+les valeurs éventuellement restantes.
+\begin{mathpar}
+% CHOICE
+%
+\inferrule
+  {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+   \domain{\mathcal{A}} \Gamma, \emptyStr \vdash v' : \textrm{T}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdash (l' \colon v') :
+    \textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}')}
+\;\TirName{[13]}
+\label{controle_des_types_13}
+
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{CHOICE} \, \mathcal{F}'}
+%------
+  {\domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{CHOICE} \, ([f']
+    \sqcup \mathcal{F}')}
+\;\TirName{[14]} 
+\label{controle_des_types_14}
+\end{mathpar}
+Ces règles traitent le cas où $\textrm{T} \lhd \wildCHOICE$. La
+règle~\RefTirName{[14]} spécifie qu'il est possible d'ignorer une
+variante (c'est-à-dire un champ de \textsf{CHOICE}). La
+règle~\RefTirName{[13]} traite le cas où l'on projette le
+\textsf{CHOICE} pour en sélectionner une variante. La première
+prémisse $f' \lhd (l', \tau', \textrm{T}', \sigma', s')$ impose que le
+label de cette variante doit être identique à l'identificateur contenu
+dans la valeur~$l'$. La seconde prémisse projette la valeur et le type
+et contrôle leur adéquation. On notera dans cette prémisse la valeur
+spéciale du champ~$x$ (qui vaut~$\emptyStr$), due au fait que
+l'environnement est canonique, et donc que~T est en réalité une
+abréviation, ce qui ne rend pas pertinent ce champ~$x$ (voir les
+règles \RefTirName{[11]}~et~\RefTirName{[12]}). D'autre part, pour
+bien comprendre ces règles, comme pour bien comprendre les cas
+$\textrm{T} \lhd \wildSET \mid \wildSEQUENCE$, il faut savoir que la
+canonicité des types n'assure pas que les labels (i.e. les noms des
+champs) soient distincts deux à deux. Ainsi il est tout à fait permis
+ici d'avoir un arbre de syntaxe abstraite correspondant au fragment de
+syntaxe concrète:
+\begin{sverb}
+T ::= CHOICE {
+        a INTEGER,
+        a INTEGER,
+        b BOOLEAN
+      }
+\end{sverb}
+Pourquoi ce choix, alors que~\cite[\S~26.6]{ASN94} interdit cela? Tout
+d'abord parce que du point de vue du contrôle de type, cette
+restriction n'est pas nécessaire, comme nous allons le vérifier. Ainsi
+la définition des environnements canoniques en est allégée. De plus,
+cette propriété d'unicité des labels sera définie ultérieurement et
+mise en parallèle avec celle d'unicité des étiquetages, dans le
+chapitre consacré à la sémantique (section~\vref{semantique}), ce qui
+donnera une nouvelle perspective à la raison d'être fondamentale de
+cette restriction. Il est donc permis d'avoir:
+\begin{sverb}
+v T ::= a : 7
+\end{sverb}
+En effet, pour prouver le jugement associé
+\begin{equation*}
+  \domain{\mathcal{A}} \Gamma, x \vdash ("\textrm{a}" \colon
+  \textsf{Int} \, (7)) : \textrm{T}
+\end{equation*}
+où $\textrm{T} \lhd \wildCHOICE$, nous avons alors le choix
+d'appliquer d'abord (nous raisonnons en partant de la racine de
+l'arbre de preuve) la règle~\RefTirName{[13]} ou~\RefTirName{[14]}. Si
+nous appliquons d'abord la règle~\RefTirName{[13]}, nous devons alors
+prouver:
+\begin{equation*}
+  \domain{\mathcal{A}} \Gamma, \emptyStr \vdash \textsf{Int} \, (7) :
+  \textsf{INTEGER} \, \emptyL
+\end{equation*}
+ce qui est vrai par la règle~\RefTirName{[6]}. Si en revanche nous
+appliquons la règle~\RefTirName{[14]} d'abord, alors nous devons
+contrôler
+\begin{sverb}
+v CHOICE {
+    a INTEGER,
+    b BOOLEAN
+  } ::= a : 7
+\end{sverb}
+ce qui sera fait ensuite en appliquant la règle~\RefTirName{[13]},
+puis~\RefTirName{[6]}.
+
+On remarque que ni~\RefTirName{[13]} ni~\RefTirName{[14]} ne filtrent
+$\textsf{CHOICE} \, \emptyL\!$.
+\begin{mathparpagebreakable}
+% SEQUENCE
+%
+% Matched field
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+   V \lhd [(\textsf{Some} \, l', v')] \sqcup V'\\
+   \domain{\mathcal{A}} \Gamma, \emptyStr \vdash v' : \textrm{T}'\\
+   \domain{\mathcal{A}} \Gamma, x \vdash \bob V' \bcb :
+   \textsf{SEQUENCE} \, \Phi'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdash \bob V \bcb :
+    \textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi')}
+\;\TirName{[15]}
+\label{controle_des_types_15}
+
+% Unmatched OPTIONAL field
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+   s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+   \domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{SEQUENCE} \, \Phi'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{SEQUENCE} \,
+    ([\varphi'] \sqcup \Phi')}
+\;\TirName{[16]}
+\label{controle_des_types_16}
+
+% Empty SEQUENCE
+%
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, x \vdash \bob\emptyL\!\bcb :
+    \textsf{SEQUENCE} \, \emptyL}
+\;\TirName{[17]} 
+\label{controle_des_types_17}
+\end{mathparpagebreakable}
+Ces règles traitent le cas où $\textrm{T} \lhd \wildSEQUENCE$. La
+règle~\RefTirName{[17]} est le sous-cas de la séquence vide
+\citep[\S~22.13.b]{ASN94}. À ce sujet, notons que le
+cas~\citep[\S~22.13.a]{ASN94}, c'est-à-dire par exemple:
+\begin{sverb}
+v SEQUENCE {a REAL OPTIONAL} ::= {}
+\end{sverb}
+n'est pas prouvable directement par cette règle~\RefTirName{[17]}: il
+faut d'abord appliquer la règle~\RefTirName{[16]} pour éliminer le
+champ optionnel. La règle~\RefTirName{[16]} stipule en effet qu'un
+champ optionnel peut être ignoré. Par définition, il n'est pas
+nécessaire que la séquence comporte alors une valeur associée à ce
+champ (conformément à \citep[\S~22.8]{ASN94}. Remarquons que le cas où
+un champ est marqué \textsf{DEFAULT} n'apparaît pas ici, mais est géré
+par la règle~\RefTirName{[15]}, au même titre que les champs
+obligatoires. Ceci est dû au fait que les valeurs sont canoniques, et
+donc en particulier les valeurs par défaut, si besoin, ont été
+introduites dans la valeur séquence (nous accomplissons ainsi
+\citep[\S~22.9]{ASN94}. La règle~\RefTirName{[15]} traite le cas où
+une valeur de la séquence est confrontée au type d'un champ de
+\textsf{SEQUENCE}. Le fait que l'on ait:
+\begin{equation*}
+\begin{array}{c}
+  \textrm{T} \lhd \textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi')\\
+   \varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+   V \lhd [(\textsf{Some} \, l', v')] \sqcup V'
+\end{array}
+\end{equation*}
+signifie que l'on peut choisir parmi les valeurs de la séquence une
+qui ait pour nom un label du type \textsf{SEQUENCE}, la façon dont on
+fait ces deux choix n'étant pas spécifiée. Rappelons à ce sujet
+que~$\sqcup$, contrairement à l'union ensembliste~$\cup$, est une
+union disjointe (ainsi si $\Phi \lhd [\varphi'] \sqcup \Phi'$ alors
+$\Phi'$~est une liste strictement plus courte que~$\Phi$.)
+
+On notera que, comme pour le cas \textsf{CHOICE} (cf.
+règles~\RefTirName{[13]} et~\RefTirName{[14]}), il n'est pas imposé
+ici que les labels soient distincts deux à deux (comme le demande
+\cite[\S~22.10]{ASN94}): ce n'est pas du ressort du contrôle de type à
+proprement parler, mais de la canonisation des types.
+
+D'autre part, on remarquera que nous n'imposons pas que les valeurs de
+la séquence soient dans l'ordre des champs du type \textsf{SEQUENCE},
+comme cela est pourtant exigé par \cite[\S~22.14]{ASN94}. Nous
+considérons en effet que cela n'est pas du ressort du contrôle des
+types, aussi la vérification de cette exigence a été faite lors de la
+canonisation des types. Nous soutenons par ailleurs que cette
+contrainte est inutile dans la sémantique statique, car la seule
+différence entre \textsf{SEQUENCE} et \textsf{SET} réside dans le
+codage de leurs valeurs (section~\vref{codage}) et le contrôle
+sémantique des types (section~\vref{controle_semantique_des_types})
+---~que l'on peut assimiler à un décodage.
+\begin{mathpar}
+% SET
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{SEQUENCE} \, \Phi}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{SET} \, \Phi}
+\;\TirName{[18]} 
+\label{controle_des_types_18}
+\end{mathpar}
+Le cas du type \textsf{SET} est traité exactement comme celui du type
+\textsf{SEQUENCE} (cf. ci-dessus pour une explication).
+
+\section{Types bien labellisés}
+\label{types_bien_labellises}
+\input{types_bien_labellises}
+
+\section{Unicité du contrôle des types}
+\label{unicite_du_controle_des_types}
+\input{unicite_du_controle_des_types}

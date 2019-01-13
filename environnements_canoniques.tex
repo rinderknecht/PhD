@@ -1,0 +1,82 @@
+%%-*-latex-*-
+
+\section{Ajout des types \textsf{REAL} et \textsf{INTEGER}}
+\label{ajout_REAL_INTEGER}
+\input{ajout_des_types_REAL_et_INTEGER}
+
+\section{Types bien fondés}
+\label{types_bien_fondes}
+\input{types_bien_fondes}
+
+\section{Découplage des valeurs globales}
+\label{decouplage_des_valeurs_globales}
+\input{decouplage_des_valeurs_globales}
+
+\section{Normalisation des types}
+\input{normalisation_des_types}
+
+\section{Découplage valeurs/types}
+\input{decouplage_valeurs_types}
+
+\section{Découplage valeurs/contraintes}
+\label{decouplage_valeurs_contraintes}
+\input{decouplage_valeurs_contraintes}
+
+\section{Normalisation des valeurs}
+\label{normalisation_des_valeurs}
+\input{normalisation_des_valeurs}
+
+\section{Recouplage valeurs/types}
+\input{recouplage_valeurs_types}
+
+\section{Unicité et positivité de constantes}
+\label{unicite_et_positivite_de_constantes}
+\input{unicite_et_positivite_de_constantes}
+
+\section{Normalisation des étiquetages}
+\label{normalisation_des_etiquetages}
+\input{normalisation_des_etiquetages}
+
+\section{Définition des environnements canoniques}
+
+\begin{mathpar}
+\inferrule
+  {%
+% Ajout des types REAL et INTEGER
+   \bouchon{25} \domain{\mathcal{A}} \Gamma \rightarrow
+   \domain{\mathcal{A}_0} \Gamma_0\\
+% Types bien fondés
+  \Bouchon{3} \domain{\mathcal{A}_0} \Gamma_0\\
+% Découplage des valeurs globales
+  \bouchon{10} (\domain{\mathcal{A}_0} \Gamma_0, \domain{\mathcal{B}}
+  \Delta) \rightarrow (\domain{\mathcal{A}_1} \Gamma_1,
+  \domain{\mathcal{B}_0} \Delta_0)\\
+% Normalisation des types
+  \bouchon{31} \domain{\mathcal{A}_1} \Gamma_1 \rightarrow
+  \domain{\mathcal{A}_2} \Gamma_2\\
+% Découplages valeurs/types
+  \domain{\mathcal{B}_0} \Delta_0 \bouchon{48} \domain{\mathcal{A}_2}
+  \Gamma_2 \rightarrow (\domain{\mathcal{A}_3} \Gamma_3,
+  \domain{\mathcal{B}_1} \Delta_1)\\
+% Découplage valeurs/contraintes
+  \domain{\mathcal{B}_1} \Delta_1 \bouchon{53} \domain{\mathcal{A}_3}
+  \Gamma_3 \rightarrow (\domain{\mathcal{A}_4} \Gamma_4,
+  \domain{\mathcal{B}_2} \Delta_2)\\
+% Normalisation des valeurs
+  \domain{\mathcal{A}_4} \Gamma_4 \bouchon{18} \domain{\mathcal{B}_2}
+  \Delta_2 \rightarrow \domain{\overline{\mathcal{B}}} \overline\Delta\\
+% Recouplage valeurs/types
+  \domain{\overline{\mathcal{B}}} \overline\Delta \bouchon{96}
+  \domain{\mathcal{A}_4} \Gamma_4 \rightarrow \domain{\mathcal{A}_5}
+  \Gamma_5\\
+% Unicité et positivité des constantes
+  \bouchon{30} \domain{\mathcal{A}_5} \Gamma_5\\
+% Normalisation des étiquetages
+  \domain{\overline{\mathcal{B}}} \overline\Delta \bouchon{33}
+  \domain{\mathcal{A}_5} \Gamma_5 \rightarrow
+  \domain{\overline{\mathcal{A}}} \overline\Gamma}
+%-----
+  {\bouchon{47} (\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}}
+    \Delta) \rightarrow (\domain{\overline{\mathcal{A}}} \overline\Gamma,
+    \domain{\overline{\mathcal{B}}} \overline\Delta)}
+\end{mathpar}

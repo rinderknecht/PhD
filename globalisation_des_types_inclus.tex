@@ -1,0 +1,147 @@
+%%-*-latex-*-
+
+\begin{framed}
+\begin{mathpar}
+\inferrule
+  {x \in \mathcal{A}\\
+  \Gamma(x) \lhd (\alpha, \tau, \{(\textrm{T}, \sigma)\})\\
+  \domain{\mathcal{A}} \Gamma \bouchon{15} \sigma \rightarrow
+  (\overline\sigma, \domain{\mathcal{A}_0} \Gamma_0)\\
+  \bouchon{0} \domain{\mathcal{A}_0 \setminus \{x\}} \Gamma_0
+  \rightarrow \domain{\overline{\mathcal{A}}} \overline\Gamma}
+%-----
+  {\bouchon{0} \domain{\mathcal{A}} \Gamma \rightarrow
+    \domain{\overline{\mathcal{A}}} \overline\Gamma \oplus x \mapsto
+    (\alpha, \tau, \{(\textrm{T}, \overline\sigma)\})}
+
+\inferrule
+  {}
+  {\bouchon{0} \domain{\varnothing} \Gamma \rightarrow
+    \domain{\varnothing} \Gamma}
+\end{mathpar}
+\end{framed}
+
+\bigskip
+
+\begin{framed}
+\begin{mathpar}
+\inferrule
+  {\domain{\mathcal{A}} \Gamma \bouchon{5} \nu \rightarrow
+    (\overline\nu, \domain{\mathcal{A}_0} \Gamma_0)\\
+  \domain{\mathcal{A}_0} \Gamma_0 \bouchon{15} \sigma \rightarrow
+  (\overline\sigma, \domain{\mathcal{A}_1} \Gamma_1)}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{15} \{\nu\} \uplus \sigma
+    \rightarrow (\{\overline\nu\} \cup \overline\sigma,
+    \domain{\mathcal{A}_1} \Gamma_1)}
+
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma \bouchon{15} \{\} \rightarrow (\{\},
+    \domain{\mathcal{A}} \Gamma)}
+\end{mathpar}
+\end{framed}
+
+\begin{mathparpagebreakable}
+% Intersection
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma \bouchon{15} \sigma \rightarrow
+    (\overline\sigma, \domain{\mathcal{A}_0} \Gamma_0)\\
+  \domain{\mathcal{A}_0} \Gamma_0 \bouchon{5} \textsf{Inter} \, \Sigma
+  \rightarrow (\textsf{Inter} \, \overline\Sigma,
+  \domain{\mathcal{A}_1} \Gamma_1)}
+%------
+  {\domain{\mathcal{A}} \Gamma \bouchon{5} \textsf{Inter} \, (\sigma
+    \Cons \Sigma) \rightarrow (\textsf{Inter} \, (\overline\sigma
+    \Cons \overline\Sigma), \domain{\mathcal{A}_1} \Gamma_1)}
+
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma \bouchon{5} \textsf{Inter} \, \emptyL
+    \rightarrow (\textsf{Inter} \, \emptyL \!, \domain{\mathcal{A}}
+    \Gamma)}
+
+% INCLUDES
+%
+% globalisation ET globalisation des types locaux sans leur
+% étiquetage...
+%
+\inferrule
+  {x \not\in \mathcal{A}\\
+  \overline\nu \triangleq \textsf{INCLUDES} \,\, \emptyL \,
+  (\textsf{TRef} \, x) \, \{\}\\
+  \domain{\mathcal{A}} \Gamma \bouchon{63} \textrm{T}' \rightarrow
+  (\overline{\textrm{T}}', \domain{\overline{\mathcal{A}}}
+  \overline\Gamma)\\
+  \overline\gamma \triangleq x \mapsto (\emptyL\!, \tau',
+  \{(\overline{\textrm{T}}', \sigma')\})}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{5} \textsf{INCLUDES} \,\,
+    \tau' \, \textrm{T}' \, \sigma' \rightarrow (\overline\nu,
+    \domain{\overline{\mathcal{A}}} \overline\Gamma \oplus
+    \overline\gamma)}
+
+% SIZE
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma \bouchon{15} \sigma \rightarrow
+    (\overline\sigma, \domain{\mathcal{A}_0} \Gamma_0)}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{5} \textsf{SIZE} \, \sigma
+    \rightarrow (\textsf{SIZE} \, \overline\sigma,
+    \domain{\mathcal{A}_0} \Gamma_0)}
+
+% FROM
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma \bouchon{15} \sigma \rightarrow
+    (\overline\sigma, \domain{\mathcal{A}_0} \Gamma_0)}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{5} \textsf{FROM} \, \sigma
+    \rightarrow (\textsf{FROM} \, \overline\sigma,
+    \domain{\mathcal{A}_0} \Gamma_0)}
+
+% WITH COMPONENT
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma \bouchon{15} \sigma \rightarrow
+    (\overline\sigma, \domain{\mathcal{A}_0} \Gamma_0)\\
+  \overline\nu \triangleq \textsf{WITH COMPONENT} \, \overline\sigma}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{5} \textsf{WITH COMPONENT} \,
+    \sigma \rightarrow (\overline\nu, \domain{\mathcal{A}_0} \Gamma_0)}
+
+% WITH COMPONENTS
+%
+\inferrule
+  {\mathcal{K} \lhd \OList{$(l_j, \sigma_j, \hat\pi_j)$}{j}{p}\\
+  \{\}, \domain{\mathcal{A}} \Gamma \bouchon{39}
+  \SList{$\sigma_j$}{j}{p} \rightarrow
+  (\SList{$\overline\sigma_j$}{j}{p}, \domain{\overline{\mathcal{A}}}
+  \overline\Gamma)\\
+  \overline{\mathcal{K}} \triangleq \OList{$(l_j, \overline\sigma_j,
+    \hat\pi_j)$}{j}{p}\\
+  \overline\nu \triangleq \textsf{WITH COMPONENTS} \, (m,
+  \overline{\mathcal{K}})}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{5} \textsf{WITH COMPONENTS} \,
+    (m, \mathcal{K}) \rightarrow (\overline\nu,
+    \domain{\overline{\mathcal{A}}} \overline\Gamma)}
+
+\inferrule
+  {\domain{\mathcal{A}} \Gamma \bouchon{15} \sigma \rightarrow
+  (\overline\sigma, \domain{\overline{\mathcal{A}}} \overline\Gamma)\\
+  \{\overline\sigma\} \cup \overline{\mathcal{S}},
+  \domain{\overline{\mathcal{A}}} \overline\Gamma \bouchon{39}
+  \mathcal{S} \rightarrow r}
+%-----
+  {\overline{\mathcal{S}}, \domain{\mathcal{A}} \Gamma \bouchon{39}
+    \{\sigma\} \uplus \mathcal{S} \rightarrow r}
+
+\inferrule
+  {}
+  {\overline{\mathcal{S}}, \domain{\mathcal{A}} \Gamma \bouchon{39}
+    \{\} \rightarrow (\overline{\mathcal{S}}, \domain{\mathcal{A}}
+    \Gamma)}
+\end{mathparpagebreakable}

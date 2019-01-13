@@ -1,0 +1,31 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+% Value range
+%
+\inferrule
+  {\bouchon{97} e_0 \rightarrow \overline{e}_0\\
+   \bouchon{97} e_1 \rightarrow \overline{e}_1}
+  %-----
+  {\bouchon{50} e_0 \, b_0 \, \textbf{..} \, b_1 \, e_1 \rightarrow
+    \overline{e}_0 \, b_0 \, \textbf{..} \, b_1 \, \overline{e}_1}
+
+% Other
+%
+\inferrule
+  {\nu \nlhd \wild \wild \textbf{..} \wild \wild}
+  %-----
+  {\bouchon{50} \nu \rightarrow \nu}
+
+\inferrule
+  {\overline{v} \triangleq \textrm{Real.normalize} \, (v)}
+  %-----
+  {\bouchon{97} \textsf{Val} \, (v) \rightarrow \textsf{Val} \,
+    (\overline{v})}
+
+\inferrule
+  {e \nlhd \textsf{Val} \, \wild}
+  %-----
+  {\bouchon{97} e \rightarrow e}
+
+\end{mathparpagebreakable}

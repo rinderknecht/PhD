@@ -1,0 +1,24 @@
+%%-*-latex-*-
+
+\begin{mathpar}
+
+\inferrule
+  {\varphi_1 \triangleq \textsf{Field} \, (\textrm{"mantissa"},
+    \emptyL\!, \emptyINTEGER, \{\}, \textsf{None}) \\
+  \varphi_2 \triangleq \textsf{Field} \, (\textrm{"base"}, \emptyL\!,
+  \emptyINTEGER, \{\textsf{Value} \, (\textsf{Int} \, 2);
+  \textsf{Value} \, (\textsf{Int} \, 10)\}, \textsf{None}) \\
+  \varphi_3 \triangleq \textsf{Field} \, (\textrm{"exponent"},
+  \emptyL\!, \emptyINTEGER, \{\}, \textsf{None}) \\
+  \tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm}
+    \, 9) \,\, \textsf{IMPLICIT}] \\
+  \gamma_0 \triangleq  \textrm{"REAL"} \mapsto (\emptyL\!, \tau,
+  \{(\textsf{SEQUENCE} \, [\varphi_1; \varphi_2; \varphi_3],
+  \{\})\})\\
+  \gamma_1 \triangleq \textrm{"INTEGER"} \mapsto (\emptyL\!,
+  \emptyL\!, \{(\emptyINTEGER\!, \{\})\})}
+%-----
+ {\bouchon{25} \domain{\mathcal{A}} \Gamma \rightarrow (\domain{\mathcal{A}}
+   \Gamma \oplus \gamma_0) \oplus \gamma_1}
+
+\end{mathpar}

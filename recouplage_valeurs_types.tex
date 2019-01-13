@@ -1,0 +1,77 @@
+%%-*-latex-*-
+
+Les valeurs par défaut sont ignorées.
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \{(\textrm{T}, \sigma)\})\\
+  \domain{\mathcal{B}} \Delta \bouchon{97} \textrm{T} \rightarrow
+  \overline{\textrm{T}}\\
+  \domain{\mathcal{B}} \Delta \bouchon{96} \domain{\mathcal{A}} \Gamma
+  \rightarrow \domain{\overline{\mathcal{A}}} \overline\Gamma}
+%-----
+  {\domain{\mathcal{B}} \Delta \bouchon{96} \domain{\{x\} \uplus
+      \mathcal{A}} \Gamma \rightarrow \domain{\overline{\mathcal{A}}}
+    \overline\Gamma \oplus x \mapsto (\alpha, \tau,
+    \{(\overline{\textrm{T}}, \sigma)\})} 
+
+\inferrule
+  {}
+  {\domain{\mathcal{B}} \Delta \bouchon{96} \domain{\varnothing}
+    \Gamma \rightarrow \domain{\varnothing} \Gamma}
+
+% INTEGER
+% 
+\inferrule
+  {y \in \mathcal{B}\\
+  \Delta(y) \lhd (\emptyL\!, \wildTRef\!, \{\}, v)\\
+  \domain{\mathcal{B}} \Delta \bouchon{97} \textsf{INTEGER} \,\,
+  \mathcal{C} \rightarrow \textsf{INTEGER} \,\,
+  \overline{\mathcal{C}}\\
+  \overline{\textrm{T}} \triangleq \textsf{INTEGER} \,\, ((c, v) \Cons
+  \overline{\mathcal{C}})}
+%-----
+  {\domain{\mathcal{B}} \Delta \bouchon{97} \textsf{INTEGER} \,\, ((c,
+    \textsf{VRef} \, y) \Cons \mathcal{C}) \rightarrow
+    \overline{\textrm{T}}}
+
+% ENUMERATED
+%
+\inferrule
+  {y \in \mathcal{B}\\
+  \Delta(y) \lhd (\emptyL\!, \wildTRef\!, \{\}, v)\\
+  \domain{\mathcal{B}} \Delta \bouchon{97} \textsf{ENUMERATED} \,\,
+  \mathcal{C} \rightarrow \textsf{ENUMERATED} \,\,
+  \overline{\mathcal{C}}\\
+  \overline{\textrm{T}} \triangleq \textsf{ENUMERATED} \,\, ((c, v)
+  \Cons \overline{\mathcal{C}})}
+%-----
+  {\domain{\mathcal{B}} \Delta \bouchon{97} \textsf{ENUMERATED} \,\,
+    ((c, \textsf{VRef} \, y) \Cons \mathcal{C}) \rightarrow
+    \overline{\textrm{T}}}
+
+% BIT STRING
+%
+\inferrule
+  {y \in \mathcal{B}\\
+  \Delta(y) \lhd (\emptyL\!, \wildTRef\!, \{\}, v)\\
+  \domain{\mathcal{B}} \Delta \bouchon{97} \textsf{BIT STRING} \,\,
+  \mathcal{C} \rightarrow \textsf{BIT STRING} \,\,
+  \overline{\mathcal{C}}\\
+  \overline{\textrm{T}} \triangleq \textsf{BIT STRING} \,\, ((c, v)
+  \Cons \overline{\mathcal{C}})}
+%-----
+  {\domain{\mathcal{B}} \Delta \bouchon{97} \textsf{BIT STRING} \,\,
+    ((c, \textsf{VRef} \, y) \Cons \mathcal{C}) \rightarrow
+    \overline{\textrm{T}}}
+
+% Others
+%
+\inferrule
+  {\textrm{T} \nlhd \textsf{INTEGER} \, (\wild\!\Cons\wild\!) \mid
+    \textsf{BIT STRING} \, (\wild\!\Cons\wild\!) \mid
+    \textsf{ENUMERATED} \, (\wild\!\Cons\wild\!)}
+%-----
+  {\Delta \bouchon{97} \textrm{T} \rightarrow \textrm{T}}
+
+\end{mathparpagebreakable}

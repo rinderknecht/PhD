@@ -1,0 +1,37 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+%%
+\inferrule
+  {\textsf{Some} \, (\nu) \bouchon{74} \Sigma \rightarrow
+    \overline\Sigma}
+  %----------------
+  {\textsf{None} \bouchon{74}  \{\textsf{SIZE} \, \{\nu\}\} \Cons
+    \Sigma \rightarrow \overline\Sigma}
+
+\inferrule
+  {\textsf{None} \bouchon{74} \textrm{merge} \, (\nu_0, \nu_1)
+    \rightarrow \overline\Sigma_0\\
+   \textsf{Some} \, (\textsf{Inter} \, \overline\Sigma_0) \bouchon{74}
+   \Sigma \rightarrow \overline\Sigma_1}
+  %-----
+  {\textsf{Some} \, (\nu_1) \bouchon{74}  \{\textsf{SIZE} \,
+    \{\nu_0\}\} \Cons \Sigma \rightarrow \overline\Sigma_1}
+
+\inferrule
+  {\nu \nlhd \textsf{SIZE} \, \wild\\
+   s \bouchon{74} \Sigma \rightarrow \overline\Sigma}
+  %-----
+  {s \bouchon{74} \{\nu\} \Cons \Sigma \rightarrow \{\nu\} \Cons
+    \overline\Sigma}
+
+\inferrule
+  {}
+  {\textsf{Some} \, (\nu) \bouchon{74} \emptyL \rightarrow
+    [\{\textsf{SIZE} \, \{\nu\}\}]}
+
+\inferrule
+  {}
+  {\textsf{None} \bouchon{74} \emptyL \rightarrow \emptyL}
+
+\end{mathparpagebreakable}

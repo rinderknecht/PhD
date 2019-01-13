@@ -1,0 +1,150 @@
+%%%-*-latex-*-
+
+Le codage de référence que nous introduisons dans notre thèse
+(formellement à la section~\vref{codage}) s'inspire de ceux normalisés
+\cite{X.690}, en particulier les CER (\emph{Canonical Encoding Rules})
+et les DER (\emph{Distinguished Encoding Rules}). Le but ici n'est pas
+de capturer tous les aspects d'un codage réel, mais d'en saisir les
+parties qui servent notre propos, par exemple les subtilités du codage
+des valeurs de type \texttt{REAL} ne présentent ici aucun intérêt. Le
+codage par les BER (\emph{Basic Encoding Rules}) ne convient pas, même
+simplifié, car il ne définit pas une fonction de codage, c'est-à-dire
+une correspondance entre des valeurs et \emph{exactement un} code. Les
+BER ne respectent pas cette condition; par exemple le codage de la
+valeur \texttt{TRUE} peut se faire à l'aide de n'importe quelle valeur
+entière strictement positive et il n'y a donc pas unicité du code.
+
+La syntaxe des codes est la suivante. Un code est une paire dont la
+première composante est une étiquette et la seconde un contenu. Un
+contenu est soit \emph{primitif}, soit \emph{construit}. Les contenus
+primitifs correspondent aux codes des valeurs des types
+\texttt{INTEGER}, \texttt{BIT STRING}, \texttt{OCTET STRING},
+\texttt{BOOLEAN}, \texttt{NULL}, chaînes de caractères et aux valeurs
+spéciales \texttt{0.0}, \texttt{PLUS\--INFINITY} et
+\texttt{MINUS\--INFINITY} du type \texttt{REAL}. Un contenu construit
+est quant à lui une liste de codes. Ainsi, nous ne nous intéressons ni
+aux optimisations (en particulier, les valeurs non spéciales du type
+\texttt{REAL} sont traitées ici comme les valeurs de type
+\texttt{SEQUENCE}) ni aux longueurs des codes (qui ne sont utiles que
+pour piloter l'environnement d'exécution du décodage).
+
+Présentons brièvement le principe de codage pour les types
+structurés.
+
+Une valeur de type \texttt{SET OF} ou \texttt{SEQUENCE OF} est
+constituée d'un ensemble avec répétition de valeurs. Chacune d'elles
+est codée, sachant quel est le type de ces valeurs (éléments). Si le
+type est \texttt{SEQUENCE OF} alors le code possède un contenu
+construit à partir de ces sous-codes \emph{dans le même ordre que dans
+  la valeur}. Nous employons le terme «~sous-code~» pour désigner un
+code qui sert à contruire le contenu d'un autre. Soit
+\begin{sverb}
+T ::= SET OF INTEGER
+t T ::= {3,1,4,1,6}
+\end{sverb}
+Alors $\semb{\texttt{t}}{\texttt{T}}$ est un code dont le contenu est
+construit par la liste des codes respectivement des
+valeurs~\texttt{3}, \texttt{1}, \texttt{4}, \texttt{1} et~\texttt{6},
+qui sont toutes de type \texttt{INTEGER}. Dans le cas d'un type
+\texttt{SET OF} n'importe quelle permutation des sous-codes convient.
+
+Le codage d'une valeur de type \texttt{CHOICE} est très simple. En
+examinant une par une les variantes, c'est-à-dire les champs du
+\texttt{CHOICE}, il y a deux possibilités: ou bien on laisse de côté
+la variante, ou bien son label est identique à celui contenu dans la
+valeur et dans ce cas le code de cette valeur sera le code de la
+valeur qu'elle contient, sachant que cette dernière valeur est du type
+de la variante. Considérons par exemple:
+\begin{sverb}
+T ::= CHOICE {
+        a INTEGER,
+        a INTEGER,
+        b BOOLEAN
+      }
+
+t T ::= a : 7
+\end{sverb}
+et envisageons une par une les variantes dans l'ordre d'écriture. Nous
+avons le choix de rejeter la première variante et de passer à la
+suivante, ou de la conserver. Si nous la conservons alors
+$\semb{\texttt{t}}{\texttt{T}} \triangleq
+\semb{\texttt{7}}{\texttt{INTEGER}}$, où le symbole~$\triangleq$
+introduit à sa droite la définition du terme qui est à sa
+gauche. Sinon, la seconde variante est examinée. À nouveau, nous
+pouvons soit la conserver soit la rejeter. Si nous la conservons,
+alors $\semb{\texttt{t}}{\texttt{T}} \triangleq
+\semb{\texttt{7}}{\texttt{INTEGER}}$. Si nous la rejetons, nous
+envisageons la variante suivante. Mais nous ne pouvons conserver cette
+dernière car son label est~\texttt{b} et diffère donc de celui contenu
+dans~\texttt{t}, c'est-à-dire~\texttt{a}. Il faut donc la rejeter,
+mais puisque c'était la dernière, nous devons rebrousser chemin avant
+de nous avouer vaincu. Nous reprenons alors la seconde étape qui
+examina la seconde variante et nous décidons alors de la conserver, ce
+qui termine l'algorithme. Notez que nous avions imposé un ordre
+\emph{a priori} qui était celui de l'écriture, mais que n'importe
+qu'elle ordre convenait tout aussi bien. Le lecteur comprend
+maintenant que notre algorithme peut être amené à effectuer des
+rebroussements, car nous n'avons pas obligé les variantes à posséder
+des labels tous distincts entre eux. Le même phénomène s'était produit
+avec l'algorithme de contrôle des types, pour les mêmes raisons: d'un
+point de vue théorique, si l'algorithme est à même de rebrousser
+chemin, alors il n'y a pas besoin de contraindre les labels. Nous
+dirons que l'algorithme est non déterministe, c'est-à-dire qu'il peut
+répondre en empruntant différent chemins (ou raisonnements). Nous
+verrons plus tard qu'en contraignant les labels à être tous distincts
+entre eux, en accord avec X.680, alors l'algorithme devient
+déterministe, c'est-à-dire qu'il ne rebrousse plus jamais chemin.
+
+Mais si l'algorithme de contrôle sémantique des types est non
+déterministe, il est en revanche \emph{cohérent}, c'est-à-dire qu'il
+ne répond pas tantôt «~oui~», tantôt «~non~» à une même question: un
+échec (un «~non~») est toujours un échec, pour toutes les exécutions
+possibles sur la même question en entrée, et idem pour une réussite
+(un «~oui~»), même s'il peut aboutir à la réponse en empruntant
+différents raisonnements.
+
+Le codage d'une valeur de type \texttt{SEQUENCE} présente trois cas,
+alors que le type \texttt{CHOICE} en possédait deux:
+\begin{enumerate}
+
+  \item \emph{La valeur est~\texttt{\{\}} et le type
+    \texttt{SEQUENCE~\{\}}}. Dans ce cas le contenu du code est
+    construit avec une liste vide de sous-codes.
+
+  \item \emph{Le type \texttt{SEQUENCE} possède un champ marqué
+    \texttt{OPTIONAL}.} Dans ce cas il est possible d'écarter ce champ
+    et d'envisager d'autres cas.
+
+  \item \emph{La valeur contient une liste non vide de
+    valeurs-éléments et le type \texttt{SEQUENCE} possède un champ
+    dont le label égale celui d'une des valeurs listées.} Alors le
+    contenu du code de la valeur contient le code de cette dernière
+    valeur, dont le type est celui du champ. On recommence pour les
+    autres champs et valeurs restantes.
+ 
+\end{enumerate}
+De plus, les codes corespondant aux éléments du \texttt{SEQUENCE}
+doivent se trouver dans le même ordre que les champs du type.
+
+Il est très important de noter que le troisième cas recouvre le
+second, ce qui montre que notre algorithme est bien non
+déterministe. Prenons un exemple:
+\begin{sverb}
+T ::= SEQUENCE {
+        a INTEGER OPTIONAL,
+        a INTEGER OPTIONAL
+      }
+
+t T ::= {a 7}
+\end{sverb}
+Il y a deux manières de coder~\texttt{t}, toutes deux conduisant au
+même code (le codage est cohérent)
+$\semb{\texttt{7}}{\texttt{INTEGER}}$ : la première façon consiste à
+associer~\texttt{7} et le type \texttt{INTEGER} du premier champ, et
+la seconde à associer~\texttt{7} avec le type \texttt{INTEGER} du
+second champ.
+
+Le code d'une valeur de type \texttt{SET} est le code de la même
+valeur comme si son type était un \texttt{SEQUENCE}, mais où les
+sous-codes, correspondant aux valeurs-éléments, sont permutés de façon
+quelconque.

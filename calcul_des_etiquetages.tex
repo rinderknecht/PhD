@@ -1,0 +1,93 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \{(\textrm{T}, \sigma)\})\\
+  \domain{\mathcal{B}} \Delta \bouchon{8} \tau \rightarrow \tau_0\\
+  \textrm{T} \bouchon{7} \tau_0 \rightarrow \overline\tau\\
+  \domain{\mathcal{B}} \Delta \bouchon{6} \domain{\mathcal{A}} \Gamma
+  \rightarrow \domain{\overline{\mathcal{A}}} \overline\Gamma\\
+  \overline\gamma \triangleq x \mapsto (\alpha, \overline\tau,
+  \{(\textrm{T}, \sigma)\})}
+%-----
+  {\domain{\mathcal{B}} \Delta \bouchon{6} \domain{\{x\} \uplus
+      \mathcal{A}} \Gamma \rightarrow \domain{\overline{\mathcal{A}}}
+    \overline\Gamma \oplus \overline\gamma}
+
+\inferrule
+  {}
+  {\domain{\mathcal{B}} \Delta \bouchon{6} \domain{\varnothing} \Gamma
+    \rightarrow \domain{\varnothing} \Gamma}
+
+\inferrule
+  {y \in \mathcal{B}\\
+  \Delta(y) \lhd (\emptyL\!, \wildTRef\!, \{\}, \textsf{Int} \, n)\\
+  \domain{\mathcal{B}} \Delta \bouchon{8} (\textsf{Tag} \,\, (c,
+  \textsf{Imm} \, n) \,\, a) \Cons \tau' \rightarrow \overline\tau}
+%-----
+  {\domain{\mathcal{B}} \Delta \bouchon{8} (\textsf{Tag} \,\, (c,
+    \textsf{Ref} \, y) \,\, a) \Cons \tau' \rightarrow \overline\tau}
+
+\inferrule
+  {t' \lhd (\textsf{Tag} \,\, (c, \textsf{Imm} \, n) \,\, a)\\
+  n \geqslant 0\\
+  \domain{\mathcal{B}} \Delta \bouchon{8} \tau' \rightarrow
+  \overline\tau'}
+%--------
+  {\domain{\mathcal{B}} \Delta \bouchon{8} t' \Cons \tau' \rightarrow
+    t' \Cons \overline\tau'}
+
+\inferrule
+  {}
+  {\domain{\mathcal{B}} \Delta \bouchon{8} \emptyL \rightarrow \emptyL}
+
+\inferrule
+  {}
+  {\textrm{T} \bouchon{7} \emptyL \rightarrow \emptyL}
+
+\inferrule
+  {\textrm{T} \bouchon{7}  \tau \rightarrow \overline\tau}
+%-----
+  {\textrm{T} \bouchon{7}  (\textsf{Tag} \,\, \psi \,\,
+    \textsf{EXPLICIT}) \Cons \tau \rightarrow (\textsf{Tag} \,\, \psi \,\, \textsf{EXPLICIT})\Cons\overline\tau}
+
+\inferrule
+  {\textrm{T} \nlhd \wildCHOICE}
+%-----
+  {\textrm{T} \bouchon{7} [(\textsf{Tag} \,\, \psi \,\,
+      \textsf{IMPLICIT})] \rightarrow [(\textsf{Tag} \,\, \psi \,\,
+      \textsf{IMPLICIT})]}
+
+\inferrule
+  {\tau \nlhd \emptyL\\
+  \textrm{T} \bouchon{7}  \tau \rightarrow \wild\!\Cons\overline\tau}
+%-----
+  {\textrm{T} \bouchon{7} (\textsf{Tag} \,\, \psi \,\,
+    \textsf{IMPLICIT}) \Cons \tau \rightarrow (\textsf{Tag} \,\, \psi
+    \,\, \textsf{EXPLICIT}) \Cons \overline\tau}
+
+\inferrule
+   {\textrm{default\_tagging} \lhd \textsf{None} \mid \textsf{Some} \,
+     (\textsf{EXPLICIT TAGS})\\
+    \textrm{T} \bouchon{7} \tau \rightarrow \overline\tau}
+%-----
+   {\textrm{T} \bouchon{7} (\textsf{Tag} \,\, \psi \,\,
+     \textsf{Inferred}) \Cons \tau \rightarrow (\textsf{Tag} \,\, \psi
+     \,\, \textsf{EXPLICIT})\Cons\overline\tau}
+
+\inferrule
+   {}
+   {\wildCHOICE \bouchon{7} [\textsf{Tag} \,\, \psi \,\,
+       \textsf{Inferred}] \rightarrow [\textsf{Tag} \,\, \psi \,\,
+       \textsf{EXPLICIT}]}
+
+\inferrule
+   {\textrm{default\_tagging} \lhd \textsf{Some} \, (\textsf{IMPLICIT TAGS} \mid \textsf{AUTOMATIC TAGS})\\
+   \tau \nlhd \emptyL\\
+    \textrm{T} \bouchon{7} \tau \rightarrow \wild\!\Cons\overline\tau'}
+%-----
+   {\textrm{T} \bouchon{7} (\textsf{Tag} \,\, \psi \,\,
+     \textsf{Inferred}) \Cons \tau \rightarrow (\textsf{Tag} \,\, \psi
+     \,\, \textsf{EXPLICIT}) \Cons \overline\tau'}
+
+\end{mathparpagebreakable}

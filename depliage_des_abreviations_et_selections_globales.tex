@@ -1,0 +1,123 @@
+%%-*-latex-*-
+
+\begin{mathpar}
+\inferrule
+  {\domain{\mathcal{A}} \Gamma \bouchon{66} \domain{\mathcal{A}}
+    \Gamma \rightarrow \domain{\overline{\mathcal{A}}}
+    \overline\Gamma}
+%-----
+  {\bouchon{68} \domain{\mathcal{A}} \Gamma \rightarrow
+    \domain{\overline{\mathcal{A}}} \overline\Gamma} 
+
+\end{mathpar}
+
+\bigskip
+
+\begin{framed}
+\begin{mathpar}
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \textrm{ct})\\
+  \domain{\mathcal{A}} \Gamma, \emptyL \bouchon{82} (\tau,
+  \textrm{ct}) \rightarrow (\overline\alpha, \overline\tau,
+  \overline{\textrm{ct}})\\
+  \domain{\mathcal{A}} \Gamma \bouchon{66} \domain{\mathcal{A}'}
+  \Gamma \rightarrow \domain{\overline{\mathcal{A}}'}
+  \overline\Gamma\\
+  \overline\gamma \triangleq x \mapsto (\alpha \Append
+  \overline\alpha, \overline\tau, \overline{\textrm{ct}})}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{66} \domain{\{x\} \uplus
+      \mathcal{A}'} \Gamma \rightarrow
+    \domain{\overline{\mathcal{A}}'} \overline\Gamma \oplus
+    \overline\gamma}
+
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma \bouchon{66} \domain{\varnothing}
+    \rightarrow \domain{\varnothing}}
+\end{mathpar}
+\end{framed}
+
+\bigskip
+
+\begin{mathpar}
+\inferrule
+  {\forall k \in [1..q].\domain{\mathcal{A}} \Gamma, \Lambda
+    \bouchon{64} (\tau, \textrm{T}_k, \sigma_k) \rightarrow
+    (\overline\alpha, \overline\tau, \overline{\textrm{ct}}_k)}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \Lambda \bouchon{82} (\tau,
+    \SList{$(\textrm{T}_k, \sigma_k)$}{k}{q}) \rightarrow
+    (\overline\alpha, \overline\tau,
+    \cup_{k=1}^{q}{\overline{\textrm{ct}}_k})}
+\end{mathpar}
+
+\bigskip
+
+\begin{framed}
+\begin{mathpar}
+% If label-constraint present, then ignore tags and type-constraints
+%
+\inferrule
+  {\tau \nlhd \emptyL \OR \sigma \not= \{\}\\
+  \domain{\mathcal{A}} \Gamma, \Lambda \bouchon{64} (\emptyL\!, {\rm
+    T}, \{\}) \rightarrow r}
+%-----
+  {\domain{\mathcal{A}} \Gamma, (\wild\!\Cons\!\wild \AS \Lambda)
+    \bouchon{64} (\tau, \textrm{T}, \sigma) \rightarrow r}
+
+% If no label-constraint present, then add tags and distribute-right
+% type-constraints
+%
+\inferrule
+  {\tau \nlhd \emptyL \OR \sigma \not= \{\}\\
+  \domain{\mathcal{A}} \Gamma, \emptyL \bouchon{64} (\emptyL\!,
+  \textrm{T}, \{\}) \rightarrow (\overline\alpha, \overline\tau,
+  \SList{$(\overline{\textrm{T}}_k, \overline\sigma_k)$}{k}{q})}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \emptyL \bouchon{64} (\tau,
+    \textrm{T}, \sigma) \rightarrow (\overline\alpha, \tau \Append
+    \overline\tau, \SList{$(\overline{\textrm{T}}_k, \{\textsf{Inter}
+      \, [\overline\sigma_k; \sigma]\})$}{k}{q})}
+\end{mathpar}
+\end{framed}
+
+\begin{mathpar}
+% Type reference
+%
+\inferrule
+  {x' \in \mathcal{A}\\
+  \Gamma(x') \lhd (\alpha', \tau', \textrm{ct}')\\
+  \domain{\mathcal{A}} \Gamma, \Lambda \bouchon{82} (\tau',
+  \textrm{ct}') \rightarrow (\overline\alpha, \overline\tau,
+  \overline{\textrm{ct}})}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \Lambda \bouchon{64} (\emptyL\!,
+    \textsf{TRef} \, x', \{\}) \rightarrow (x' \Cons \alpha' \Append
+    \overline\alpha, \overline\tau, \overline{\textrm{ct}})}
+
+% Selection Type
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, l \Cons \Lambda \bouchon{64}
+    (\emptyL\!, \textrm{T}, \{\}) \rightarrow r}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \Lambda \bouchon{64} (\emptyL\!, l <
+    \tau \, \textrm{T}, \{\}) \rightarrow r}
+
+% CHOICE
+%
+\inferrule
+   {f' \lhd (l, \tau', \textrm{T}', \sigma', s')\\
+   \domain{\mathcal{A}} \Gamma, \Lambda \bouchon{64} (\tau',
+   \textrm{T}', \sigma') \rightarrow r}
+%-----
+   {\domain{\mathcal{A}} \Gamma, l \Cons \Lambda \bouchon{64}
+     (\emptyL\!, \textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}'), \{\})
+     \rightarrow r}
+
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, \emptyL \bouchon{64} (\emptyL\!,
+    \textrm{T}, \{\}) \rightarrow (\emptyL\!, \{(\textrm{T}, \{\})\})}
+\end{mathpar}

@@ -1,0 +1,1835 @@
+%%-*-latex-*-
+
+\newtheorem{unicite_typage_semantique}{Théorème}[section]
+\begin{unicite_typage_semantique}[Unicité du contrôle de type sémantique]
+\label{unicite_typage_semantique}
+\ \\
+
+\begin{tabular}{|l|}
+  \hline 
+  \\
+  S'il existe une preuve qu'une valeur codée est d'un\\
+  type bien étiqueté, alors cette preuve est unique. \\
+  \\
+  \hline
+\end{tabular}
+\end{unicite_typage_semantique}
+
+\medskip
+
+Nous avons besoin de deux lemmes techniques au préalable.
+
+\newtheorem{tags_CHOICE}[unicite_typage_semantique]{Théorème}
+
+\begin{tags_CHOICE}
+\label{tags_CHOICE}
+\begin{equation*}
+  \begin{array}{|ll|}
+    \hline 
+          & \\
+    Si    & \domain{\mathcal{A}} \Gamma, \{e'\} \cup \textrm{E}
+            \vdashT \textsf{CHOICE} \, \mathcal{F} \\
+    et    & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+            (\tilde{v}) \Wide e' \\
+    alors & \neg(\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau
+            \,\, (\textsf{CHOICE} \, \mathcal{F})) \\
+          & \\
+    \hline
+  \end{array}
+\end{equation*}
+\end{tags_CHOICE}
+
+\bigskip
+
+\noindent \textbf{Preuve du lemme \ref{tags_CHOICE}} \\
+
+La démonstration se fera par induction. 
+\begin{itemize}
+
+  \item $\mathcal{F} \lhd [f'] \sqcup \mathcal{F}'$ et $f' \lhd (l',
+    \tau', \textrm{T}', \sigma', s')$ et $v \lhd x' \colon v'$ \\
+
+     Les autres hypothèses sont
+     \begin{itemize}
+     
+       \item \textbf{H.0}: $\domain{\mathcal{A}} \Gamma, \{e'\} \cup
+         \textrm{E} \vdashT \textsf{CHOICE} \, \mathcal{F}$. C'est la
+         règle~\RefTirName{[3]} \vpageref{types_bien_etiquetes_3} qui
+         s'applique:
+         \begin{mathpar}
+           \inferrule
+             {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+              \domain{\mathcal{A}} \Gamma, \{\} \vdashT \textrm{T}'\\
+              \forall e \in \textrm{E}.\neg(\domain{\mathcal{A}}
+              \Gamma \vdash e \PAR (\tau', \textrm{T}'))\\
+              \domain{\mathcal{A}} \Gamma, \{(\tau', \textrm{T}')\}
+              \cup \textrm{E} \vdashT \textsf{CHOICE} \, \mathcal{F}'}
+             %-----
+             {\domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT
+               \textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}')}
+             \;\TirName{[3]}
+         \end{mathpar}
+         Appliquons-là. Ce faisant nous effectuons la substitution:
+         \begin{itemize}
+
+           \item $\textrm{E} \stackrel{\beta}{\longleftarrow} \{e'\}
+             \cup \textrm{E}$
+
+         \end{itemize}
+         Étiquetons ensuite ses prémisses non redondantes avec les
+         hypothèses de filtre:
+         \begin{itemize} 
+    
+           \item \textbf{H.0.0}: $\domain{\mathcal{A}} \Gamma, \{\}
+             \vdashT \textrm{T}'$
+
+           \item \textbf{H.0.1}: $\forall e \in \{e'\} \cup
+             \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma \vdash e \PAR
+             (\tau', \textrm{T}'))$
+
+           \item \textbf{H.0.2}: $\domain{\mathcal{A}} \Gamma,
+             \{(\tau', \textrm{T}')\} \cup (\{e'\} \cup \textrm{E})
+             \vdashT \textsf{CHOICE} \, \mathcal{F}'$
+
+         \end{itemize}
+
+       \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma \vdash
+         \mathcal{D} \, (\tilde{v}) \Wide e'$
+
+     \end{itemize}
+     Prouvons
+     \begin{itemize}
+     
+       \item \textbf{C}: $\neg(\domain{\mathcal{A}} \Gamma \models
+         \tilde{v} : \tau \,\, (\textsf{CHOICE} \, \mathcal{F}))$
+
+     \end{itemize}
+     Les seules règles du contrôle sémantique des types dérivant des
+     jugements sur les types \textsf{CHOICE} sont:
+     \begin{mathparpagebreakable}
+       \inferrule
+         {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+          \domain{\mathcal{A}} \Gamma \vdash \mathcal{D}(\tilde{v})
+           \Wide (\tau', \textrm{T}')\\
+          \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau' \,
+          \textrm{T}'}
+         %-----
+         {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \emptyL \,\,
+           (\textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}'))}
+         \;\TirName{[14]}
+
+         \inferrule
+           {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+             (\textsf{CHOICE} \, \mathcal{F}')}
+           %-----
+           {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+             (\textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}'))}
+           \;\TirName{[15]}
+     \end{mathparpagebreakable}
+     La proposition \textbf{H.0.1} implique
+     \begin{itemize}      
+     
+       \item \textbf{H.2}: $\neg(\domain{\mathcal{A}} \Gamma \vdash e'
+         \PAR (\tau', \textrm{T}'))$
+
+     \end{itemize}
+     La propriété de symétrie de~$\|$ (Prop.~\vref{Symetrie_PAR}) et
+     \textbf{H.2} impliquent:
+     \begin{itemize}
+     
+       \item \textbf{H.3}: $\neg(\domain{\mathcal{A}} \Gamma \vdash
+         (\tau', \textrm{T}') \PAR e')$
+       
+     \end{itemize}
+     Enfin, \textbf{H.1} et \textbf{H.3} et le théorème
+     \vref{Theoreme_inclusion} impliquent
+     \begin{itemize}
+     
+       \item \textbf{H.4}: $\neg(\domain{\mathcal{A}} \Gamma \vdash
+         \mathcal{D} (\tilde{v}') \Wide (\tau', \textrm{T}'))$
+
+     \end{itemize}
+     Or \textbf{H.4} est la négation de la première prémisse de la
+     règle~\RefTirName{[14]}, qui ne peut donc s'appliquer. Il ne nous
+     reste alors qu'à prouver que la règle~\RefTirName{[15]} ne peut
+     s'appliquer, pour prouver le théorème. Reprenons l'énoncé du
+     théorème et effectuons-y les renommages suivants:
+     \begin{itemize}
+
+       \item $\textrm{E} \stackrel{\alpha}{\longleftarrow} \{(\tau',
+         \textrm{T}')\} \cup \textrm{E}$
+ 
+       \item $\mathcal{F} \stackrel{\alpha}{\longleftarrow}
+         \mathcal{F}'$
+
+     \end{itemize}
+     Nous obtenons alors:
+     \begin{equation*}
+       \begin{array}{ll}
+         Si    & \domain{\mathcal{A}} \Gamma, \{e'\} \cup (\{(\tau',
+                 \textrm{T}')\} \cup \textrm{E}) \vdashT
+                 \textsf{CHOICE} \, \mathcal{F}' \\
+         et    & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+                 (\tilde{v}) \Wide e' \\
+         alors & \neg(\domain{\mathcal{A}} \Gamma \models \tilde{v} :
+                 \tau \,\, (\textsf{CHOICE} \, \mathcal{F}'))
+       \end{array}
+     \end{equation*}
+     Nous reconnaissons en cet énoncé une instance de l'hypothèse
+     d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+     \textbf{H.0.2} et \textbf{H.1}. En l'appliquant il vient donc:
+     \begin{itemize}
+ 
+       \item \textbf{H.5}: $\neg(\domain{\mathcal{A}} \Gamma \models
+         \tilde{v} : \tau \,\, (\textsf{CHOICE} \, \mathcal{F}'))$
+
+     \end{itemize}
+     Or \textbf{H.5} est la négation de la prémisse de la
+     règle~\RefTirName{[15]}, qui ne peut donc être appliquée.
+     Puisque les deux seules règles pouvant dériver
+     \begin{equation*}
+       \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+       (\textsf{CHOICE} \, \mathcal{F})
+     \end{equation*}
+     ne peuvent être appliquées, cela signifie que \textbf{C}~est
+     vraie.\hfill$\triangle$
+
+   \item $\mathcal{F} \lhd \emptyL$ et $v \lhd x' \colon v'$ \\
+
+     Les autres hypothèses sont
+     \begin{itemize}
+
+       \item \textbf{H.0}: $\domain{\mathcal{A}} \Gamma, \{e'\} \cup
+         \textrm{E} \vdashT \textsf{CHOICE} \, \mathcal{F}$
+
+       \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma \vdash
+         \mathcal{D} \, (\tilde{v}) \Wide e'$
+
+     \end{itemize}
+     Prouvons
+     \begin{itemize}
+
+       \item \textbf{C}: $\neg(\domain{\mathcal{A}} \Gamma \models
+         \tilde{v} : \tau \,\, (\textsf{CHOICE} \, \mathcal{F}))$
+
+     \end{itemize}
+     Ni la règle~\RefTirName{[14]}
+     \vpageref{controle_semantique_des_types_14}, ni la
+     règle~\RefTirName{[15]}
+     \vpageref{controle_semantique_des_types_15} ne peuvent être
+     appliquées car $\mathcal{F} \lhd \emptyL$ (aucun des deux filtres
+     n'accepte cette valeur). Puisque les deux seules règles pouvant
+     dériver \(\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau
+     \,\, (\textsf{CHOICE} \, \mathcal{F})\) ne peuvent être
+     appliquées, cela signifie que \textbf{C}~est
+     vraie.\hfill$\triangle$
+
+\end{itemize}
+
+\noindent $\Box$
+
+\newtheorem{tags_SEQUENCE}[unicite_typage_semantique]{Théorème}
+
+\begin{tags_SEQUENCE}
+\label{tags_SEQUENCE}
+\begin{equation*}
+  \begin{array}{|ll|}
+    \hline 
+      & \\
+      Soit  & \tilde{v} \lhd (\psi, \textsf{Const} \,
+              (\tilde{v}' \Cons \tilde{V}'))\\
+      Si    & \domain{\mathcal{A}} \Gamma, \{e'\} \cup \textrm{E}
+              \vdashT \textsf{SEQUENCE} \, \Phi \\
+      et    & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+              (\tilde{v}') \Wide e' \\
+      alors & \neg(\domain{\mathcal{A}} \Gamma \models \tilde{v} :
+              \tau \,\, (\textsf{SEQUENCE} \, \Phi)) \\
+      & \\
+   \hline
+  \end{array}
+\end{equation*}
+\end{tags_SEQUENCE}
+
+\bigskip
+
+\noindent \textbf{Preuve du lemme~\ref{tags_SEQUENCE}} \\
+
+La démonstration se fera par induction.
+\begin{itemize}
+
+  \item $\Phi \lhd \varphi' \Cons \Phi'$  et $\varphi' \lhd
+    \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')$\\ et
+    $\tilde{v} \lhd (\psi, \textsf{Const} \, (\tilde{v}' \Cons
+    \tilde{V}'))$ et $s' \lhd \textsf{None}$ \\
+
+    Distinguons des hypothèses de filtre:
+    \begin{itemize}
+
+      \item \textbf{HF.0}: $s' \lhd \textsf{None}$ 
+
+      \item \textbf{HF.1}: $\Phi \lhd \varphi' \Cons \Phi'$
+
+    \end{itemize}
+    Les autres hypothèses sont
+    \begin{itemize}
+
+      \item \textbf{H.0}: $\domain{\mathcal{A}} \Gamma, \{e'\} \cup
+        \textrm{E} \vdashT \textsf{SEQUENCE} \, \Phi$. Les
+        propositions \textbf{HF.0} et \textbf{HF.1} font que la
+        règle~\RefTirName{[5]} \vpageref{types_bien_etiquetes_5}
+        s'applique:
+        \begin{mathpar}
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau',
+              \textrm{T}', \sigma', \textsf{None})\\
+             \domain{\mathcal{A}} \Gamma, \{\} \vdashT
+              \textrm{T}'\\
+             \forall e \in \textrm{E}.\neg(\domain{\mathcal{A}}
+              \Gamma \vdash e \PAR (\tau', \textrm{T}'))\\\\
+             \domain{\mathcal{A}} \Gamma, \{\} \vdashT
+               \textsf{SEQUENCE} \, \Phi'}
+            %----
+            {\domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT
+              \textsf{SEQUENCE} \, (\varphi' \Cons \Phi')}
+            \;\TirName{[5]}
+        \end{mathpar}
+        Appliquons-là. Ce faisant nous effectuons la substitution
+        \begin{itemize}
+
+          \item $\textrm{E} \stackrel{\beta}{\longleftarrow} \{e'\}
+            \cup \textrm{E}$
+
+        \end{itemize}
+        Étiquetons ses prémisses:
+        \begin{itemize}
+
+          \item \textbf{H.0.0}: $\domain{\mathcal{A}} \Gamma, \{\}
+            \vdashT \textrm{T}'$
+
+          \item \textbf{H.0.1}: $\forall e \in \{e'\} \cup
+            \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma \vdash e \PAR
+            (\tau', \textrm{T}'))$
+
+          \item \textbf{H.0.2}: $\domain{\mathcal{A}} \Gamma, \{\}
+            \vdashT \textsf{SEQUENCE} \, \Phi'$
+
+        \end{itemize}
+
+      \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma \vdash
+         \mathcal{D} \, (\tilde{v}') \Wide e'$
+
+    \end{itemize}
+    Prouvons
+    \begin{itemize}
+
+      \item \textbf{C}: $\neg(\domain{\mathcal{A}} \Gamma \models
+        \tilde{v} : \tau \,\, (\textsf{SEQUENCE} \, \Phi))$
+
+    \end{itemize}
+    Les seules règles dérivant des jugements sur les types
+    \textsf{SEQUENCE} sont celles numérotées~\RefTirName{[16]}
+    \vpageref{controle_semantique_des_types_16}, \RefTirName{[17]}
+    \vpageref{controle_semantique_des_types_17} et~\RefTirName{[18]}
+    \vpageref{controle_semantique_des_types_18}:
+    \begin{mathparpagebreakable}
+      \inferrule
+        {\textrm{T} \lhd \textsf{SEQUENCE} \, (\varphi' \Cons
+           \Phi')\\
+          \varphi' \lhd \textsf{Field} \, (l', \tau',
+           \textrm{T}', \sigma', s')\\
+          \tilde{V} \lhd \tilde{v}' \Cons \tilde{V}'\\
+          \domain{\mathcal{A}} \Gamma \vdash
+           \mathcal{D}(\tilde{v}') \Wide (\tau', \textrm{T}')\\
+          \domain{\mathcal{A}} \Gamma \models \tilde{v}' : \tau'
+           \, \textrm{T}'\\\\
+          \domain{\mathcal{A}} \Gamma \models (\psi,
+           \textsf{Const} \, \tilde{V}') : \tau \,\,
+           (\textsf{SEQUENCE} \, \Phi')}
+        %------
+        {\domain{\mathcal{A}} \Gamma \models (\psi,
+           \textsf{Const} \, \tilde{V}) : \tau \, \textrm{T}}
+        \;\TirName{[16]}
+             
+      \inferrule
+        {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T},
+           \sigma', s')\\
+           s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+           \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau
+           \,\, (\textsf{SEQUENCE} \, \Phi')}
+        %-----
+        {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau
+           \,\, (\textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi'))}
+         \;\TirName{[17]}
+         
+      \inferrule
+        {\textrm{T} \lhd \textsf{SEQUENCE} \, \emptyL\\
+           \psi \lhd (\textsf{UNIVERSAL}, \textsf{Imm} \, 16)}
+        %-----
+        {\domain{\mathcal{A}} \Gamma \models (\psi,
+           \textsf{Const} \, \emptyL\!) : [\textsf{Tag} \,\,
+             \psi \,\, \textsf{IMPLICIT}] \,\, \textrm{T}}
+        \;\TirName{[18]}
+    \end{mathparpagebreakable}
+    \emph{Nous allons prouver qu'aucune d'elles ne peut en réalité
+      être appliquée.} Tout d'abord, \textbf{HF.1} rend impossible
+    l'application de la règle~\RefTirName{[18]} (qui ne filtre que
+    $\Phi \lhd \emptyL\!$). D'autre part, \textbf{H.0.1} implique
+    \begin{itemize}      
+
+      \item \textbf{H.2}: $\neg(\domain{\mathcal{A}} \Gamma \vdash e'
+        \PAR (\tau', \textrm{T}'))$
+
+    \end{itemize}
+    La propriété de symétrie de~$\|$ (propriété~\vref{Symetrie_PAR})
+    et \textbf{H.2} impliquent:
+    \begin{itemize}
+
+      \item \textbf{H.3}: $\neg(\domain{\mathcal{A}} \Gamma \vdash
+        (\tau', \textrm{T}') \PAR e')$
+
+    \end{itemize}
+    Enfin, \textbf{H.1} et \textbf{H.3} et le
+    théorème~\vref{Theoreme_inclusion} impliquent
+    \begin{itemize}
+
+      \item \textbf{H.4}: $\neg(\domain{\mathcal{A}} \Gamma \vdash
+        \mathcal{D} (\tilde{v}') \Wide (\tau', \textrm{T}'))$
+
+    \end{itemize}
+    Or \textbf{H.4} est la négation d'une prémisse de la
+    règle~\RefTirName{[16]}
+    \vpageref{controle_semantique_des_types_19}, qui ne peut donc
+    s'appliquer. Enfin, \textbf{HF.0} rend impossible l'application de
+    la règle~\RefTirName{[17]}
+    \vpageref{controle_semantique_des_types_20} dont l'une des
+    prémisses est:
+    \begin{itemize}
+
+      \item $s'\lhd \textsf{Some OPTIONAL}$
+       
+    \end{itemize}
+    En conclusion, puisque les seules règles pouvant dériver
+    \(\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+    (\textsf{SEQUENCE} \, \Phi)\) ne peuvent s'appliquer, cela
+    signifie que \textbf{C}~est vraie.\hfill$\triangle$
+         
+  \item $\Phi \lhd \varphi' \Cons \Phi'$ \\ et $\varphi' \lhd
+     \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')$ \\ et
+     $\tilde{v} \lhd (\psi, \textsf{Const} \, (\tilde{v}' \Cons
+     \tilde{V}'))$ \\ et $s' \lhd \textsf{Some OPTIONAL}$ \\
+
+     Distinguons des hypothèses de filtre:
+     \begin{itemize}
+
+       \item \textbf{HF.0}: $s' \lhd \textsf{Some OPTIONAL}$
+     
+       \item \textbf{HF.1}: $\Phi \lhd \varphi' \Cons \Phi'$
+
+     \end{itemize}
+     Les autres hypothèses sont
+     \begin{itemize}
+
+       \item \textbf{H.0}: $\domain{\mathcal{A}} \Gamma, \{e'\} \cup
+         \textrm{E} \vdashT \textsf{SEQUENCE} \, \Phi$. Les
+         propositions \textbf{HF.0} et \textbf{HF.1} font que l'on
+         applique la règle~\RefTirName{[6]}
+         \vpageref{types_bien_etiquetes_6}:
+         \begin{mathpar}
+           \inferrule
+             {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+               \sigma', s')\\
+               s' \nlhd \textsf{None}\\
+               \domain{\mathcal{A}} \Gamma, \{\} \vdashT
+               \textrm{T}'\\
+               \forall e \in \textrm{E}.\neg(\domain{\mathcal{A}}
+               \Gamma \vdash e \PAR (\tau', \textrm{T}'))\\
+               \domain{\mathcal{A}} \Gamma, \{(\tau', \textrm{T}')\}
+               \cup \textrm{E} \vdashT \textsf{SEQUENCE} \, \Phi'}
+             %-----
+             {\domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT
+               \textsf{SEQUENCE} \, (\varphi' \Cons \Phi')}
+             \;\TirName{[6]}
+         \end{mathpar}
+         Appliquons-là. Ce faisant nous effectuons la substitution:
+         \begin{itemize}
+
+           \item $\textrm{E} \stackrel{\beta}{\longleftarrow} \{e'\}
+             \cup \textrm{E}$
+
+         \end{itemize}
+         Étiquetons ensuite ses prémisses non redondantes avec les
+         hypothèses de filtre (ou moins précises):
+         \begin{itemize}
+
+           \item \textbf{H.0.0}: $\domain{\mathcal{A}} \Gamma, \{\}
+             \vdashT \textrm{T}'$
+
+           \item \textbf{H.0.1}: $\forall e \in \{e'\} \cup
+             \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma \vdash e \PAR
+             (\tau', \textrm{T}'))$
+
+           \item \textbf{H.0.2}: $\domain{\mathcal{A}} \Gamma,
+             \{(\tau', \textrm{T}')\} \cup (\{e'\} \cup \textrm{E})
+             \vdashT \textsf{SEQUENCE} \, \Phi'$
+
+         \end{itemize}
+
+       \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma \vdash
+         \mathcal{D} \, (\tilde{v}') \Wide e'$
+
+     \end{itemize}
+     Prouvons
+     \begin{itemize}
+     
+       \item \textbf{C}: $\neg(\domain{\mathcal{A}} \Gamma \models
+         \tilde{v} : \tau \,\, (\textsf{SEQUENCE} \, \Phi))$
+
+     \end{itemize}
+     Les seules règles dérivant des jugements sur les types
+     \textsf{SEQUENCE} sont celles numérotées~\RefTirName{[16]}
+     \vpageref{controle_semantique_des_types_16}, \RefTirName{[17]}
+     \vpageref{controle_semantique_des_types_17} et~\RefTirName{[18]}
+     \vpageref{controle_semantique_des_types_18}:
+     \begin{mathparpagebreakable}
+       \inferrule
+         {\textrm{T} \lhd \textsf{SEQUENCE} \, (\varphi' \Cons
+           \Phi')\\
+           \varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+           \sigma', s')\\
+           \tilde{V} \lhd \tilde{v}' \Cons \tilde{V}'\\
+           \domain{\mathcal{A}} \Gamma \vdash \mathcal{D}(\tilde{v}')
+           \Wide (\tau', \textrm{T}')\\
+           \domain{\mathcal{A}} \Gamma \models \tilde{v}' : \tau' \,
+           \textrm{T}'\\\\
+           \domain{\mathcal{A}} \Gamma \models (\psi,
+           \textsf{Const} \, \tilde{V}') : \tau \,\,
+           (\textsf{SEQUENCE} \, \Phi')}
+         %-----
+         {\domain{\mathcal{A}} \Gamma \models (\psi,
+           \textsf{Const} \, \tilde{V}) : \tau \, \textrm{T}}
+         \;\TirName{[16]}
+
+         \inferrule
+           {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T},
+             \sigma', s')\\
+             s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+             \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+             (\textsf{SEQUENCE} \, \Phi')}
+           %-----
+           {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+             (\textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi'))}
+           \;\TirName{[17]}
+
+         \inferrule
+           {\textrm{T} \lhd \textsf{SEQUENCE} \, \emptyL\\
+             \psi \lhd (\textsf{UNIVERSAL}, \textsf{Imm} \, 16)}
+           %-----
+           {\domain{\mathcal{A}} \Gamma \models (\psi,
+             \textsf{Const} \, \emptyL\!) : [\textsf{Tag} \,\,
+               \psi \,\, \textsf{IMPLICIT}] \,\, \textrm{T}}
+           \;\TirName{[18]}
+     \end{mathparpagebreakable}
+     \emph{Nous allons prouver qu'aucune d'elles ne peut en réalité
+       être appliquée.} Tout d'abord, \textbf{HF.1} rend impossible
+     l'application de la règle~\RefTirName{[18]} (qui ne filtre que
+     $\Phi \lhd \emptyL\!$). D'autre part, \textbf{H.0.1} implique
+     \begin{itemize}
+
+       \item \textbf{H.2}: $\neg(\domain{\mathcal{A}} \Gamma \vdash e'
+         \PAR (\tau', \textrm{T}'))$
+
+     \end{itemize}
+     La propriété de symétrie de~$\|$ (propriété \vref{Symetrie_PAR})
+     et \textbf{H.2} impliquent:
+     \begin{itemize}
+
+       \item \textbf{H.3}: $\neg(\domain{\mathcal{A}} \Gamma \vdash
+         (\tau', \textrm{T}') \PAR e')$
+
+     \end{itemize}
+     Enfin, les propositions \textbf{H.1} et \textbf{H.3}, ainsi que
+     le théorème~\vref{Theoreme_inclusion} impliquent
+     \begin{itemize}
+
+       \item \textbf{H.4}: $\neg(\domain{\mathcal{A}} \Gamma \vdash
+         \mathcal{D} (\tilde{v}') \Wide (\tau', \textrm{T}'))$
+
+     \end{itemize}
+     Or \textbf{H.4} est la négation d'une prémisse de la
+     règle~\RefTirName{[16]}, qui ne peut donc s'appliquer. Il ne nous
+     reste qu'à prouver que la règle~\RefTirName{[17]} est
+     inapplicable. Pour ce faire, reprenons l'énoncé du théorème en y
+     effectuant les renommages:
+     \begin{itemize}
+
+       \item $\textrm{E} \stackrel{\alpha}{\longleftarrow} \{(\tau',
+         \textrm{T}')\} \cup \textrm{E}$
+
+       \item $\Phi \stackrel{\alpha}{\longleftarrow} \Phi'$
+
+     \end{itemize} 
+     Nous obtenons alors:
+     \begin{equation*}
+       \begin{array}{ll}
+         Soit  & \tilde{v} \lhd (\psi, \textsf{Const} \,
+                 (\tilde{v}' \Cons \tilde{V}'))\\ 
+         Si    & \domain{\mathcal{A}} \Gamma, \{e'\} \cup (\{(\tau',
+                 \textrm{T}')\} \cup \textrm{E}) \vdashT
+                 \textsf{SEQUENCE} \, \Phi' \\
+         et    & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+                 (\tilde{v}') \Wide e' \\
+         alors & \neg(\domain{\mathcal{A}} \Gamma \models \tilde{v} :
+                 \tau \,\, (\textsf{SEQUENCE} \, \Phi'))
+       \end{array}
+     \end{equation*}
+     Nous reconnaissons en cet énoncé une instance de l'hypothèse
+     d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+     \textbf{H.0.2} et \textbf{H.1}. En l'appliquant il vient donc:
+     \begin{itemize}
+
+       \item \textbf{H.5}: $\neg(\domain{\mathcal{A}} \Gamma \models
+         \tilde{v} : \tau \,\, (\textsf{SEQUENCE} \, \Phi'))$
+
+     \end{itemize}
+     Or \textbf{H.5} est la négation d'une prémisse de la
+     règle~\RefTirName{[17]}, qui ne peut donc être appliquée. En
+     conclusion, puisque les seules règles pouvant dériver \(
+     \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+     (\textsf{SEQUENCE} \, \Phi)\) ne peuvent s'appliquer, cela
+     signifie que \textbf{C}~est vraie.\hfill$\triangle$
+
+  \item $\Phi \lhd \varphi' \Cons \Phi'$ \\ et $\varphi'\lhd
+    \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')$ \\ et
+    $\tilde{v} \lhd (\psi, \textsf{Const} \, (\tilde{v}' \Cons
+    \tilde{V}'))$ \\ et $s' \lhd \textsf{Some} \, (\textsf{DEFAULT} \,
+    \wild\!)$ \\
+
+    Distinguons deux des hypothèses de filtre:
+    \begin{itemize}
+
+      \item \textbf{HF.0}: $s' \lhd \textsf{Some} \, (\textsf{DEFAULT}
+        \, \wild\!)$
+
+      \item \textbf{HF.1}: $\Phi \lhd \varphi' \Cons \Phi'$
+
+    \end{itemize}
+    Les autres hypothèses sont
+    \begin{itemize}
+
+      \item \textbf{H.0}: $\domain{\mathcal{A}} \Gamma, \{e'\} \cup
+        \textrm{E} \vdashT \textsf{SEQUENCE} \, \Phi$. Les
+        propositions \textbf{HF.0} et \textbf{HF.1} font que l'on
+        applique la règle~\RefTirName{[6]}
+        \vpageref{types_bien_etiquetes_6}:
+        \begin{mathpar}
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+              s' \nlhd \textsf{None}\\
+              \domain{\mathcal{A}} \Gamma, \{\} \vdashT \textrm{T}'\\
+              \forall e \in \textrm{E}.\neg(\domain{\mathcal{A}}
+              \Gamma \vdash e \PAR (\tau', \textrm{T}'))\\
+              \domain{\mathcal{A}} \Gamma, \{(\tau', \textrm{T}')\}
+              \cup \textrm{E} \vdashT \textsf{SEQUENCE} \, \Phi'}
+            %-----
+            {\domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT
+              \textsf{SEQUENCE} \, (\varphi' \Cons \Phi')}
+            \;\TirName{[6]}
+        \end{mathpar}
+        Appliquons-là. Ce faisant nous effectuons la substitution:
+        \begin{itemize}
+
+          \item $\textrm{E} \stackrel{\beta}{\longleftarrow} \{e'\}
+            \cup \textrm{E}$
+
+        \end{itemize}
+        Étiquetons ensuite ses prémisses non redondantes avec les
+        hypothèses de filtre (ou moins précises):
+        \begin{itemize}
+
+          \item \textbf{H.0.0}: $\domain{\mathcal{A}} \Gamma, \{\}
+            \vdashT \textrm{T}'$
+
+          \item \textbf{H.0.1}: $\forall e \in \{e'\} \cup
+            \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma \vdash e \PAR
+            (\tau', \textrm{T}'))$
+
+          \item \textbf{H.0.2}: $\domain{\mathcal{A}} \Gamma,
+            \{(\tau', \textrm{T}')\} \cup (\{e'\} \cup \textrm{E})
+            \vdashT \textsf{SEQUENCE} \, \Phi'$
+
+        \end{itemize}
+        
+      \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma \vdash
+        \mathcal{D} \, (\tilde{v}') \Wide e'$
+    \end{itemize}
+    Prouvons
+    \begin{itemize}
+    
+      \item \textbf{C}: $\neg(\domain{\mathcal{A}} \Gamma \models
+        \tilde{v} : \tau \,\, (\textsf{SEQUENCE} \, \Phi))$
+
+    \end{itemize}
+    Les seules règles dérivant des jugements sur les types
+    \textsf{SEQUENCE} sont celles numérotées~\RefTirName{[16]}
+    \vpageref{controle_semantique_des_types_16}, \RefTirName{[17]}
+    \vpageref{controle_semantique_des_types_17} et~\RefTirName{[18]}
+    \vpageref{controle_semantique_des_types_18}:
+    \begin{mathparpagebreakable}
+      \inferrule
+        {\textrm{T} \lhd \textsf{SEQUENCE} \, (\varphi' \Cons
+          \Phi')\\
+          \varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+          \sigma', s') \\
+          \tilde{V} \lhd \tilde{v}' \Cons \tilde{V}'\\
+          \domain{\mathcal{A}} \Gamma \vdash \mathcal{D}(\tilde{v}')
+          \Wide (\tau', \textrm{T}')\\
+          \domain{\mathcal{A}} \Gamma \models \tilde{v}' : \tau' \,
+          \textrm{T}'\\\\
+          \domain{\mathcal{A}} \Gamma \models (\psi,
+          \textsf{Const} \, \tilde{V}') : \tau \,\,
+          (\textsf{SEQUENCE} \, \Phi')}
+        %-----
+        {\domain{\mathcal{A}} \Gamma \models (\psi,
+          \textsf{Const} \, \tilde{V}) : \tau \, \textrm{T}}
+        \;\TirName{[16]}
+
+      \inferrule
+        {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T},
+          \sigma', s')\\
+          s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+          \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+          (\textsf{SEQUENCE} \, \Phi')}
+        %-----
+        {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+          (\textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi'))}
+        \;\TirName{[17]}
+
+      \inferrule
+        {\textrm{T} \lhd \textsf{SEQUENCE} \, \emptyL\\
+          \psi \lhd (\textsf{UNIVERSAL}, \textsf{Imm} \, 16)}
+        %-----
+        {\domain{\mathcal{A}} \Gamma \models (\psi,
+          \textsf{Const} \, \emptyL\!) : [\textsf{Tag} \,\, \psi
+            \,\, \textsf{IMPLICIT}] \,\, \textrm{T}}
+        \;\TirName{[18]}
+    \end{mathparpagebreakable}
+    \emph{Nous allons prouver qu'aucune d'elles ne peut en réalité
+      être appliquée.} Tout d'abord \textbf{HF.1} rend impossible
+    l'application de la règle~\RefTirName{[18]} (qui ne filtre que
+    $\Phi \lhd \emptyL\!$). D'autre part, \textbf{H.0.1} implique
+    \begin{itemize}      
+
+      \item \textbf{H.2}: $\neg(\domain{\mathcal{A}} \Gamma \vdash e'
+        \PAR (\tau', \textrm{T}'))$
+
+    \end{itemize}
+    La propriété de symétrie de~$\|$ (propriété~\vref{Symetrie_PAR})
+    et \textbf{H.2} impliquent:
+    \begin{itemize}
+
+      \item \textbf{H.3}: $\neg(\domain{\mathcal{A}} \Gamma \vdash
+        (\tau', \textrm{T}') \PAR e')$
+        
+    \end{itemize}
+    Enfin, \textbf{H.1} et \textbf{H.3} et le
+    théorème~\vref{Theoreme_inclusion} impliquent
+    \begin{itemize}
+
+      \item \textbf{H.4}: $\neg(\domain{\mathcal{A}} \Gamma \vdash
+        \mathcal{D} (\tilde{v}') \Wide (\tau', \textrm{T}'))$
+
+    \end{itemize}
+    Or \textbf{H.4} est la négation d'une prémisse de la
+    règle~\RefTirName{[16]}
+    \vpageref{controle_semantique_des_types_19}, qui ne peut donc
+    s'appliquer. Enfin, \textbf{HF.0} rend impossible l'application de
+    la règle~\RefTirName{[17]}
+    \vpageref{controle_semantique_des_types_20} dont l'une des
+    prémisses est:
+    \begin{itemize}
+
+      \item $s'\lhd \textsf{Some OPTIONAL}$
+ 
+    \end{itemize}
+    En conclusion, puisque les seules règles pouvant dériver
+    \(\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+    (\textsf{SEQUENCE} \, \Phi)\) ne peuvent s'appliquer, cela
+    signifie que \textbf{C}~est vraie.\hfill$\triangle$
+
+  \item $\Phi \lhd \emptyL$ \\ et $\tilde{v} \lhd (\psi,
+    \textsf{Const} \, (\tilde{v}' \Cons \tilde{V}'))$ \\
+
+    Les autres hypothèse sont
+    \begin{itemize}
+    
+      \item \textbf{H.0}: $\domain{\mathcal{A}} \Gamma, \{e'\} \cup
+        \textrm{E} \vdashT \textsf{SEQUENCE} \, \Phi$
+
+      \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma \vdash
+        \mathcal{D} \, (\tilde{v}') \Wide e'$
+
+    \end{itemize}
+    Prouvons
+    \begin{itemize}
+
+    \item \textbf{C}: $\neg(\domain{\mathcal{A}} \Gamma \models
+      \tilde{v} : \tau \,\, (\textsf{SEQUENCE} \, \Phi))$
+
+    \end{itemize}
+    Aucune règle ne permet de dériver \(\domain{\mathcal{A}} \Gamma
+    \models \tilde{v} : \tau \,\, (\textsf{SEQUENCE} \, \Phi)\). Cela
+    signifie que \textbf{C}~est vraie.\hfill$\triangle$
+
+\end{itemize}
+
+\noindent $\Box$
+
+\newtheorem{tags_SET_aux}[unicite_typage_semantique]{Lemme}
+
+\begin{tags_SET_aux}
+\label{tags_SET_aux}
+\begin{equation*}
+  \begin{array}{|ll|}
+    \hline 
+         & \\
+    Si   & \domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT
+           \textsf{SET} \, \Phi \\
+    et   & \domain{\mathcal{A}} \Gamma \models (\psi,
+           \textsf{Const} \, \tilde{V}) : \tau \,\,      
+           (\textsf{SET} \,\Phi) \\
+   alors & \forall e \in \textrm{E}.\forall \tilde{v}' \in
+           \tilde{V}.\neg(\domain{\mathcal{A}} \Gamma \vdash
+           \mathcal{D} \, (\tilde{v}') \Wide e) \\
+         & \\
+   \hline
+  \end{array}
+\end{equation*}
+\end{tags_SET_aux}
+
+\bigskip
+
+\noindent \textbf{Preuve du lemme~\ref{tags_SET_aux}} \\
+
+\noindent La démonstration se fera par induction.
+\begin{itemize}
+
+  \item $\Phi \lhd [\varphi'] \sqcup \Phi'$ et $\varphi' \lhd
+    \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')$ \\ et
+    $\tilde{v} \lhd (\psi, \textsf{Const} \, \tilde{V})$ et
+    $\tilde{V} \lhd [\tilde{v}'] \sqcup \tilde{V}'$ \\
+         
+    Distinguons une des hypothèses de filtre:
+    \begin{itemize}
+     
+      \item \textbf{HF.0}: $\tilde{V} \lhd [\tilde{v}'] \sqcup
+        \tilde{V}'$
+
+    \end{itemize}
+    Les autres hypothèses sont
+    \begin{itemize}
+
+      \item \textbf{H.0}: $\domain{\mathcal{A}} \Gamma, \textrm{E}
+        \vdashT \textsf{SET} \, \Phi$. C'est la
+        règle~\RefTirName{[4]} \vpageref{types_bien_etiquetes_4} qui
+        s'applique:
+        \begin{mathpar}
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+              \domain{\mathcal{A}} \Gamma, \{\} \vdashT
+              \textrm{T}'\\
+              \forall e \in \textrm{E}.\neg(\domain{\mathcal{A}}
+              \Gamma \vdash e \PAR (\tau', \textrm{T}'))\\
+              \domain{\mathcal{A}} \Gamma, \{(\tau', \textrm{T}')\}
+              \cup \textrm{E} \vdashT \textsf{SET} \, \Phi'}
+            %-----
+            {\domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT
+              \textsf{SET} \, ([\varphi'] \sqcup \Phi')}
+            \;\TirName{[4]}
+        \end{mathpar}
+        Appliquons-là directement (i.e. toutes les variables de la
+        règle sont liées aux variables de même nom dans
+        l'environnement du cas courant de la preuve). Étiquetons ses
+        prémisses:
+        \begin{itemize}
+
+          \item \textbf{H.0.0}: $\domain{\mathcal{A}} \Gamma, \{\}
+            \vdashT \textrm{T}'$
+
+          \item \textbf{H.0.1}: $\forall e \in
+            \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma \vdash e \PAR
+            (\tau', \textrm{T}'))$
+
+          \item \textbf{H.0.2}: $\domain{\mathcal{A}} \Gamma,
+            \{(\tau', \textrm{T}')\} \cup \textrm{E} \vdashT
+            \textsf{SET} \, \Phi'$
+
+        \end{itemize}
+
+      \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma \models (\psi,
+        \textsf{Const} \, \tilde{V}) : \tau \,\, \textsf{SET} \,
+        \Phi$. La règle~\RefTirName{[19]}
+        \vpageref{controle_semantique_des_types_19} peut s'appliquer:
+        \begin{mathpar}
+          \inferrule
+            {\textrm{T} \lhd \textsf{SET} \, ([\varphi'] \sqcup
+              \Phi')\\
+              \varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+              \tilde{V} \lhd [\tilde{v}'] \sqcup \tilde{V}'\\
+              \domain{\mathcal{A}} \Gamma \vdash
+              \mathcal{D}(\tilde{v}') \Wide (\tau', \textrm{T}')\\
+              \domain{\mathcal{A}} \Gamma \models \tilde{v}' : \tau'
+              \, \textrm{T}'\\
+              \domain{\mathcal{A}} \Gamma \models (\psi,
+              \textsf{Const} \, \tilde{V}') : \tau \,\,
+              (\textsf{SET} \, \Phi')}
+            %-----
+            {\domain{\mathcal{A}} \Gamma \models (\psi,
+              \textsf{Const} \, \tilde{V}) : \tau \, \textrm{T}}
+            \;\TirName{[19]}
+        \end{mathpar}
+        Appliquons-là directement et étiquetons ses prémisses non
+        redondantes avec les hypothèses de filtre:
+        \begin{itemize}
+
+          \item \textbf{H.1.0}: $\domain{\mathcal{A}} \Gamma \vdash
+            \mathcal{D}(\tilde{v}') \Wide (\tau', \textrm{T}')$
+
+          \item \textbf{H.1.1}: $\domain{\mathcal{A}} \Gamma \models
+            \tilde{v}' : \tau' \, \textrm{T}'$
+
+          \item \textbf{H.1.2}: $\domain{\mathcal{A}} \Gamma \models
+            (\psi, \textsf{Const} \, \tilde{V}') : \tau \,\,
+            (\textsf{SET} \, \Phi')$
+
+        \end{itemize}
+
+    \end{itemize}
+    Prouvons
+    \begin{itemize}
+
+      \item \textbf{C}: $\forall e \in \textrm{E}.\forall \tilde{v}'
+        \in \tilde{V}.\neg(\domain{\mathcal{A}} \Gamma \vdash
+        \mathcal{D} \, (\tilde{v}') \Wide e)$
+
+    \end{itemize}
+    Reprenons l'énoncé du théorème en y effectuant les renommages
+    suivants:
+    \begin{itemize}
+
+      \item $\textrm{E} \stackrel{\alpha}{\longleftarrow} \{(\tau',
+        \textrm{T}')\} \cup \textrm{E}$
+
+      \item $\tilde{v}' \stackrel{\alpha}{\longleftarrow} \tilde{v}''$
+
+      \item $\tilde{V} \stackrel{\alpha}{\longleftarrow} \tilde{V}'$
+
+    \end{itemize}
+    Il devient alors:
+    \begin{equation*}
+      \begin{array}{ll}
+        Si    & \domain{\mathcal{A}} \Gamma, \{(\tau', \textrm{T}')\}
+               \cup \textrm{E} \vdashT \textsf{SET} \, \Phi \\
+        et    & \domain{\mathcal{A}} \Gamma \models (\psi,
+                \textsf{Const} \, \tilde{V}') : \tau \,\,
+                (\textsf{SET} \, \Phi) \\
+        alors & \forall e \in \{(\tau', \textrm{T}')\} \cup
+        \textrm{E}.\forall \tilde{v}'' \in
+        \tilde{V}'.\neg(\domain{\mathcal{A}} \Gamma \vdash \mathcal{D}
+        \, (\tilde{v}'') \Wide e)
+      \end{array}
+    \end{equation*}
+    Nous reconnaissons en cet énoncé une instance de l'hypothèse
+    d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+    \textbf{H.0.2} et \textbf{H.1.2}. En l'appliquant il vient donc:
+    \begin{itemize}
+
+      \item \textbf{H.2}: $\forall e \in \{(\tau', \textrm{T}')\}
+        \cup \textrm{E}.\forall \tilde{v}'' \in
+        \tilde{V}'.\neg(\domain{\mathcal{A}} \Gamma \vdash \mathcal{D}
+        \, (\tilde{v}'') \Wide e)$
+
+    \end{itemize}
+    La proposition \textbf{H.2} implique 
+    \begin{itemize}
+      
+      \item \textbf{H.3}: $\forall e \in \textrm{E}. \forall
+        \tilde{v}'' \in \tilde{V}'.\neg(\domain{\mathcal{A}} \Gamma
+        \vdash \mathcal{D} (\tilde{v}'') \Wide e)$
+
+    \end{itemize}
+    D'autre part, \textbf{H.1.0}, \textbf{H.0.1} et le
+    théorème~\vref{Theoreme_inclusion} impliquent
+    \begin{itemize}
+
+      \item \textbf{H.4}: $\forall e \in
+        \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma \vdash \mathcal{D}
+        (\tilde{v}') \Wide e)$
+
+    \end{itemize}
+    La proposition (\textbf{H.3}\AND\textbf{H.4}) est équivalente à
+    \begin{itemize}
+
+      \item \textbf{H.5}: $\forall e \in
+        \textrm{E}.(\neg(\domain{\mathcal{A}} \Gamma \vdash
+        \mathcal{D} (\tilde{v}') \Wide e) \AND \forall \tilde{v}'' \in
+        \tilde{V}'.\neg(\domain{\mathcal{A}} \Gamma \vdash \mathcal{D}
+        (\tilde{v}'') \Wide e))$
+
+    \end{itemize}
+    Et \textbf{H.5} est équivalente à
+    \begin{itemize}
+
+      \item \textbf{H.6}: $\forall e \in \textrm{E}.\forall
+        \tilde{v}'' \in [\tilde{v}'] \sqcup
+        \tilde{V}'.\neg(\domain{\mathcal{A}} \Gamma \vdash \mathcal{D}
+        (\tilde{v}'') \Wide e)$
+
+    \end{itemize}
+    Et \textbf{H.6} et \textbf{HF.0}
+    impliquent~\textbf{C}.\hfill$\triangle$
+         
+  \item $\Phi \lhd [\varphi'] \sqcup \Phi'$ \\ et $\varphi' \lhd
+    \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')$ \\ et $s'
+    \lhd \textsf{Some OPTIONAL}$ \\
+         
+    Les autres hypothèses sont
+    \begin{itemize}
+
+      \item \textbf{H.0}: $\domain{\mathcal{A}} \Gamma, \textrm{E}
+        \vdashT \textsf{SET} \, \Phi$. C'est la règle~\RefTirName{[4]}
+        \vpageref{types_bien_etiquetes_4} qui s'applique:
+        \begin{mathpar}
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+              \domain{\mathcal{A}} \Gamma, \{\} \vdashT \textrm{T}'\\
+              \forall e \in \textrm{E}.\neg(\domain{\mathcal{A}}
+              \Gamma \vdash e \PAR (\tau', \textrm{T}'))\\
+              \domain{\mathcal{A}} \Gamma, \{(\tau', \textrm{T}')\}
+              \cup \textrm{E} \vdashT \textsf{SET} \, \Phi'}
+            %-----
+            {\domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT
+              \textsf{SET} \, ([\varphi'] \sqcup \Phi')}
+            \;\TirName{[4]}
+        \end{mathpar}
+        Appliquons-là directement (i.e. toutes les variables de la
+        règle sont liées aux variables de même nom dans
+        l'environnement du cas courant de la preuve). Étiquetons ses
+        prémisses:
+        \begin{itemize}
+
+          \item \textbf{H.0.0}: $\domain{\mathcal{A}} \Gamma, \{\}
+            \vdashT \textrm{T}'$
+
+          \item \textbf{H.0.1}: $\forall e \in
+            \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma \vdash e \PAR
+            (\tau', \textrm{T}'))$
+
+          \item \textbf{H.0.2}: $\domain{\mathcal{A}} \Gamma,
+            \{(\tau', \textrm{T}')\} \cup \textrm{E} \vdashT
+            \textsf{SET} \, \Phi'$
+
+        \end{itemize}
+
+      \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma \models (\psi,
+        \textsf{Const} \, \tilde{V}) : \tau \,\, (\textsf{SET}
+        \, \Phi)$. La règle~\RefTirName{[20]}
+        \vpageref{controle_semantique_des_types_20} peut être
+        appliquée:
+        \begin{mathpar}
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T},
+              \sigma', s')\\
+              s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+              \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau
+              \,\, (\textsf{SET} \, \Phi')}
+            %-----
+            {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+              (\textsf{SET} \, ([\varphi'] \sqcup \Phi'))}
+            \;\TirName{[20]}
+        \end{mathpar}
+        Appliquons directement la règle (i.e. toutes les variables de
+        la règle sont liées aux variables de même nom dans
+        l'environnement du cas courant de la preuve). Étiquetons ses
+        prémisses non redondantes:
+        \begin{itemize}
+
+          \item \textbf{H.1.0}: $\domain{\mathcal{A}} \Gamma \models
+            \tilde{v} : \tau \,\, (\textsf{SET} \, \Phi')$
+
+        \end{itemize}
+
+    \end{itemize}
+    Prouvons
+    \begin{itemize}
+
+      \item \textbf{C}: $\forall e \in \textrm{E}.\forall \tilde{v}'
+        \in \tilde{V}.\neg(\domain{\mathcal{A}} \Gamma \vdash
+        \mathcal{D} \, (\tilde{v}') \Wide e)$
+
+    \end{itemize}
+    Reprenons l'énoncé du lemme et effectuons-y les renommages
+    suivants:
+    \begin{itemize}
+
+      \item $\textrm{E} \stackrel{\alpha}{\longleftarrow} \{(\tau',
+        \textrm{T}')\} \cup \textrm{E}$
+
+      \item $\Phi \stackrel{\alpha}{\longleftarrow} \Phi'$
+
+    \end{itemize}
+    Nous obtenons alors:
+    \begin{equation*}
+      \begin{array}{ll}
+        Si    & \domain{\mathcal{A}} \Gamma, \{(\tau', \textrm{T}')\}
+                \cup \textrm{E} \vdashT \textsf{SET} \, \Phi' \\
+        et    & \domain{\mathcal{A}} \Gamma \models (\psi,
+                \textsf{Const} \, \tilde{V}) : \tau \,\,
+                (\textsf{SET} \, \Phi') \\
+        alors & \forall e \in \{(\tau', \textrm{T}')\} \cup
+                \textrm{E}.\forall \tilde{v}' \in
+                \tilde{V}.\neg(\domain{\mathcal{A}} \Gamma \vdash
+                \mathcal{D} \, (\tilde{v}') \Wide e)
+      \end{array}
+    \end{equation*}
+    Nous reconnaissons en cet énoncé une instance de l'hypothèse
+    d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+    \textbf{H.0.2} et \textbf{H.1.0}. En l'appliquant il vient donc:
+    \begin{itemize}
+
+      \item \textbf{H.2}: $\forall e \in \{(\tau', \textrm{T}')\} \cup
+        \textrm{E}. \forall \tilde{v}' \in
+        \tilde{V}.\neg(\domain{\mathcal{A}} \Gamma \vdash \mathcal{D}
+        \, (\tilde{v}') \Wide e)$
+
+    \end{itemize}
+    Et \textbf{H.2} implique
+    immédiatement~\textbf{C}.\hfill$\triangle$
+
+  \item $\Phi \lhd \emptyL$ \\ et $\tilde{v} \lhd (\psi,
+    \textsf{Const} \, \tilde{V})$ \\ et $\tilde{V} \lhd \emptyL$
+    \\
+
+    Distinguons une des hypothèses de filtre:
+    \begin{itemize}
+
+      \item \textbf{HF.0}: $\tilde{V} \lhd \emptyL$
+        
+    \end{itemize}        
+    Les autres hypothèses sont
+    \begin{itemize}
+
+      \item \textbf{H.0}: $\domain{\mathcal{A}} \Gamma, \textrm{E}
+        \vdashT \textsf{SET} \, \Phi$
+
+      \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma \models (\psi,
+        \textsf{Const} \, \tilde{V}) : \tau \,\, (\textsf{SET}
+        \, \Phi)$
+
+    \end{itemize}
+    Prouvons
+    \begin{itemize}
+
+      \item \textbf{C}: $\forall e \in \textrm{E}.\forall \tilde{v}'
+        \in \tilde{V}.\neg(\domain{\mathcal{A}} \Gamma \vdash
+        \mathcal{D} \, (\tilde{v}') \Wide e)$
+
+    \end{itemize}
+    \textbf{HF.0} implique trivialement~\textbf{C}.\hfill$\triangle$
+
+\end{itemize}
+
+\noindent $\Box$
+
+\newtheorem{tags_SET}[unicite_typage_semantique]{Lemme}
+
+\begin{tags_SET}
+\label{tags_SET}
+\begin{equation*}
+  \begin{array}{|ll|}
+   \hline 
+            & \\
+      Soit  & \tilde{v} \lhd (\psi, \textsf{Const} \,
+              ([\tilde{v}'] \sqcup \tilde{V}')) \\
+      Si    & \domain{\mathcal{A}} \Gamma, \{e'\} \cup \textrm{E}
+              \vdashT \textsf{SET} \, \Phi \\
+      et    & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+              (\tilde{v}') \Wide e' \\
+      alors & \neg(\domain{\mathcal{A}} \Gamma \models \tilde{v} :
+              \tau \,\, (\textsf{SET} \, \Phi)) \\ 
+            & \\
+   \hline
+  \end{array}
+\end{equation*}
+\end{tags_SET}
+
+\bigskip
+
+\noindent \textbf{Preuve du lemme~\ref{tags_SET}} \\
+
+Soient
+\begin{itemize}
+
+  \item \textbf{H.0}: $\tilde{v} \lhd (\psi, \textsf{Const} \,
+    \tilde{V})$
+
+  \item \textbf{H.1}: $\tilde{V} \lhd [\tilde{v}'] \sqcup \tilde{V}'$
+
+\end{itemize}
+Reprenons l'énoncé du lemme~\vref{tags_SET_aux} et effectuons-y le
+renommage suivant:
+\begin{itemize}
+
+  \item $\textrm{E} \stackrel{\alpha}{\longleftarrow} \{e'\} \cup
+    \textrm{E}$
+
+\end{itemize}
+Il devient alors:
+\begin{equation*}
+  \begin{array}{ll}
+    Si    & \domain{\mathcal{A}} \Gamma, \{e'\} \cup \textrm{E}
+            \vdashT \textsf{SET} \, \Phi \\
+    et    & \domain{\mathcal{A}} \Gamma \models (\psi,
+            \textsf{Const} \, \tilde{V}) : \tau \,\,
+            (\textsf{SET} \,\Phi)  \\
+    alors & \forall e \in \{e'\} \cup \textrm{E}.\forall \tilde{v}'
+            \in \tilde{V}.\neg(\domain{\mathcal{A}} \Gamma 
+            \vdash \mathcal{D} \, (\tilde{v}') \Wide e)
+  \end{array}
+\end{equation*}
+Évaluons partiellement ce lemme en choisissant $e = e'$:
+\begin{equation*}
+  \begin{array}{ll}
+    Si    & \domain{\mathcal{A}} \Gamma, \{e'\} \cup \textrm{E}
+            \vdashT \textsf{SET} \, \Phi \\
+    et    & \domain{\mathcal{A}} \Gamma \models (\psi,
+            \textsf{Const} \, \tilde{V}) : \tau \,\,
+            (\textsf{SET} \, \Phi) \\
+    alors & \forall \tilde{v}' \in \tilde{V}.\neg(\domain{\mathcal{A}}
+            \Gamma \vdash \mathcal{D} \, (\tilde{v}') \Wide e')
+  \end{array}
+\end{equation*}
+Cet énoncé est équivalent à:
+\begin{equation*}
+  \begin{array}{ll}
+    Si    & \domain{\mathcal{A}} \Gamma, \{e'\} \cup \textrm{E}
+            \vdashT \textsf{SET} \, \Phi \\
+    et    & \domain{\mathcal{A}} \Gamma \models (\psi,
+           \textsf{Const} \, \tilde{V}) : \tau \,\,
+           (\textsf{SET} \, \Phi) \\
+    alors & \neg(\tilde{V} \lhd [\tilde{v}'] \sqcup
+            \tilde{V}' \Rightarrow \domain{\mathcal{A}} \Gamma \vdash
+            \mathcal{D} \, (\tilde{v}') \Wide e')
+  \end{array}
+\end{equation*}
+En tenant maintenant compte de \textbf{H.0} et \textbf{H.1}, ce
+dernier énoncé se réécrit:
+\begin{equation*}
+  \begin{array}{ll}
+    Si    & \domain{\mathcal{A}} \Gamma, \{e'\} \cup \textrm{E}
+            \vdashT \textsf{SET} \, \Phi \\
+    et    & \domain{\mathcal{A}} \Gamma \models (\psi,
+            \textsf{Const} \, \tilde{V}) : \tau \,\,
+            (\textsf{SET} \, \Phi) \\ 
+    alors & \neg(\tilde{v} \lhd (\psi, \textsf{Const} \,
+            ([\tilde{v}'] \sqcup \tilde{V}')) \Rightarrow  
+            \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+           (\tilde{v}') \Wide e')
+  \end{array}
+\end{equation*}
+Prenons-en finalement une contraposition et nous obtenons la preuve de
+notre lemme~\vref{tags_SET}.\hfill$\Box$
+
+\bigskip
+
+\noindent \textbf{Preuve du théorème~\ref{unicite_typage_semantique}}
+\\
+
+Rappelons l'énoncé du théorème: \\
+
+\begin{tabular}{|l|}
+  \hline 
+  \\
+  \emph{S'il existe une preuve qu'une valeur codée est d'un}\\
+  \emph{type bien
+    étiqueté, alors cette preuve est unique.} \\
+  \\
+  \hline
+\end{tabular}
+
+\bigskip
+
+Les hypothèses sont donc:
+\begin{itemize}
+
+  \item \textbf{H.0}: $\domain{\mathcal{A}} \Gamma \vdashT \textrm{T}$
+
+  \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma \models \tilde{v} :
+    \tau \, \textrm{T}$
+
+\end{itemize}
+La preuve se fait par induction sur la forme de~T. Nous allons prouver
+qu'à chaque étape de la dérivation, ou bien aucune règle n'est
+applicable, ou bien une seule instance d'une seule règle est
+applicable, grâce à \textbf{H.0} et \textbf{H.1}. Tout d'abord on
+remarque que la seule façon de prouver \textbf{H.0} est de prouver
+\begin{itemize}
+  
+   \item \textbf{H.0bis}: $\domain{\mathcal{A}} \Gamma, \{\} \vdashL
+     \textrm{T}$.
+
+\end{itemize}
+par la règle~\TirName{[1]} \vpageref{types_bien_etiquetes_1}:
+\begin{mathpar}
+  \inferrule
+    {\domain{\mathcal{A}} \Gamma, \{\} \vdashT \textrm{T}}
+    %-----
+    {\domain{\mathcal{A}} \Gamma \vdashT \textrm{T}}
+    \;\TirName{[1]}
+\end{mathpar}
+Nous remplaçons alors \textbf{H.0} par \textbf{H.0bis} dans l'énoncé
+du théorème. Les seules règles à examiner de près
+sont~\RefTirName{[14]} \vpageref{controle_semantique_des_types_14}
+et~\RefTirName{[15]} \vpageref{controle_semantique_des_types_15} (pour
+le type \textsf{CHOICE}), \RefTirName{[16]}
+\vpageref{controle_semantique_des_types_16} à~\RefTirName{[18]}
+\vpageref{controle_semantique_des_types_18} (pour le type
+\textsf{SEQUENCE}) et~\RefTirName{[19]}
+\vpageref{controle_semantique_des_types_19} à~\RefTirName{[21]}
+\vpageref{controle_semantique_des_types_21} (pour le type
+\textsf{SET}).
+\begin{itemize}
+
+  \item $\textrm{T} \lhd \textsf{CHOICE} \, ([f'] \sqcup
+    \mathcal{F}')$ \\ et $f'\lhd (l', \tau', \textrm{T}', \sigma',
+    s')$ \\
+
+    Les autres hypothèses sont
+    \begin{itemize}
+
+      \item \textbf{H.0bis}: $\domain{\mathcal{A}} \Gamma, \{\}
+        \vdashT \textrm{T}$. La règle~\RefTirName{[3]}
+        \vpageref{types_bien_etiquetes_3} peut être appliquée:
+        \begin{mathpar}
+          \inferrule
+            {f' \lhd (l', \tau', \textrm{T}', \sigma', s') \\
+             \domain{\mathcal{A}} \Gamma, \{\} \vdashT \textrm{T}'\\
+             \forall e \in \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma
+             \vdash e \PAR (\tau', \textrm{T}'))\\
+             \domain{\mathcal{A}} \Gamma, \{(\tau', \textrm{T}')\}
+             \cup \textrm{E} \vdashT \textsf{CHOICE} \, \mathcal{F}'}
+            %-----
+            {\domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT
+              \textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}')}
+            \;\TirName{[3]}
+        \end{mathpar}
+        Appliquons-là directement (i.e. toutes les variables de la
+        règle sont liées aux variables de même nom dans
+        l'environnement du cas courant de la preuve) et étiquetons ses
+        prémisses non redondantes avec les hypothèses de filtre:
+        \begin{itemize}
+
+          \item \textbf{H.0bis.0}: $\domain{\mathcal{A}} \Gamma, \{\}
+            \vdashT \textrm{T}'$
+
+          \item \textbf{H.0bis.1}: $\forall e \in
+            \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma \vdash e \PAR
+            (\tau', \textrm{T}'))$
+
+          \item \textbf{H.0bis.2}: $\domain{\mathcal{A}} \Gamma,
+            \{(\tau', \textrm{T}')\} \cup \textrm{E} \vdashT
+            \textsf{CHOICE} \, \mathcal{F}'$
+
+        \end{itemize}
+        
+      \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma \models
+        \tilde{v} : \tau \, \textrm{T}$ \\ Les
+        règles~\RefTirName{[14]}
+        \vpageref{controle_semantique_des_types_14}
+        ou~\RefTirName{[15]}
+        \vpageref{controle_semantique_des_types_15} peuvent être
+        appliquées:
+        \begin{mathparpagebreakable}
+          \inferrule
+            {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+              \domain{\mathcal{A}} \Gamma \vdash \mathcal{D}
+              (\tilde{v}) \Wide (\tau', \textrm{T}')\\
+              \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau' \,
+              \textrm{T}'}
+           %-----
+            {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \emptyL
+              \,\, (\textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}'))}
+            \;\TirName{[14]}
+
+          \inferrule
+            {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+              (\textsf{CHOICE} \, \mathcal{F}')}
+            %-----
+            {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+              (\textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}'))}
+            \;\TirName{[15]}
+        \end{mathparpagebreakable}
+        Nous constatons d'abord que si \(\neg(\domain{\mathcal{A}}
+        \Gamma \vdash \mathcal{D}(\tilde{v}) \Wide (\tau',
+        \textrm{T}'))\), alors la seule règle applicable
+        est~\RefTirName{[15]}.  Supposons donc maintenant:
+        \begin{itemize}
+
+          \item \textbf{H.2}: $\domain{\mathcal{A}} \Gamma \vdash
+            \mathcal{D}(\tilde{v}) \Wide (\tau', \textrm{T}')$
+
+        \end{itemize}
+        \emph{Prouvons que la seule règle pouvant éventuellement être
+          appliquée est~\RefTirName{[14]}}. Reprenons l'énoncé du
+        théorème~\vref{tags_CHOICE} en y effectuant les renommages
+        suivants:
+        \begin{itemize}
+          
+          \item $e' \stackrel{\alpha}{\longleftarrow} (\tau',
+            \textrm{T}')$
+
+          \item $\mathcal{F} \stackrel{\alpha}{\longleftarrow}
+            \mathcal{F}'$
+
+        \end{itemize}
+        Nous obtenons alors:
+        \begin{equation*}
+          \begin{array}{ll}
+            Si    & \domain{\mathcal{A}} \Gamma, \{(\tau',
+                    \textrm{T}')\} \cup \textrm{E} \vdashT
+                    \textsf{CHOICE} \,  \mathcal{F}' \\
+            et    & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+                    (\tilde{v}) \Wide (\tau', \textrm{T}') \\
+            alors & \neg(\domain{\mathcal{A}} \Gamma \models \tilde{v}
+            : \tau \,\, (\textsf{CHOICE} \, \mathcal{F}'))
+          \end{array}
+        \end{equation*}
+        Appliquons ce théorème à \textbf{H.0bis.2} et \textbf{H.2}. Il
+        vient:
+        \begin{itemize}
+
+          \item \textbf{H.2}: $\neg(\domain{\mathcal{A}} \Gamma
+            \models \tilde{v} : \tau \,\, (\textsf{CHOICE} \,
+            \mathcal{F}'))$
+
+        \end{itemize}
+        Or \textbf{H.2} est la négation de la prémisse de la
+        règle~\RefTirName{[15]}, qui ne peut donc être
+        appliquée.\hfill$\triangle$
+
+    \end{itemize}
+
+  \item $\textrm{T} \lhd \textsf{SET} \, ([\varphi'] \sqcup \Phi')$ et
+    $\varphi'\lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma',
+    s')$ \\
+
+    Les autres hypothèses sont
+    \begin{itemize}
+
+      \item \textbf{H.0bis}: $\domain{\mathcal{A}} \Gamma, \{\}
+        \vdashT \textrm{T}$. La règle~\RefTirName{[4]}
+        \vpageref{types_bien_etiquetes_4} peut être appliquée:
+        \begin{mathpar}
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+              \domain{\mathcal{A}} \Gamma, \{\} \vdashT \textrm{T}'\\
+              \forall e \in \textrm{E}.\neg(\domain{\mathcal{A}}
+              \Gamma \vdash e \PAR (\tau', \textrm{T}'))\\
+              \domain{\mathcal{A}} \Gamma, \{(\tau', \textrm{T}')\}
+              \cup \textrm{E} \vdashT \textsf{SET} \, \Phi'}
+            %------
+            {\domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT
+              \textsf{SET} \, ([\varphi'] \sqcup \Phi') }
+            \;\TirName{[4]}
+        \end{mathpar}
+        Appliquons-là directement et étiquetons ses prémisses non
+        redondantes:
+        \begin{itemize}
+
+          \item \textbf{H.0bis.0}: $\domain{\mathcal{A}} \Gamma,
+            \emptyL\! \vdashT \textrm{T}'$
+
+          \item \textbf{H.0bis.1}: $\forall e \in
+            \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma \vdash e \PAR
+            (\tau', \textrm{T}'))$
+
+          \item \textbf{H.0bis.2}: $\domain{\mathcal{A}} \Gamma,
+            \{(\tau', \textrm{T}')\} \cup \textrm{E} \vdashT
+            \textsf{SET} \, \Phi'$
+
+        \end{itemize}
+
+      \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma \models
+        \tilde{v} : \tau \, \textrm{T}$. Les seules règles à examiner
+        sont~\RefTirName{[19]}
+        \vpageref{controle_semantique_des_types_19}
+        et~\RefTirName{[20]}
+        \vpageref{controle_semantique_des_types_20}:
+        \begin{mathparpagebreakable}
+          \inferrule
+            {\textrm{T} \lhd \textsf{SET} \, ([\varphi'] \sqcup
+              \Phi')\\
+              \varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+              \tilde{V} \lhd [\tilde{v}'] \sqcup \tilde{V}'\\
+              \domain{\mathcal{A}} \Gamma \vdash
+              \mathcal{D}(\tilde{v}') \Wide (\tau', \textrm{T}')\\
+              \domain{\mathcal{A}} \Gamma \models \tilde{v}' : \tau'
+              \, \textrm{T}'\\
+              \domain{\mathcal{A}} \Gamma \models (\psi,
+              \textsf{Const} \,  \tilde{V}') : \tau \,\,
+              (\textsf{SET} \, \Phi')}
+            %-----
+            {\domain{\mathcal{A}} \Gamma \models (\psi,
+              \textsf{Const} \, \tilde{V}) : \tau \, \textrm{T}}
+            \;\TirName{[19]}
+
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T},
+              \sigma', s')\\
+              s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+              \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau
+              \,\, (\textsf{SET} \, \Phi')}
+            %-----
+            {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+              (\textsf{SET} \, ([\varphi'] \sqcup \Phi'))}
+            \;\TirName{[20]}
+        \end{mathparpagebreakable}
+        car la règle~\RefTirName{[21]}
+        \vpageref{controle_semantique_des_types_21} ne filtre que
+        $\Phi \lhd \emptyL\!$.
+ 
+    \end{itemize}
+    Premièrement, si \(\tilde{v} \nlhd (\psi, \textsf{Const} \,
+    \tilde{V})\), alors la seule règle pouvant s'appliquer
+    serait~\RefTirName{[20]}, ce qui démontrerait le théorème. Aussi
+    posons:
+    \begin{itemize}
+
+      \item \textbf{HF.0}: $\tilde{v} \lhd (\psi, \textsf{Const}
+        \, \tilde{V})$
+
+    \end{itemize}
+    De même si \(\tilde{V} \nlhd [\tilde{v}'] \sqcup \tilde{V}'\),
+    alors la seule règle pouvant éventuellement être appliquée
+    serait~\RefTirName{[20]}, ce qui démontrerait aussi le
+    théorème. Supposons donc pour les sous-cas restant:
+    \begin{itemize}
+
+      \item \textbf{H.4}: $\tilde{V} \lhd [\tilde{v}'] \sqcup
+        \tilde{V}'$
+        
+    \end{itemize}
+    Les propositions \textbf{HF.0} et \textbf{H.4} impliquent
+    \begin{itemize}
+
+      \item \textbf{H.5}: $\tilde{v} \lhd (\psi, \textsf{Const}
+        \, ([\tilde{v}'] \sqcup \tilde{V}'))$
+
+    \end{itemize}
+    Maintenant, les règles~\RefTirName{[19]} et~\RefTirName{[20]}
+    peuvent \emph{a priori} être appliquées, mais \emph{nous allons
+      montrer que seule la règle~\RefTirName{[19]} est éventuellement
+      applicable}. Appliquons directement la règle~\RefTirName{[19]}
+    et étiquetons ses prémisses non redondantes avec les hypothèses
+    précédentes:
+    \begin{itemize}
+
+      \item \textbf{H.1.0}: $\domain{\mathcal{A}} \Gamma \vdash
+        \mathcal{D}(\tilde{v}') \Wide (\tau', \textrm{T}')$
+
+      \item \textbf{H.1.1}: $\domain{\mathcal{A}} \Gamma \models
+        \tilde{v}' : \tau' \, \textrm{T}'$
+
+      \item \textbf{H.1.2}: $\domain{\mathcal{A}} \Gamma \models
+        (\psi, \textsf{Const} \, \tilde{V}') : \tau \,\,
+        (\textsf{SET} \, \Phi')$
+
+    \end{itemize}
+    Nous devons considérer deux aspects:
+    \begin{enumerate}
+
+      \item Nous devons prouver que \textbf{H.0} et \textbf{H.1bis}
+        permettent de conclure que
+        \begin{itemize}
+
+          \item \textbf{C.0}: $\forall \tilde{v}'' \in
+            \tilde{V}'.\neg(\domain{\mathcal{A}} \Gamma \vdash
+            \mathcal{D}(\tilde{v}'') \Wide (\tau', \textrm{T}'))$
+     
+        \end{itemize}
+        En effet, ainsi \textbf{H.4}, qui est une prémisse de
+        \textbf{H.1}, serait l'unique projection possible. En d'autres
+        termes:
+        \begin{itemize}
+
+          \item $\textbf{H.4} \Rightarrow \textbf{C.0}$
+
+        \end{itemize}
+        d'où l'unicité de la projection. Reprenons le
+        lemme~\vref{tags_SET_aux} et effectuons-y les renommages
+        suivants:
+        \begin{itemize}
+
+          \item $\textrm{E} \stackrel{\alpha}{\longleftarrow}
+            \{(\tau', \textrm{T}')\} \cup \textrm{E}$
+                   
+          \item $\tilde{v}' \stackrel{\alpha}{\longleftarrow}
+            \tilde{v}''$
+
+          \item $\tilde{V} \stackrel{\alpha}{\longleftarrow}
+            \tilde{V}'$
+
+          \item $\Phi \stackrel{\alpha}{\longleftarrow} \Phi'$
+
+        \end{itemize}
+        Nous obtenons alors le lemme:
+        \begin{equation*}
+          \begin{array}{ll}
+            Si    & \domain{\mathcal{A}} \Gamma, \{(\tau',
+                    \textrm{T}')\} \cup \textrm{E} \vdashT
+                    \textsf{SET} \, \Phi' \\
+            et    & \domain{\mathcal{A}} \Gamma \models (\psi, 
+                    \textsf{Const} \, \tilde{V}') : \tau \,\,
+                    (\textsf{SET} \, \Phi') \\
+            alors & \forall e \in \{(\tau', \textrm{T}')\} \cup
+                    \textrm{E}.\forall \tilde{v}'' \in 
+                    \tilde{V}'.\neg(\domain{\mathcal{A}} \Gamma \vdash
+                    \mathcal{D} \, (\tilde{v}'') \Wide e)
+          \end{array}
+        \end{equation*}
+        Appliquons-le respectivement à \textbf{H.0bis.2} et
+        \textbf{H.1.2}. Il vient
+        \begin{itemize}
+
+          \item \textbf{H.2}: $\forall e \in \{(\tau', \textrm{T}')\}
+            \cup \textrm{E}.\forall \tilde{v}'' \in
+            \tilde{V}'.\neg(\domain{\mathcal{A}} \Gamma \vdash
+            \mathcal{D} \, (\tilde{v}'') \Wide e)$
+
+        \end{itemize}
+        \textbf{H.2} implique \textbf{C.0} (on prend $e = (\tau',
+        \textrm{T}')$).\hfill$\Diamond$
+
+      \item \emph{Prouvons que la règle~\RefTirName{[20]}
+        \vpageref{controle_semantique_des_types_20} ne peut
+        s'appliquer.} Prouvons la négation de sa prémisse, soit à
+        prouver:
+        \begin{itemize}
+
+          \item \textbf{C.1}: $\neg(\domain{\mathcal{A}} \Gamma
+            \models \tilde{v} : \tau \,\, (\textsf{SET} \, \Phi'))$
+            
+        \end{itemize}
+        Reprenons l'énoncé du lemme~\vref{tags_SET} et effectuons-y
+        les renommages suivants:
+        \begin{itemize}
+
+          \item $e' \stackrel{\alpha}{\longleftarrow} (\tau',
+            \textrm{T}')$
+            
+          \item $\Phi \stackrel{\alpha}{\longleftarrow} \Phi'$
+
+        \end{itemize}
+        Nous obtenons alors :
+        \begin{equation*}
+          \begin{array}{ll}
+            Soit  & \tilde{v} \lhd (\psi, \textsf{Const} \,
+                    ([\tilde{v}'] \sqcup \tilde{V}')) \\
+            Si    & \domain{\mathcal{A}} \Gamma, \{(\tau',
+                    \textrm{T}')\} \cup \textrm{E} \vdashT
+                    \textsf{SET} \, \Phi' \\
+            et    & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+                    (\tilde{v}') \Wide e' \\
+            alors & \neg(\domain{\mathcal{A}} \Gamma \models \tilde{v}
+                    : \tau \,\, (\textsf{SET} \, \Phi'))
+          \end{array}
+        \end{equation*}
+        En appliquant directement ce lemme respectivement à
+        \textbf{H.5}, \textbf{H.0bis.2} et \textbf{H.1.1} il vient
+        \textbf{C.1}.\hfill$\Diamond$
+
+    \end{enumerate}
+    
+  \item $\textrm{T} \lhd \textsf{SEQUENCE} \, (\varphi' \Cons
+    \Phi')$ \\ 
+    et $\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+    \sigma', s')$ \\ 
+
+    Nous remarquons tout de suite que si \(s' \nlhd \textsf{Some} \,
+    \textsf{OPTIONAL}\), alors la seule règle du contrôle sémantique
+    des types applicable serait~\RefTirName{[19]}
+    \vpageref{controle_semantique_des_types_19}, ce qui démontrerait
+    ce cas du théorème. Pour étudier les autres cas, supposons donc:
+    \begin{itemize}
+
+      \item \textbf{HF.0}: $s' \lhd \textsf{Some} \,
+        \textsf{OPTIONAL}$
+
+    \end{itemize}
+    Les autres hypothèses sont
+    \begin{itemize}
+
+    \item \textbf{H.0bis}: $\domain{\mathcal{A}} \Gamma, \{\} \vdashT
+      \textrm{T}$. La règle~\RefTirName{[6]}
+      \vpageref{types_bien_etiquetes_6} peut être appliquée:
+      \begin{mathpar}
+        \inferrule
+          {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+            \sigma', s')\\
+            s' \nlhd \textsf{None}\\
+            \domain{\mathcal{A}} \Gamma, \{\} \vdashT \textrm{T}'\\
+            \forall e \in \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma
+            \vdash e \PAR (\tau', \textrm{T}'))\\
+            \domain{\mathcal{A}} \Gamma, \{(\tau', \textrm{T}')\} \cup
+            \textrm{E} \vdashT \textsf{SEQUENCE} \, \Phi'}
+          %------
+          {\domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT
+            \textsf{SEQUENCE} \, (\varphi' \Cons \Phi')}
+          \;\TirName{[6]} 
+      \end{mathpar}
+      Appliquons-là et étiquetons ses prémisses non redondantes avec
+      les hypothèses de filtre, ou moins précises quelles (i.e. des
+      instances de celles-ci):
+      \begin{itemize}
+
+        \item \textbf{H.0bis.0}: $\domain{\mathcal{A}} \Gamma, \{\}
+          \vdashT \textrm{T}'$
+
+        \item \textbf{H.0bis.1}: $\forall e \in
+          \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma \vdash e \PAR
+          (\tau', \textrm{T}'))$
+
+        \item \textbf{H.0bis.2}: $\domain{\mathcal{A}} \Gamma,
+          \{(\tau', \textrm{T}')\} \cup \textrm{E} \vdashT
+          \textsf{SEQUENCE} \, \Phi'$
+
+      \end{itemize}
+
+    \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma \models \tilde{v}
+      : \tau \, \textrm{T}$. Les règles à examiner
+      sont~\RefTirName{[16]}
+      \vpageref{controle_semantique_des_types_16} et~\RefTirName{[17]}
+      \vpageref{controle_semantique_des_types_17}:
+      \begin{mathparpagebreakable}
+        \inferrule
+          {\textrm{T} \lhd \textsf{SEQUENCE} \, (\varphi' \Cons
+            \Phi')\\
+            \varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+            \sigma', s') \\
+            \tilde{V} \lhd \tilde{v}' \Cons \tilde{V}'\\
+            \domain{\mathcal{A}} \Gamma \vdash \mathcal{D}(\tilde{v}')
+            \Wide (\tau', \textrm{T}')\\
+            \domain{\mathcal{A}} \Gamma \models \tilde{v}' : \tau' \,
+            \textrm{T}'\\
+            \domain{\mathcal{A}} \Gamma \models (\psi,
+            \textsf{Const} \, \tilde{V}') : \tau \,\,
+            (\textsf{SEQUENCE} \, \Phi')}
+          %-----
+          {\domain{\mathcal{A}} \Gamma \models (\psi,
+            \textsf{Const} \, \tilde{V}) : \tau \, \textrm{T}}
+          \;\TirName{[16]}
+
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T},
+              \sigma', s')\\
+              s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+              \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau
+              \,\, (\textsf{SEQUENCE} \, \Phi')}
+            %-----
+            {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+              (\textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi'))}
+            \;\TirName{[17]}
+      \end{mathparpagebreakable}
+      Premièrement, si \(\tilde{v} \nlhd (\psi, \textsf{Const}
+      \, \tilde{V})\), alors la seule règle applicable
+      serait~\RefTirName{[17]}, ce qui prouverait ce cas du
+      théorème. Pour poursuivre l'étude des cas restants, posons donc:
+      \begin{itemize}
+
+        \item \textbf{HF.1}: $\tilde{v} \lhd (\psi,
+          \textsf{Const} \, \tilde{V})$
+        
+      \end{itemize}
+      D'autre part, si \(\tilde{V} \nlhd \tilde{v}' \Cons
+      \tilde{V}'\), alors la seule règle applicable
+      serait~\RefTirName{[17]}, ce qui concluerait le cas
+      courant. Pour étudier les cas restants, posons donc:
+      \begin{itemize}
+
+        \item \textbf{HF.2}: $\tilde{V} \lhd \tilde{v}' \Cons
+          \tilde{V}'$
+ 
+      \end{itemize}
+      Les propositions \textbf{HF.1} et \textbf{HF.2} impliquent:
+      \begin{itemize}
+
+        \item \textbf{H.2}: $\tilde{v} \lhd (\psi,
+          \textsf{Const} \, (\tilde{v}' \Cons \tilde{V}'))$
+
+      \end{itemize}
+      Maintenant les règles~\RefTirName{[16]} et\RefTirName{[17]}
+      peuvent \emph{a priori} être appliquées, mais \emph{nous allons
+        montrer que seule la règle~\RefTirName{[16]} est
+        éventuellement applicable}. Appliquons directement la
+      règle~\RefTirName{[16]} et étiquetons ses prémisses non
+      redondantes avec les hypothèses précédentes:
+      \begin{itemize}
+
+        \item \textbf{H.1.0}: $\domain{\mathcal{A}} \Gamma \vdash
+          \mathcal{D}(\tilde{v}') \Wide (\tau', \textrm{T}')$
+       
+        \item \textbf{H.1.1}: $\domain{\mathcal{A}} \Gamma \models
+          \tilde{v}' : \tau' \, \textrm{T}'$
+
+        \item \textbf{H.1.2}: $\domain{\mathcal{A}} \Gamma \models
+          (\psi, \textsf{Const} \, \tilde{V}') : \tau \,\,
+          (\textsf{SEQUENCE} \, \Phi')$
+
+      \end{itemize}
+      \emph{Prouvons que la règle~\RefTirName{[17]}
+        \vpageref{controle_semantique_des_types_17} ne peut
+        s'appliquer.} Prouvons la négation d'une de ses prémisses,
+      soit à prouver:
+      \begin{itemize}
+
+        \item \textbf{C}: $\neg(\domain{\mathcal{A}} \Gamma \models
+          \tilde{v} : \tau \,\, (\textsf{SEQUENCE} \, \Phi'))$
+
+      \end{itemize}
+      Considérons l'énoncé du lemme~\vref{tags_SEQUENCE} et
+      effectuons-y les renommages suivants:
+      \begin{itemize}
+
+        \item $e' \stackrel{\alpha}{\longleftarrow} (\tau',
+          \textrm{T}')$
+
+        \item $\Phi \stackrel{\alpha}{\longleftarrow} \Phi'$
+
+      \end{itemize}
+      Nous obtenons alors:
+      \begin{equation*}
+        \begin{array}{ll}
+          Soit  & \tilde{v} \lhd (\psi, \textsf{Const} \,
+                  (\tilde{v}' \Cons \tilde{V}'))\\
+          Si    & \domain{\mathcal{A}} \Gamma, \{(\tau',
+                  \textrm{T}')\} \cup \textrm{E} \vdashT
+                  \textsf{SEQUENCE} \, \Phi' \\
+          et    & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+                  (\tilde{v}') \Wide (\tau', \textrm{T}') \\
+          alors & \neg(\domain{\mathcal{A}} \Gamma \models \tilde{v} :
+                  \tau \,\, (\textsf{SEQUENCE} \, \Phi'))
+        \end{array}
+      \end{equation*}
+      En l'appliquant respectivement à \textbf{H.2}, \textbf{H.0bis.2}
+      et \textbf{H.1.0}, il vient~\textbf{C}.\hfill$\Diamond\triangle$
+
+    \end{itemize}
+
+\end{itemize}
+
+\noindent $\Box$

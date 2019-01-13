@@ -1,0 +1,112 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \{\} \vdashT \textrm{T}}
+  %-----
+  {\domain{\mathcal{A}} \Gamma \vdashT \textrm{T}}
+  \;\TirName{[1]}
+  \label{types_bien_etiquetes_1}
+
+% TRef 
+%
+\inferrule
+  {x' \in \mathcal{A}\\
+   \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+   \domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT \textrm{T}'}
+  %-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT \textsf{TRef} \,
+    (x')}
+  \;\TirName{[2]}
+  \label{types_bien_etiquetes_2}
+
+% Structured types
+
+% CHOICE
+%
+\inferrule
+  {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+   \domain{\mathcal{A}} \Gamma, \{\} \vdashT \textrm{T}'\\
+   \forall e \in \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma \vdash
+   e \PAR (\tau', \textrm{T}'))\\
+   \domain{\mathcal{A}} \Gamma, \{(\tau', \textrm{T}')\} \cup
+   \textrm{E} \vdashT \textsf{CHOICE} \, \mathcal{F}'}
+  %-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT \textsf{CHOICE}
+    \, ([f'] \sqcup \mathcal{F}')}
+  \;\TirName{[3]}
+  \label{types_bien_etiquetes_3}
+
+% SET
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma',
+    s') \\
+   \domain{\mathcal{A}} \Gamma, \{\} \vdashT \textrm{T}'\\
+   \forall e \in \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma \vdash e
+   \PAR (\tau', \textrm{T}'))\\
+   \domain{\mathcal{A}} \Gamma, \{(\tau', \textrm{T}')\} \cup
+   \textrm{E} \vdashT \textsf{SET} \, \Phi'}
+  %-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT \textsf{SET} \,
+    ([\varphi'] \sqcup \Phi')}
+  \;\TirName{[4]}
+  \label{types_bien_etiquetes_4}
+
+% SEQUENCE
+
+% Mandatory field
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma',
+    \textsf{None})\\
+   \domain{\mathcal{A}} \Gamma, \{\} \vdashT \textrm{T}'\\
+   \forall e \in \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma \vdash e
+   \PAR (\tau', \textrm{T}'))\\
+   \domain{\mathcal{A}} \Gamma, \{\} \vdashT \textsf{SEQUENCE} \,
+   \Phi'}
+  %------
+  {\domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT \textsf{SEQUENCE}
+    \, (\varphi' \Cons \Phi')}
+  \;\TirName{[5]}
+  \label{types_bien_etiquetes_5}
+
+% OPTIONAL or DEFAULT field
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma',
+    s')\\
+   s' \nlhd \textsf{None}\\
+   \domain{\mathcal{A}} \Gamma, \{\} \vdashT \textrm{T}'\\
+   \forall e \in \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma \vdash e
+   \PAR (\tau', \textrm{T}'))\\\\
+   \domain{\mathcal{A}} \Gamma, \{(\tau', \textrm{T}')\} \cup
+   \textrm{E} \vdashT \textsf{SEQUENCE} \, \Phi'}
+  %------
+  {\domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT \textsf{SEQUENCE}
+    \, (\varphi' \Cons \Phi')}
+  \;\TirName{[6]}
+  \label{types_bien_etiquetes_6}
+
+% SEQUENCE OF/SET OF
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \{\} \vdashT \textrm{T}'}
+  %-----
+  {\domain{\mathcal{A}} \Gamma, \{\} \vdashT (\textsf{SEQUENCE OF}
+    \mid \textsf{SET OF}) \, \tau' \, \textrm{T}' \, \sigma'}
+  \;\TirName{[7]}
+  \label{types_bien_etiquetes_7}
+
+% Others
+%
+\inferrule
+  {\textrm{T} \nlhd \wildTRef \mid \wildCHOICE \\
+    \mid \wildSETOF \mid \wildSEQUENCEOF \\
+    \mid \wildSET \mid \wildSEQUENCE}
+  %-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{E} \vdashT \textrm{T}}
+  \;\TirName{[8]}
+  \label{types_bien_etiquetes_8}
+
+\end{mathparpagebreakable}

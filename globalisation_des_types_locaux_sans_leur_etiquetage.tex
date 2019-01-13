@@ -1,0 +1,208 @@
+%%-*-latex-*-
+
+\begin{framed}
+\begin{mathpar}
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \SList{$(\textrm{T}_k,
+      \sigma_k)$}{k}{q})\\ 
+   \{\}, \domain{\{x\} \cup \mathcal{A}} \Gamma \bouchon{37}
+   \SList{$\textrm{T}_k$}{k}{q} \rightarrow
+   (\SList{$\overline{\textrm{T}}_k$}{k}{q}, \domain{\mathcal{A}_0}
+   \Gamma_0)\\
+  \bouchon{65} \domain{\mathcal{A}_0 \setminus \{x\}} \Gamma_0
+  \rightarrow \domain{\overline{\mathcal{A}}_1} \overline\Gamma_1}
+%-----
+  {\bouchon{65} \domain{\{x\} \uplus \mathcal{A}} \Gamma \rightarrow
+    \domain{\overline{\mathcal{A}}_1} \overline\Gamma_1 \oplus x
+    \mapsto (\alpha, \tau, 
+    \SList{$(\overline{\textrm{T}}_k,\sigma_k)$}{k}{q})}
+
+\inferrule
+  {}
+  {\bouchon{65} \domain{\varnothing} \Gamma \rightarrow
+    \domain{\varnothing} \Gamma}
+\end{mathpar}
+\end{framed}
+
+\bigskip
+
+\begin{framed}
+\begin{mathpar}
+\inferrule
+  {\domain{\mathcal{A}} \Gamma \bouchon{63} \textrm{T} \rightarrow
+    (\overline{\textrm{T}}, \domain{\overline{\mathcal{A}}}
+    \overline\Gamma)\\
+  \{\overline{\textrm{T}}\} \cup \overline{\mathcal{T}},
+  \domain{\overline{\mathcal{A}}} \overline\Gamma \bouchon{37}
+  \mathcal{T} \rightarrow r}
+%-----
+  {\overline{\mathcal{T}}, \domain{\mathcal{A}} \Gamma \bouchon{37}
+  \{\textrm{T}\} \uplus \mathcal{T} \rightarrow r}
+
+\inferrule
+  {}
+  {\overline{\mathcal{T}}, \domain{\mathcal{A}} \Gamma \bouchon{37}
+    \{\} \rightarrow (\overline{\mathcal{T}}, \domain{\mathcal{A}}
+    \Gamma)}
+\end{mathpar}
+\end{framed}
+
+\bigskip
+\bigskip
+
+% Selection
+%
+\begin{mathparpagebreakable}
+\inferrule
+  {x \not\in \mathcal{A}\\
+   \overline{\textrm{T}} \triangleq l' < \tau' \, (\textsf{TRef} \,
+   x)\\
+   \overline\gamma \triangleq x \mapsto (\emptyL\!, \emptyL\!,
+   \{(\textrm{T}', \{\})\})}
+  %-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{63} l' < \tau' \, \textrm{T}'
+    \rightarrow (\overline{\textrm{T}}, \domain{\mathcal{A}} \Gamma
+    \oplus \overline\gamma)}
+
+% SET OF
+% ..... expansion
+%
+\inferrule
+  {x \not\in \mathcal{A}\\
+   \overline{\textrm{T}} \triangleq \textsf{SET OF} \,\, \tau' \,
+   (\textsf{TRef} \, x) \, \{\}\\
+   \overline\gamma \triangleq x \mapsto (\emptyL\!, \emptyL\!,
+   \{(\textrm{T}', \sigma')\})}
+  %-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{63} \textsf{SET OF} \, \tau'
+    \, \textrm{T}' \, \sigma' \rightarrow (\overline{\textrm{T}},
+    \domain{\mathcal{A}} \Gamma \oplus \overline\gamma)}
+
+% SEQUENCE OF
+% ..... expansion
+%
+\inferrule
+  {x \not\in \mathcal{A}\\
+  \overline{\textrm{T}} \triangleq \textsf{SEQUENCE OF} \,\, \tau' \,
+  (\textsf{TRef} \, x) \, \{\}\\
+  \overline\gamma \triangleq x \mapsto (\emptyL\!, \emptyL\!,
+  \{(\textrm{T}', \sigma')\})}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{63} \textsf{SEQUENCE OF} \,
+    \tau' \, \textrm{T}' \, \sigma' \rightarrow
+    (\overline{\textrm{T}}, \domain{\mathcal{A}} \Gamma \oplus
+    \overline\gamma)}
+
+% CHOICE
+%
+\inferrule
+  {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+  \domain{\mathcal{A}} \Gamma \bouchon{63} \textsf{CHOICE} \,
+  \mathcal{F}' \rightarrow (\textsf{CHOICE} \,
+  \overline{\mathcal{F}}', \domain{\overline{\mathcal{A}}}
+  \overline\Gamma)\\
+  x \not\in \overline{\mathcal{A}}\\
+  \overline{f}' \triangleq (l', \tau', \textsf{TRef} \, x, \{\},
+  s')\\
+  \overline\gamma \triangleq x \mapsto (\emptyL\!, \emptyL\!,
+  \{(\textrm{T}', \sigma')\})}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{63} \textsf{CHOICE} \, (f'
+    \Cons \mathcal{F}') \rightarrow (\textsf{CHOICE} \, 
+   (\overline{f}'
+    \Cons \overline{\mathcal{F}}'), \domain{\overline{\mathcal{A}}}
+    \overline\Gamma \oplus \overline\gamma)}
+
+% SET
+%
+% ..... Field
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma',
+    s') \\
+  \domain{\mathcal{A}} \Gamma \bouchon{63} \textsf{SET} \, \Phi'
+  \rightarrow (\textsf{SET} \, \overline\Phi',
+  \domain{\overline{\mathcal{A}}} \overline\Gamma)\\
+  x \not\in \overline{\mathcal{A}}\\
+  \overline\varphi' \triangleq \textsf{Field} \, (l', \tau',
+  \textsf{TRef} \, x, \{\}, s')\\
+  \overline\gamma \triangleq x \mapsto (\emptyL\!, \emptyL\!,
+  \{(\textrm{T}', \sigma')\})}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{63} \textsf{SET} \, (\varphi'
+    \Cons \Phi') \rightarrow (\textsf{SET} \, (\overline\varphi' \Cons
+    \overline\Phi'), \domain{\overline{\mathcal{A}}} \overline\Gamma
+    \oplus \overline\gamma)}
+
+% ..... COMPONENTS OF
+%
+\inferrule
+  {\varphi' \lhd \textsf{COMPONENTS OF} \, \tau' \, \textrm{T}' \,
+    \sigma'\\
+  \domain{\mathcal{A}} \Gamma \bouchon{63} \textsf{SET} \, \Phi'
+  \rightarrow (\textsf{SET} \, \overline\Phi',
+  \domain{\overline{\mathcal{A}}} \overline\Gamma)\\
+  x \not\in \overline{\mathcal{A}}\\
+  \overline\varphi' \triangleq \textsf{COMPONENTS OF} \, \tau' \,
+  (\textsf{TRef} \, x) \, \{\} \\
+  \overline\gamma \triangleq x \mapsto (\emptyL\!, \emptyL\!,
+  \{(\textrm{T}', \sigma')\})}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{63} \textsf{SET} \, (\varphi'
+    \Cons \Phi') \rightarrow (\textsf{SET} \, (\overline\varphi' \Cons
+    \overline\Phi'), \domain{\overline{\mathcal{A}}} \overline\Gamma
+    \oplus \overline\gamma)}
+
+% SEQUENCE
+%
+% ..... Field
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma',
+    s')\\
+  \domain{\mathcal{A}} \Gamma \bouchon{63} \textsf{SEQUENCE} \, \Phi'
+  \rightarrow (\textsf{SEQUENCE} \, \overline\Phi',
+  \domain{\overline{\mathcal{A}}} \overline\Gamma) \\
+  x \not\in \overline{\mathcal{A}}\\
+  \overline\varphi' \triangleq \textsf{Field} \, (l', \tau',
+  \textsf{TRef} \, x, \{\}, s')\\
+  \overline\gamma \triangleq x \mapsto (\emptyL\!, \emptyL\!,
+  \{(\textrm{T}', \sigma')\})}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{63} \textsf{SEQUENCE} \,
+    (\varphi' \Cons \Phi') \rightarrow (\textsf{SEQUENCE} \,
+    (\overline\varphi' \Cons \overline\Phi'),
+    \domain{\overline{\mathcal{A}}} \overline\Gamma \oplus
+    \overline\gamma)}
+
+% ..... COMPONENTS OF
+%
+\inferrule
+  {\varphi' \lhd \textsf{COMPONENTS OF} \, \tau' \, \textrm{T}' \,
+    \sigma'\\
+  \domain{\mathcal{A}} \Gamma \bouchon{63} \textsf{SEQUENCE} \, \Phi'
+  \rightarrow (\textsf{SEQUENCE} \, \overline\Phi',
+  \domain{\overline{\mathcal{A}}} \overline\Gamma) \\
+  x \not\in \overline{\mathcal{A}}\\
+  \overline\varphi' \triangleq \textsf{COMPONENTS OF} \, \tau' \,
+  (\textsf{TRef} \, x) \, \{\}\\
+  \overline\gamma \triangleq x \mapsto (\emptyL\!, \emptyL\!,
+  \{(\textrm{T}', \sigma')\})}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{63} \textsf{SEQUENCE} \,
+    (\varphi' \Cons \Phi') \rightarrow (\textsf{SEQUENCE} \,
+    (\overline\varphi' \Cons \overline\Phi'),
+    \domain{\overline{\mathcal{A}}} \overline\Gamma \oplus
+    \overline\gamma)}
+
+% Others
+%
+\inferrule
+  {\textrm{T} \nlhd \wildCHOICE \mid \wildSET \mid \wildSEQUENCE \\
+  \mid \textsf{SET OF} \, \wild \wild \wild \mid \textsf{SEQUENCE OF}
+  \, \wild \wild \wild \mid \wildSelect}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{63} \textrm{T} \rightarrow
+    (\textrm{T}, \domain{\mathcal{A}} \Gamma)}
+
+\end{mathparpagebreakable}

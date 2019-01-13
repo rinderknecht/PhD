@@ -1,0 +1,62 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\bouchon{76} \Sigma \rightarrow \overline\Sigma\\
+   \bouchon{72} \overline\Sigma \rightarrow \overline\nu}
+  %-----
+  {\bouchon{92} \textsf{Inter} \, (\Sigma) \rightarrow \overline\nu}
+
+\inferrule
+  {\nu \nlhd \textsf{Inter} \, \wild}
+  %-----
+  {\bouchon{92} \nu \rightarrow \nu}
+
+% SIZE (0)  
+%
+\inferrule
+  {\{\textsf{SIZE} \, \{\textsf{Value} \, (\textsf{Int} \, 0)\}\} \in
+    \Sigma\\
+   \bouchon{78} \Sigma \rightarrow \overline\Sigma}
+  %-----
+  {\bouchon{76} \Sigma \rightarrow \overline\Sigma}
+
+% SIZE (_ _ .. _ _)
+%
+\inferrule
+  {\{\textsf{SIZE} \, \{e_0 \, b_0 \textbf{..} b_1 \, e_1\}\} \in
+    \Sigma\\
+   \nu \triangleq \textsf{Val} \, (\textsf{Int} \, 0) \leqslant
+   \textbf{..} \leqslant \textsf{Val} \, (\textsf{Int} \, 0)\\
+   \bouchon{69} \nu \equiv e_0 b_0 \textbf{..} b_1 e_1\\
+   \bouchon{78} \Sigma \rightarrow \overline\Sigma}
+  %-----
+  {\bouchon{76} \Sigma \rightarrow \overline\Sigma}
+
+\inferrule
+  {\forall \sigma \listin \Sigma.\sigma \nlhd \{\textsf{SIZE} \,
+    \{\textsf{Value} \, (\textsf{Int} \, 0)\}\}\\
+   \forall \sigma \listin \Sigma.(\sigma \lhd \{\textsf{SIZE} \, \{e_0
+   \, b_0 \textbf{..} b_1 \, e_1\}\} \Rightarrow \neg(\bouchon{69} \nu
+   \equiv e_0 b_0 \textbf{..} b_1 e_1))}
+  %-----
+  {\bouchon{76} \Sigma \rightarrow \Sigma}
+
+\inferrule
+  {\bouchon{78} \Sigma \rightarrow \overline\Sigma}
+  %-----
+  {\bouchon{78} \{\textsf{FROM} \, \sigma\} \Cons \Sigma \rightarrow
+    \overline\Sigma}
+
+\inferrule
+  {\nu \nlhd \textsf{FROM} \, \wild\\
+   \bouchon{78} \Sigma \rightarrow \overline\Sigma}
+  %-----
+  {\bouchon{78} \{\nu\} \Cons \Sigma \rightarrow \{\nu\} \Cons
+    \overline\Sigma}
+
+\inferrule
+  {}
+  {\bouchon{78} \emptyL \rightarrow \emptyL}
+
+\end{mathparpagebreakable}

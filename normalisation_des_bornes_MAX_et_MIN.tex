@@ -1,0 +1,98 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {x, \textrm{T} \bouchon{61} e_0 \mid \Sigma \rightarrow
+    \overline{e}_0\\
+   x, \textrm{T} \bouchon{61} e_1 \mid \Sigma \rightarrow
+   \overline{e}_1}
+  %-----
+   {x, \textrm{T} \bouchon{45} e_0 b_0 \, \textbf{..} \, b_1 e_1 \mid
+     \Sigma \rightarrow \overline{e}_0 b_0 \, \textbf{..} \, b_1
+     \overline{e}_1}
+
+\inferrule
+  {x, \textrm{T} \bouchon{59} \Sigma \rightarrow \textrm{min}}
+  %-----
+  {x, \textrm{T} \bouchon{61} \textsf{MIN} \mid \Sigma \rightarrow
+    \textrm{min}}
+
+\inferrule
+  {x, \textrm{T} \bouchon{60} \Sigma \rightarrow \textrm{max}}
+  %----
+  {x, \textrm{T} \bouchon{61} \textsf{MAX} \mid \Sigma \rightarrow
+    \textrm{max}}
+
+\inferrule
+  {e \nlhd \textsf{MIN} \mid \textsf{MAX}}
+  %-----
+  {x, \textrm{T} \bouchon{61} e \mid \Sigma \rightarrow e}
+\end{mathparpagebreakable}
+
+\noindent Borne inférieure du premier intervalle dans une liste de contraintes
+\begin{mathparpagebreakable}
+\inferrule
+  {}
+  {x, \textrm{T} \bouchon{59} \{\textsf{Value} \, (v)\} \Cons \Sigma
+    \rightarrow \textsf{Val} \, (v)}
+
+\inferrule
+  {}
+  {x, \textrm{T} \bouchon{59} \{e_0 b_0 \textbf{..} b_1 e_1\} \Cons
+    \Sigma \rightarrow e_0}
+
+\inferrule
+  {}
+  {x, \wildINTEGER \bouchon{59} \emptyL \rightarrow \textsf{MIN}}
+
+\inferrule
+  {}
+  {\textrm{"REAL"}, \textrm{T} \bouchon{59} \emptyL \rightarrow
+    \textsf{Val} \, (\textsf{MINUS-INFINITY})}
+
+\inferrule
+  {}
+  {x, \textsf{CharString} \, (\textrm{kind}) \bouchon{59} \emptyL
+    \rightarrow \textrm{lower\_bound} \, (\textrm{kind})}
+
+\inferrule
+  {\nu \nlhd \textsf{Value} \, \wild \mid \wild \wild \textbf{..}
+    \wild \wild\\
+   x, \textrm{T} \bouchon{59} \Sigma \rightarrow e}
+  %-----
+  {x, \textrm{T} \bouchon{59} \{\nu\} \Cons \Sigma \rightarrow e}
+\end{mathparpagebreakable}
+
+\noindent Borne supérieure du premier intervalle dans une liste de contraintes
+\begin{mathparpagebreakable}
+\inferrule
+  {}
+  {x, \textrm{T} \bouchon{60} \{\textsf{Value} \, (v)\} \Cons \Sigma
+    \rightarrow \textsf{Val} \, (v)}
+
+\inferrule
+  {}
+  {x, \textrm{T} \bouchon{60} \{e_0 b_0 \textbf{..} b_1 e_1\} \Cons
+    \Sigma \rightarrow e_1}
+
+\inferrule
+  {}
+  {x, \wildINTEGER \bouchon{60} \emptyL \rightarrow \textsf{MAX}}
+
+\inferrule
+  {}
+  {\textrm{"REAL"}, \textrm{T} \bouchon{60} \emptyL \rightarrow
+    \textsf{Val} \, (\textsf{PLUS-INFINITY})}
+
+\inferrule
+  {}
+  {x, \textsf{CharString} \, (\textrm{kind}) \bouchon{60} \emptyL
+    \rightarrow \textrm{upper\_bound} \, (\textrm{kind})}
+
+\inferrule
+  {\nu \nlhd \textsf{Value} \, \wild \mid \wild \wild \textbf{..}
+    \wild \wild\\
+   x, \textrm{T} \bouchon{59} \Sigma \rightarrow e}
+  %-----
+  {x, \textrm{T} \bouchon{59} \{\nu\} \Cons \Sigma \rightarrow e}
+\end{mathparpagebreakable}

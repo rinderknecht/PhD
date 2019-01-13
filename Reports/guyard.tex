@@ -1,0 +1,111 @@
+%%-*-latex-*-
+
+\documentclass[a4paper,11pt,twoside]{article}
+
+% Page geometry for College Publications
+%
+\usepackage[bindingoffset=0cm,a4paper,centering,textheight=200mm,textwidth=120mm,includefoot,includehead,dvips]{geometry}
+
+% Language and fonts
+%
+\usepackage[british]{babel}    % British English
+\usepackage[T1]{fontenc}       % Required for hyphenation and \DJ
+\usepackage[utf8]{inputenc}    % UTF-8 encoding
+\usepackage{hyphenat}          % \hyp{} is a breakable dash
+%\usepackage{url}               % To typeset URLs
+\usepackage{mdwlist}           % Tight vertical spacing of list items
+\usepackage{microtype}         % Microtypographic enhancements
+
+\hfuzz 2pt % Do not report overhang less than 2pt
+
+% Title and author
+%
+\title{\Huge Report on the thesis of\\ Christian Rinderknecht}
+\author{\Large Jacques Guyard}
+\date{8 November 1998}
+
+%--------------------------------------------------------------------
+%
+\begin{document}
+
+\maketitle
+
+The thesis of Mr~Christian Rinderknecht belongs to the framework of
+heterogeneous, distributed computer systems and their communication
+protocols. It is an important domain, of increasing relevance. The
+interest and originality of the work is to be situated at the
+confluence of the pragmatism ruling the world of telecommunications
+and the formalism of the language theorists. A language, ASN.1, and an
+encoding --~both shared and standardised~-- have been defined with the
+goal of enabling heterogeneous systems to communicate. Given the
+complexity and the size of these standards, the existing compilers are
+not conformant and many issues do show up in practice. The aim of this
+work is to provide a formal definition of the notation ASN.1 with a
+twofold purpose: to fix and complete the standard, on the one hand,
+and to derive a software tool which is correct and trustworthy, on the
+other hand.
+
+The manuscript contains an informal presentation of the research in
+80~pages, and an annex of about 280~page long, which put forward the
+complete formalisation.
+
+The introduction expresses very clearly the objectives and stakes of
+the thesis and gives a very didactic summary of the completed work.
+
+Chapter~1 delves quickly into the heart of the matter and brings forth
+the first analytical phase, with transformations applicable to an
+ASN.1 module in order to obtain a normalised version of it which eases
+the following stages. These transformations are presented as steps
+(16) that implicitly structure the chapter. As is, the presentation is
+clear, but the author could have justified the number of steps and
+regroup some steps in order to obtain a more explicit structure.
+
+Chapter~2 introduces informally the type checking. The author
+pre\-sents a property which exists in the standard without
+justification, that is, that the types must be well tagged in order to
+obtain the uniqueness of the type checking, therefore a more efficient
+implementation of the algorithm.
+
+Chapter~3 deals with the semantic or the semantic correctness of the
+encoding, based on a particular encoding rule as a reference. The
+uniqueness of the encoding is obtained by means of a constraint
+analogous to the previous one on the well tagged types. This chapter
+ends with the verification that the rewrites to the kernel indeed
+preserve the codes.
+
+Chapter~4 deals with the checking of the subtypes, which the author
+has purposefully and justifiably separated from the type checking.
+
+The conclusion summarises the objectives, mentions the built prototype
+and opens a few research tracks, in particular towards a formalisation
+of a more secure and compact encoding.
+
+The annex includes six chapters which make up the benefit of the
+formal logic and the proofs of the theorems stated informally in the
+previous chapters.
+
+The document in its present state is acceptable. The separation
+between formal and informal aspects is a good initiative. It is
+somewhat regrettable, although understandable, that the author focused
+on the central part of his work, that is to say, the formalisation,
+and that he only stated the problem in the introduction and gave the
+results in the conclusion. It would have been interesting and useful
+to have early on a chapter presenting the issues faced, including then
+an overview of ASN.1, and a chapter later on where would be detailed
+the system built and the applications already in use and expected.
+
+The work must also yield publications in international venues.
+
+\paragraph{Conclusion} This thesis, given its objectives, its approach
+and results is indeniably of a scientific and practical
+interest. Given the originality of the approach, the quality of the
+work invested, as well as the quantity, I give a favourable notice for
+the defense by Mr~Christian Rinderknecht of a thesis to obtain the
+diploma of doctor of the university Paris~VI in the specialty of
+informatics.
+
+\bigskip\bigskip
+
+Jacques Guyard
+
+\end{document}

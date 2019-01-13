@@ -1,0 +1,52 @@
+%%-*-latex-*-
+
+\input{moliere.tex}
+
+\vspace*{1cm}
+
+\lettrine{J}{usqu'à présent}, les compilateurs ASN.1 sont déficients
+quant à leur analyse syntaxique. En effet, ils ne parviennent pas à
+reconnaître toute la grammaire du langage, et par conséquent, imposent
+des restrictions par rapport à celle-ci, ou bien ont un comportement
+inattendu et celé. Nous montrons que l'on peut obtenir une grammaire
+ASN.1 dans sa version de \oldstylenums{1990} ayant la propriété LL(1)
+(section~\vref{LL1}), grâce à une suite de transformations à partir de
+la forme normalisée, sans faire aucun compromis avec celle-ci. Une
+grammaire peut être ici considérée comme étant un ensemble d'équations
+rationnelles ayant pour (plus petite) solution un langage non
+contextuel. Chaque transformation est donc décrite en fonction
+d'opérations rationnelles (union, produit et étoile) garantissant
+l'invariance du langage engendré par la grammaire résultante.
+
+Les macros ASN.1 sont traitées mais pas dans toute leur généralité,
+étant donné que cela est irréalisable. Les restrictions apportées
+permettent de réaliser en OCaml un analyseur syntaxique complet
+fonctionnant en \emph{une passe}.
+
+Tout d'abord nous présentons une grammaire LL(1) pour le lexique
+d'ASN.1, obtenue à partir des indications en langue naturelle du
+document ISO. Ensuite vient l'étude de la syntaxe d'ASN.1.  La
+contrainte qui guidait le choix des transformations était de rendre
+analysable de façon descendante la grammaire finale, ce qui impliquait
+qu'elle devait être non ambiguë.  Or, la question de l'ambiguïté d'une
+grammaire étant un problème indécidable, il a fallu faire des choix
+explicites \emph{ad hoc} pour résoudre les difficultés rencontrées.
+De plus, nous ne savions même pas \emph{a priori}, en supposant
+éliminées ces difficultés, s'il existait une grammaire LL(1) pour
+ASN.1. Ces deux raisons rendirent nécessaire un travail «~à la main~».
+D'autre part, étant données deux grammaires, le problème de l'égalité
+des langages engendrés par celles-ci est aussi indécidable
+\citep{AhoUllman}.  Par conséquent, la preuve de cette égalité se fera
+par la présentation \emph{in extenso}, étape par étape, de chaque
+transformation syntaxique (cf. annexe pour tous les détails).  Pour
+faciliter la compréhension, la grammaire initiale sera découpée en
+sections dont nous suivrons l'évolution. La preuve de la propriété
+LL(1) est donnée ensuite. Les errata de la norme ont été pris en
+compte dès les étapes initiales des transformations, leur validité
+étant rétroactive.  Ils sont signalés dès leur première apparition.
+
+\input{presentation_du_formalisme_syntaxique}
+\input{nouvelle_grammaire_d_ASN}
+\input{verification_de_la_propriete_LL1}
+\input{macros}
+\input{transformations_grammaticales}

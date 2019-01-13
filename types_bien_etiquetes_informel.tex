@@ -1,0 +1,54 @@
+%%-*-latex-*-
+
+Dans le but de parvenir au déterminisme de l'algorithme de contrôle
+sémantique des types, c'est-à-dire à l'unicité des exécutions de
+celui-ci, nous allons contraindre les types, de façon analogue à la
+façon dont nous avions restreint les types à être bien labellisés pour
+obtenir l'unicité du contrôle (syntaxique) des types et l'uncité du
+codage.
+
+Nous définissons formellement à la section~\vref{types_bien_etiquetes}
+un prédicat sur les types que nous nommons \emph{types bien
+  étiquetés}. Trois cas sont possibles:
+\begin{enumerate}
+
+  \item \emph{\emph{T}~n'est ni \texttt{SET}, ni \texttt{SEQUENCE} ni
+    \texttt{CHOICE}.} Alors, T~est bien étiqueté.
+
+  \item \emph{\emph{T}~est \texttt{CHOICE} ou \texttt{SET}.} Si les
+    ensembles d'étiquetages de ses champs (présentés à la
+    section~\vref{inclusion_d_etiquetages_informelle}) sont tous
+    disjoints entre eux, alors T~est bien étiqueté.
+
+  \item \emph{\emph{T}~est \texttt{SEQUENCE}.} Si pour tous les champs
+    d'une succession de champs marqués \texttt{OPTIONAL} ou
+    \texttt{DEFAULT} et celui qui la suit immédiatement, leurs
+    ensembles d'étiquetages sont tous disjoints entre eux, alors T~est
+    bien étiqueté.
+
+\end{enumerate}
+Dans tous les autres cas, T~n'est pas bien étiqueté.
+
+Cette relation restreint le nombre de types valides et correspond à
+une généralisation des restrictions pour le type \texttt{SEQUENCE}
+\cite[\S~22.5]{ASN94}, pour le type \texttt{SET} \cite[\S~24.3]{ASN94}
+et pour le type \texttt{CHOICE} \cite[\S~26.4]{ASN94}. Pourquoi une
+généralisation? Parce que l'interprétation stricte de la norme X.680
+nous amène à rejeter
+\begin{sverb}
+T ::= CHOICE {
+        a [0] [1] INTEGER,
+        b [0] BOOLEAN
+      }
+\end{sverb}
+En effet, la norme ne tient compte pour la comparaison des champs que
+de la première étiquette \texttt{[0]} de chaque étiquetage. Notre
+thèse est qu'une analyse récursive des étiquetages, telle que nous
+l'avons donnée à la section~\vref{inclusion_d_etiquetages_informelle},
+donc plus fine, ne rend pas pour autant légales des spécifications qui
+poseraient des problèmes sémantiques, plus précisément: pour le
+contrôle sémantique des types (qui, rappelons-le, capture l'essence
+d'un éventuel décodage). Autrement dit, les valeurs du type~\texttt{T}
+syntaxiquement différentes auront des codes syntaxiquement différents,
+car les étiquetages suffiront toujours à les distinguer, autant que la
+syntaxe, via les labels, permettait de distinguer les valeurs.

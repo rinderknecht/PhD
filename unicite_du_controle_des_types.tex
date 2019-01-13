@@ -1,0 +1,963 @@
+%%-*-latex-*-
+
+\newtheorem{unicite_typage}{Théorème}[section]
+
+\begin{unicite_typage}[Unicité du contrôle des types]
+\label{unicite_typage}
+\begin{equation*}
+\begin{tabular}{|l|}
+  \hline 
+  \\
+  \emph{S'il existe une preuve qu'une valeur est d'un type bien labellisé,} \\
+  \emph{alors cette preuve est unique.} \\
+  \\
+  \hline
+\end{tabular}
+\end{equation*}
+\end{unicite_typage}
+Nous avons d'abord besoin de deux lemmes techniques. Pour la preuve du
+théorème, cf.~\vref{preuve_unicite_typage}.
+
+\newtheorem{labels_SEQUENCE_aux}[unicite_typage]{Lemme}
+
+\begin{labels_SEQUENCE_aux}
+\label{labels_SEQUENCE_aux}
+\begin{equation*}
+\begin{array}{|ll|}
+   \hline 
+      & \\
+   Si & \domain{\mathcal{A}} \Gamma, \textrm{L} \vdashL
+   \textsf{SEQUENCE} \, \Phi \\
+   et & \domain{\mathcal{A}} \Gamma, x \vdash \bob V \bcb :
+   \textsf{SEQUENCE} \, \Phi \\
+   alors & \forall l \in \textrm{L}.\forall (\textsf{Some} \, x', \wild\!) \in
+            V . x' \neq l \\
+         & \\
+   \hline
+\end{array}
+\end{equation*}
+\end{labels_SEQUENCE_aux}
+
+\smallskip
+
+\noindent \textbf{Preuve du lemme~\ref{labels_SEQUENCE_aux}} \\
+
+\noindent La démonstration se fera par induction.
+\begin{itemize}
+
+  \item $\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+    \sigma', s')$ et $\Phi \lhd [\varphi'] \sqcup \Phi'$
+    et $V \lhd [(\textsf{Some} \, l', v')] \sqcup V'$.
+    Distinguons une des hypothèses de filtre:
+    \begin{itemize}
+
+      \item \textbf{HF.0}: $V \lhd [(\textsf{Some} \, l', v')] \sqcup
+        V'$
+
+    \end{itemize}
+    Les autres hypothèses sont
+    \begin{itemize}
+
+      \item \textbf{H.0}: $\domain{\mathcal{A}} \Gamma, \textrm{L}
+        \vdashL \textsf{SEQUENCE} \, \Phi$ \\
+        C'est la règle~\RefTirName{[5]}
+        (page~\pageref{types_bien_labellises_5}) qui s'applique:
+        \begin{mathpar}
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+             \domain{\mathcal{A}} \Gamma, \{\} \vdashL \textrm{T}'\\
+             \domain{\mathcal{A}} \Gamma, \{l'\} \uplus \textrm{L} \vdashL
+             \textsf{SEQUENCE} \, \Phi'}
+            %-------
+            {\domain{\mathcal{A}} \Gamma, \textrm{L} \vdashL
+              \textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi')} 
+            \;\TirName{[5]}
+        \end{mathpar}
+        Appliquons-là directement (i.e. toutes les variables de la
+        règle sont liées aux variables de même nom dans
+        l'environnement du cas courant de la preuve). Étiquetons ses
+        prémisses non redondantes avec les hypothèses de filtre:
+        \begin{itemize}
+
+          \item \textbf{H.0.0}: $\domain{\mathcal{A}} \Gamma, \{\}
+            \vdashL \textrm{T}'$
+
+          \item \textbf{H.0.1}: $\domain{\mathcal{A}} \Gamma, \{l'\}
+            \uplus \textrm{L} \vdashL \textsf{SEQUENCE} \, \Phi'$
+
+        \end{itemize}
+
+      \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma, x \vdash
+        \bob V \bcb : \textsf{SEQUENCE} \, \Phi$ \\
+        \textbf{HF.0} nous permet d'appliquer la règle~\RefTirName{[15]}
+        (page~\pageref{controle_des_types_15}):
+        \begin{mathpar}
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+             V \lhd [(\textsf{Some} \, l', v')] \sqcup V'\\
+            \domain{\mathcal{A}} \Gamma, \emptyStr \vdash v' :
+            \textrm{T}'\\
+            \domain{\mathcal{A}} \Gamma, x \vdash \bob V' \bcb :
+            \textsf{SEQUENCE} \, \Phi'}
+            %-----
+            {\domain{\mathcal{A}} \Gamma, x \vdash \bob V \bcb :
+             \textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi')}
+            \;\TirName{[15]}
+        \end{mathpar}
+        Appliquons-là directement et étiquetons ses prémisses non
+        redondantes:
+        \begin{itemize}
+
+          \item \textbf{H.1.0}: $\domain{\mathcal{A}} \Gamma,
+            \emptyStr \vdash v' : \textrm{T}'$
+
+          \item \textbf{H.1.1}: $\domain{\mathcal{A}} \Gamma, x
+            \vdash \bob V' \bcb : \textsf{SEQUENCE} \, \Phi'$
+
+        \end{itemize}
+
+    \end{itemize}
+    Prouvons
+    \begin{itemize}
+      \item \textbf{C}: $\forall l \in \textrm{L}.\forall (\textsf{Some}
+        \, x', \wild\!) \in V . x' \neq l$
+    \end{itemize}
+    Reprenons l'énoncé du théorème et effectuons-y les renommages
+    suivants:
+    \begin{itemize}
+
+      \item $\Phi \stackrel{\alpha}{\longleftarrow} \Phi'$
+
+      \item $\textrm{L} \stackrel{\alpha}{\longleftarrow} \{l'\}
+        \uplus \textrm{L}$
+
+      \item $V \stackrel{\alpha}{\longleftarrow} V'$
+
+    \end{itemize}         
+    \begin{equation*}
+      \begin{array}{ll}
+        Si & \domain{\mathcal{A}} \Gamma, \{l'\} \uplus \textrm{L}
+        \vdashL \textsf{SEQUENCE} \, \Phi' \\
+        et & \domain{\mathcal{A}} \Gamma, x \vdash \bob V' \bcb :
+        \textsf{SEQUENCE} \, \Phi' \\
+        alors & \forall l \in \{l'\} \uplus \textrm{L}.\forall
+        (\textsf{Some} \, x', \wild\!) \in V'. x' \neq l \\
+     \end{array}
+    \end{equation*}
+    Nous reconnaissons en cet énoncé une instance de l'hypothèse
+    d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+    \textbf{H.0.1} et \textbf{H.1.1}. En l'appliquant il vient donc:
+    \begin{itemize}
+
+      \item \textbf{H.2}: $\forall l \in \{l'\} \uplus
+        \textrm{L}.\forall (\textsf{Some} \, x', \wild\!) \in V'. x'
+        \neq l$
+
+    \end{itemize}
+    \textbf{H.2} implique
+    \begin{itemize}
+
+      \item \textbf{H.3}: $\forall l \in \textrm{L}.\forall \textsf{Some}
+        \, x', \wild\!) \in V'. x' \neq l$
+
+     \item \textbf{H.4}: $\forall l \in \textrm{L}.l' \neq l$
+
+    \end{itemize}
+    \noindent \textbf{H.3}~et~\textbf{H.4} impliquent
+    \begin{itemize}
+
+      \item \textbf{H.5}: $\forall l \in \textrm{L}.(l' \neq l \AND
+        \forall (\textsf{Some} \, x', \wild\!) \in V'. x' \neq l)$
+
+    \end{itemize}
+    \noindent \textbf{H.5}~et~\textbf{HF.0}
+    impliquent~\textbf{C}. $\triangle$
+
+  \item $\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma',
+    s')$ \\
+    et $\Phi \lhd [\varphi'] \sqcup \Phi'$ \\
+    et $v \lhd \bob V \bcb$ \\
+    et $s' \lhd \textsf{Some OPTIONAL}$ \\
+ 
+    Distinguons deux des hypothèses de filtre:
+    \begin{itemize}
+
+      \item \textbf{HF.1}: $s' \lhd \textsf{Some OPTIONAL}$
+
+    \end{itemize}
+    Les autres hypothèses sont
+    \begin{itemize}
+
+      \item \textbf{H.0}: $\domain{\mathcal{A}} \Gamma, \textrm{L}
+        \vdashL \textsf{SEQUENCE} \, \Phi$ \\
+        C'est la règle~\RefTirName{[5]}
+        (page~\pageref{types_bien_labellises_5}) qui s'applique:
+        \begin{mathpar}
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+             \domain{\mathcal{A}} \Gamma, \{\} \vdashL \textrm{T}'\\
+             \domain{\mathcal{A}} \Gamma, \{l'\} \uplus \textrm{L}
+             \vdashL \textsf{SEQUENCE} \, \Phi'}
+            %-----
+            {\domain{\mathcal{A}} \Gamma, \textrm{L} \vdashL
+              \textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi')}
+          \;\TirName{[5]}
+        \end{mathpar}
+        Appliquons-là directement et étiquetons ses prémisses non
+        redondantes avec les hypothèses de filtre:
+        \begin{itemize}
+
+          \item \textbf{H.0.0}: $\domain{\mathcal{A}} \Gamma, \{\}
+            \vdashL \textrm{T}'$
+
+          \item \textbf{H.0.1}: $\domain{\mathcal{A}} \Gamma, \{l'\}
+            \uplus \textrm{L} \vdashL \textsf{SEQUENCE} \, \Phi'$
+
+        \end{itemize}
+
+      \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma, x \vdash \bob
+        V \bcb : \textsf{SEQUENCE} \, \Phi$ \\
+        La règle~\RefTirName{[16]}
+        (page~\pageref{controle_des_types_16}) peut s'appliquer:
+        \begin{mathpar}
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+             s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+             \domain{\mathcal{A}} \Gamma, x \vdash v :
+             \textsf{SEQUENCE} \, \Phi'}
+             %-----
+             {\domain{\mathcal{A}} \Gamma, x \vdash v :
+               \textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi')}
+          \;\TirName{[16]}
+        \end{mathpar}
+        Appliquons-là en effectuant la substitution
+        \begin{itemize}
+
+          \item $v \stackrel{\beta}{\longleftarrow} \bob V \bcb$
+
+        \end{itemize}
+        Étiquetons sa prémisse non redondante:
+        \begin{itemize}
+ 
+          \item \textbf{H.1.0}: $\domain{\mathcal{A}} \Gamma, x \vdash
+            \bob V \bcb : \textsf{SEQUENCE} \, \Phi'$
+    
+        \end{itemize}
+
+    \end{itemize}
+    Prouvons
+    \begin{itemize}
+
+      \item \textbf{C}: $\forall l \in \textrm{L}.\forall (\textsf{Some}
+        \, x', \wild\!) \in V.x' \neq l$
+
+    \end{itemize}
+    Reprenons l'énoncé du théorème et effectuons-y les renommages
+    suivants:
+    \begin{itemize}
+     
+      \item $\Phi \stackrel{\alpha}{\longleftarrow} \Phi'$
+
+      \item $\textrm{L} \stackrel{\alpha}{\longleftarrow} \{l'\} \uplus
+        \textrm{L}$
+
+    \end{itemize}         
+    \begin{equation*}
+      \begin{array}{ll}
+        Si & \domain{\mathcal{A}} \Gamma, \{l'\} \uplus \textrm{L}
+        \vdashL \textsf{SEQUENCE} \, \Phi' \\ 
+        et & \domain{\mathcal{A}} \Gamma, x \vdash \bob V \bcb :
+        \textsf{SEQUENCE} \, \Phi' \\
+        alors & \forall l \in \{l'\} \uplus \textrm{L}.\forall
+        (\textsf{Some} \, x', \wild\!) \in V. x' \neq l
+     \end{array}
+   \end{equation*}
+   Nous reconnaissons en cet énoncé une instance de l'hypothèse
+   d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+   \textbf{H.0.1} et \textbf{H.1.0}. En l'appliquant il vient donc:
+   \begin{itemize}
+
+     \item \textbf{H.2}: $\forall l \in \{l'\} \uplus \textrm{L}.\forall
+       (\textsf{Some} \, x', \wild\!) \in V. x' \neq l$
+
+    \end{itemize}
+    Puis \textbf{H.2} implique trivialement~\textbf{C}. $\triangle$
+
+  \item $\Phi \lhd \emptyL$ \\
+    et $V \lhd \emptyL$ \\
+    et $v \lhd \bob V \bcb$ \\
+
+    Distinguons des hypothèses de filtre:
+    \begin{itemize}
+
+      \item \textbf{HF.0}: $\Phi \lhd \emptyL$
+
+      \item \textbf{HF.1}: $V \lhd \emptyL$
+
+    \end{itemize}
+    Les autres hypothèses sont
+    \begin{itemize}
+
+    \item \textbf{H.0}: $\domain{\mathcal{A}} \Gamma, \textrm{L}
+      \vdashL
+      \textsf{SEQUENCE} \, \Phi$ \\
+      \textbf{HF.0} et \textbf{HF.1} font que c'est la
+      règle~\RefTirName{[7]} (page~\pageref{types_bien_labellises_7})
+      qui s'applique:
+      \begin{mathpar}
+        \inferrule
+          {\textrm{T} \nlhd \wildTRef \mid \wildCHOICE \\
+                \mid \wildSETOF \mid \wildSEQUENCEOF \\\
+                \mid \wildSET \mid \wildSEQUENCE}
+          %-----
+          {\domain{\mathcal{A}} \Gamma, \textrm{L} \vdashL \textrm{T}}
+        \;\TirName{[7]}
+      \end{mathpar}
+
+    \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma, x \vdash \bob V
+      \bcb : \textsf{SEQUENCE} \, \Phi$ \\
+      \textbf{HF.0} et \textbf{HF.1} font que c'est la
+      règle~\RefTirName{[17]} (page~\pageref{controle_des_types_17})
+      qui s'applique:
+      \begin{mathpar}
+        \inferrule
+          {}
+          {\domain{\mathcal{A}} \Gamma, x \vdash \bob\emptyL\!\bcb :
+            \textsf{SEQUENCE} \, \emptyL}
+        \;\TirName{[17]}
+      \end{mathpar}
+
+  \end{itemize}
+  Prouvons
+  \begin{itemize}
+
+    \item \textbf{C}: $\forall l \in \textrm{L}.\forall (\textsf{Some} \, x',
+      \wild\!) \in V.x' \neq l$
+
+  \end{itemize}
+  \textbf{HF.1} implique trivialement~\textbf{C}. $\triangle$
+
+\end{itemize}
+
+\noindent $\Box$
+
+\newtheorem{labels_SEQUENCE}[unicite_typage]{Lemme}
+
+\begin{labels_SEQUENCE}
+\label{labels_SEQUENCE}
+\begin{equation*}
+\begin{array}{|ll|}
+    \hline
+    & \\
+    Soit & v \lhd \bob [(\textsf{Some} \, x', v')] \sqcup V' \bcb \\
+    Si & \domain{\mathcal{A}} \Gamma, \{x'\} \uplus \textrm{L} \vdashL
+    \textsf{SEQUENCE} \, \Phi \\
+    alors & \neg(\domain{\mathcal{A}} \Gamma, x \vdash  v :
+    \textsf{SEQUENCE} \, \Phi) \\
+    & \\
+    \hline
+\end{array}
+\end{equation*}
+\end{labels_SEQUENCE}
+
+\bigskip
+
+\noindent \textbf{Preuve du lemme~\ref{labels_SEQUENCE}} \\
+
+Soit $v \lhd \bob V \bcb$. \\
+
+Reprenons l'énoncé du lemme~\ref{labels_SEQUENCE_aux} et effectuons-y
+les renommages suivants:
+\begin{itemize}
+
+  \item $x \stackrel{\alpha}{\longleftarrow} x''$
+
+  \item $\textrm{L} \stackrel{\alpha}{\longleftarrow} \{x'\} \uplus \textrm{L}$ 
+
+\end{itemize}
+Il devient alors:
+\begin{equation*}
+\begin{array}{ll}
+ Si & \domain{\mathcal{A}} \Gamma, \{x'\} \uplus \textrm{L} \vdashL
+ \textsf{SEQUENCE} \, \Phi
+ \\
+ et & \domain{\mathcal{A}} \Gamma, x \vdash \bob V \bcb
+                          : \textsf{SEQUENCE} \, \Phi \\
+ alors & \forall l \in \{x'\} \uplus \textrm{L}.\forall (\textsf{Some} \,  x'',
+ \wild\!) \in V.x'' \neq l
+\end{array}
+\end{equation*}
+Évaluons partiellement ce lemme en choisissant $l = x'$:
+\begin{equation*}
+\begin{array}{ll}
+ Si & \domain{\mathcal{A}} \Gamma, \{x'\} \uplus \textrm{L} \vdashL
+ \textsf{SEQUENCE} \, \Phi
+ \\
+ et & \domain{\mathcal{A}} \Gamma, x \vdash \bob V \bcb
+                          : \textsf{SEQUENCE} \, \Phi \\
+ alors & \forall (\textsf{Some} \,  x'', \wild\!) \in V.x'' \neq x'
+\end{array}
+\end{equation*}
+Cet énoncé est équivalent à:
+\begin{equation*}
+  \begin{array}{ll}
+    Si   & \domain{\mathcal{A}} \Gamma, \{x'\} \uplus \textrm{L} \vdashL
+           \textsf{SEQUENCE} \, \Phi \\
+    et   & \domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{SEQUENCE} \,
+            \Phi \\
+   alors & V \nlhd [(\textsf{Some} \,  x', v')] \sqcup V'
+  \end{array}
+\end{equation*}
+Prenons-en finalement une contraposition et nous obtenons notre
+lemme~\ref{labels_SEQUENCE}. $\Box$
+
+\newtheorem{labels_CHOICE}[unicite_typage]{Lemme}
+
+\begin{labels_CHOICE}
+\label{labels_CHOICE}
+\begin{equation*}
+\begin{array}{|ll|}
+\hline
+   & \\
+Si & \domain{\mathcal{A}} \Gamma, \{x'\} \uplus \textrm{L} \vdashL
+\textsf{CHOICE} \, \mathcal{F}\\
+alors & \neg(\domain{\mathcal{A}} \Gamma, x \vdash (x' \colon v') :
+\textsf{CHOICE} \, \mathcal{F}) \\
+  & \\ 
+  \hline
+\end{array}
+\end{equation*}
+\end{labels_CHOICE}
+
+\bigskip
+
+\noindent \textbf{Preuve du lemme~\ref{labels_CHOICE}} \\
+
+La démonstration se fera par induction sur~$\mathcal{F}$.
+\begin{itemize}
+
+  \item $f' \lhd (l', \tau', \textrm{T}', \sigma', s')$ \\
+    $\mathcal{F} \lhd [f'] \sqcup \mathcal{F}'$ \\
+    et $v \lhd x' \colon v'$ \\
+
+    L'autre hypothèse est
+    \begin{itemize}
+         
+      \item \textbf{H}: $\domain{\mathcal{A}} \Gamma, \{x'\} \uplus
+        \textrm{L} \vdashL \textsf{CHOICE} \, \mathcal{F}$ \\
+        Appliquons la règle~\RefTirName{[3]}
+        (page~\pageref{types_bien_labellises_3}):
+        \begin{mathpar}
+          \inferrule
+            {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+             \domain{\mathcal{A}} \Gamma, \{\} \vdashL \textrm{T}'\\
+             \domain{\mathcal{A}} \Gamma, \{l'\} \uplus \textrm{L}
+             \vdashL \textsf{CHOICE} \, \mathcal{F}'}
+             %-----
+           {\domain{\mathcal{A}} \Gamma, \textrm{L} \vdashL
+             \textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}')}
+          \;\TirName{[3]}
+        \end{mathpar}
+        Ce faisant nous effectuons la substitution:
+        \begin{itemize}
+
+          \item $\textrm{L} \stackrel{\beta}{\longleftarrow}
+            \{x'\} \uplus \textrm{L}$
+
+        \end{itemize}
+        Étiquetons ses prémisses non redondantes avec les hypothèses
+        de filtre:
+        \begin{itemize}
+
+          \item \textbf{H.0}: $\domain{\mathcal{A}} \Gamma, \{\} \vdashL
+            \textrm{T}'$
+
+          \item \textbf{H.1}: $ \domain{\mathcal{A}} \Gamma, \{l'\}
+            \uplus (\{x'\} \uplus \textrm{L}) \vdashL \textsf{CHOICE}
+            \, \mathcal{F}'$
+
+        \end{itemize}
+
+    \end{itemize}
+    Prouvons
+    \begin{itemize}
+      
+      \item \textbf{C}: $\neg(\domain{\mathcal{A}} \Gamma, x \vdash v :
+        \textsf{CHOICE} \, \mathcal{F})$
+ 
+    \end{itemize}
+    Les seules règle dérivant des jugement sur les types \textsf{CHOICE}
+    sont
+    \begin{mathparpagebreakable}
+      \inferrule
+        {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+         \domain{\mathcal{A}} \Gamma, \emptyStr \vdash v' : \textrm{T}'}
+        %-----
+        {\domain{\mathcal{A}} \Gamma, x \vdash (l' \colon v') :
+          \textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}')}
+      \;\TirName{[13]} 
+
+      \inferrule
+        {\domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{CHOICE} \,
+          \mathcal{F}'}
+        %-----
+        {\domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{CHOICE} \,
+          ([f'] \sqcup \mathcal{F}')}
+      \;\TirName{[14]}
+    \end{mathparpagebreakable}
+    Tout d'abord \textbf{H.1}~implique 
+    \begin{itemize}
+
+      \item \textbf{H.3}: $x' \neq l'$
+
+    \end{itemize}
+    Par conséquent la règle~\RefTirName{[13]} ne peut s'appliquer.
+    Reprenons l'énoncé du lemme en y effectuant les renommages
+    suivants:
+    \begin{itemize}
+
+      \item $\mathcal{F} \stackrel{\alpha}{\longleftarrow} \mathcal{F}'$
+
+      \item $\textrm{L} \stackrel{\alpha}{\longleftarrow} \{l'\}
+        \uplus \textrm{L}$
+
+    \end{itemize}
+    Nous obtenons alors:
+    \begin{equation*}
+    \begin{array}{ll}
+      Si & \domain{\mathcal{A}} \Gamma, \{x'\} \uplus (\{l'\} \uplus
+      \textrm{L}) \vdashL \textsf{CHOICE} \, \mathcal{F}'\\
+      alors & \neg(\domain{\mathcal{A}} \Gamma, x \vdash (x' \colon v') :
+     \textsf{CHOICE} \, \mathcal{F}')
+    \end{array}
+    \end{equation*}
+    Nous reconnaissons en cet énoncé une instance de l'hypothèse
+    d'induction, car sa prémisse est~\textbf{H.1}. En l'appliquant il
+    vient donc:
+    \begin{itemize}
+
+      \item $\textbf{H.4}: \neg(\domain{\mathcal{A}} \Gamma, x \vdash (x'
+        \colon v') : \textsf{CHOICE} \, \mathcal{F}')$
+
+    \end{itemize}
+    Or, \textbf{H.4}~est une instance de la négation de la prémisse de
+    la règle~\RefTirName{[14]}, qui ne peut donc s'appliquer non plus.
+    Puisque le deux seules règles pouvant dériver
+    \(\domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{CHOICE} \,
+    \mathcal{F}\) ne peuvent s'appliquer, cela signifie que
+    \textbf{C}~est vraie. $\triangle$
+
+  \item $\mathcal{F} \lhd \emptyL$ et $v \lhd x' \colon v'$ \\
+
+    L'autre hypothèse est
+    \begin{itemize}
+         
+      \item \textbf{H}: $\domain{\mathcal{A}} \Gamma, \{x'\} \uplus
+        \textrm{L} \vdashL \textsf{CHOICE} \, \mathcal{F}$
+
+    \end{itemize}         
+    Prouvons
+    \begin{itemize}
+      
+      \item \textbf{C}: $\neg(\domain{\mathcal{A}} \Gamma, x \vdash v
+        : \textsf{CHOICE} \, \mathcal{F})$
+ 
+    \end{itemize}
+    Ni la règle~\RefTirName{[13]}
+    (page~\pageref{controle_des_types_13}), ni la
+    règle~\RefTirName{[14]} (page~\pageref{controle_des_types_14}) ne
+    peuvent s'appliquer car $\mathcal{F} \lhd \emptyL$ (aucun filtre
+    n'accepte cette valeur). Puisque le deux seules règles pouvant
+    dériver le jugement \(\domain{\mathcal{A}} \Gamma, x \vdash v :
+    \textsf{CHOICE} \, \mathcal{F}\) ne peuvent s'appliquer, cela
+    signifie que \textbf{C}~est vraie. $\triangle$
+
+\end{itemize}
+
+\noindent $\Box$
+
+\noindent \textbf{Preuve du théorème \label{preuve_unicite_typage} \ref{unicite_typage}} \\
+
+Rappelons son énoncé:
+\begin{center}
+\begin{tabular}{|l|}
+  \hline 
+  \\
+  S'il existe une preuve qu'une valeur est d'un type bien labellisé, \\
+  alors cette preuve est unique. \\
+  \\
+  \hline
+\end{tabular}
+\end{center}
+Les hypothèses:
+\begin{itemize}
+
+  \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma \vdashL \textrm{T}$
+
+  \item \textbf{H.2}: $\domain{\mathcal{A}} \Gamma, x \vdash v : \textrm{T}$ 
+
+\end{itemize}
+La preuve se fait par induction sur la forme de~T. Nous allons prouver
+qu'à chaque étape de la dérivation, ou bien aucune règle n'est
+applicable, ou bien une seule instance d'une seule règle
+est applicable, grâce à~\textbf{H.0} et~\textbf{H.1}.
+
+Tout d'abord on remarque que la seule façon de prouver~\textbf{H.1}
+est de prouver:
+\begin{itemize}
+      
+  \item \textbf{H.1bis}: $\domain{\mathcal{A}} \Gamma, \{\} \vdashL
+    \textrm{T}$
+
+\end{itemize}
+par la règle~\RefTirName{[1]}
+(page~\pageref{types_bien_labellises_1}):
+\begin{mathpar}
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \{\} \vdashL \textrm{T}}
+  %-----
+  {\domain{\mathcal{A}} \Gamma \vdashL \textrm{T}}
+\;\TirName{[1]}
+\end{mathpar}
+Nous remplaçons alors \textbf{H.1} par~\textbf{H.1bis} dans l'énoncé
+du théorème. Maintenant, les type à examiner de près sont
+\textsf{CHOICE} et \textsf{SEQUENCE}.
+\begin{itemize}
+
+  \item $\textrm{T} \lhd \textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}')$
+    et $f'\lhd (l', \tau', \textrm{T}', \sigma', s')$\\
+
+    Les autres hypothèses sont
+    \begin{itemize}
+
+      \item \textbf{H.1bis}: $\domain{\mathcal{A}} \Gamma, \{\}
+        \vdashL \textrm{T}$ \\
+        C'est la règle~\RefTirName{[3]}
+        (page~\pageref{types_bien_labellises_3}) qui s'applique:
+        \begin{mathpar}
+          \inferrule
+            {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+             \domain{\mathcal{A}} \Gamma, \{\} \vdashL \textrm{T}'\\
+             \domain{\mathcal{A}} \Gamma, \{l'\} \uplus \textrm{L}
+             \vdashL \textsf{CHOICE} \, \mathcal{F}'}
+            %-------
+            {\domain{\mathcal{A}} \Gamma, \textrm{L} \vdashL
+              \textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}')}
+          \;\TirName{[3]}
+        \end{mathpar}
+        Appliquons-là directement (i.e. toutes les variables de la
+        règle sont liées aux variables de même nom dans
+        l'environnement du cas courant de la preuve) et étiquetons ses
+        prémisses non redondantes avec les hypothèses de filtre:
+        \begin{itemize}
+
+          \item \textbf{H.1bis.0}: $\domain{\mathcal{A}} \Gamma, \{\}
+            \vdashL \textrm{T}'$
+
+          \item \textbf{H.1bis.1}: $\domain{\mathcal{A}} \Gamma,
+            \{l'\} \uplus \textrm{L} \vdashL \textsf{CHOICE} \,
+            \mathcal{F}'$
+
+        \end{itemize}
+
+      \item \textbf{H.2}: $\domain{\mathcal{A}} \Gamma, x \vdash v : \textrm{T}$ \\
+        La règle~\RefTirName{[13]} (page~\pageref{controle_des_types_13}):
+        \begin{mathpar}
+          \inferrule
+            {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+             \domain{\mathcal{A}} \Gamma, \emptyStr \vdash v' : \textrm{T}'}
+            %------
+            {\domain{\mathcal{A}} \Gamma, x \vdash (l' \colon v') :
+              \textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}')}
+          \;\TirName{[13]} 
+        \end{mathpar}
+        ou~\RefTirName{[14]} (page~\pageref{controle_des_types_14}):
+        \begin{mathpar}
+          \inferrule
+            {\domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{CHOICE}
+              \, \mathcal{F}'}
+            %-----
+            {\domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{CHOICE}
+              \, ([f'] \sqcup \mathcal{F}')}
+          \;\TirName{[14]}
+        \end{mathpar}
+        peuvent s'appliquer. Nous remarquons d'abord que si $v \nlhd
+        x' \colon v'$ alors la seule règle éventuellement applicable
+        serait~\RefTirName{[14]}, ce qui démontrerait le
+        théorème. Supposons donc maintenant:
+        \begin{itemize}
+
+          \item \textbf{HF.0}: $v \lhd x' \colon v'$
+
+        \end{itemize}
+        Nous remarquons alors que si $x' \neq l'$, alors la seule
+        règle éventuellement applicable serait~\RefTirName{[14]}, ce
+        qui démontrerait le théorème. Supposons donc maintenant:
+        \begin{itemize}
+
+          \item \textbf{HF.1}: $x' = l'$
+
+        \end{itemize}
+        Rien ne s'oppose \emph{a priori} à ce que la
+        règle~\RefTirName{[13]} s'applique. \emph{Il nous suffit alors
+          de prouver que la règle~\RefTirName{[14]} ne peut
+          s'appliquer}. Pour ce faire, prouvons la négation de sa
+        prémisse, soit à prouver:
+        \begin{itemize}
+
+          \item \textbf{C}: $\neg(\domain{\mathcal{A}} \Gamma, x \vdash
+            v : \textsf{CHOICE} \, \mathcal{F}')$
+
+        \end{itemize}
+        \textbf{HF.1} et \textbf{H.1bis.1} impliquent
+        \begin{itemize}
+
+          \item \textbf{H.3}: $\domain{\mathcal{A}} \Gamma, \{x'\}
+            \uplus \textrm{L} \vdashL \textsf{CHOICE} \, \mathcal{F}'$
+
+        \end{itemize}
+        Rappelons l'énoncé du lemme~\ref{labels_CHOICE}:
+        \begin{equation*}
+        \begin{array}{ll}
+          Si & \domain{\mathcal{A}} \Gamma, \{x'\} \uplus \textrm{L}
+          \vdashL \textsf{CHOICE} \, \mathcal{F} \\
+          alors & \neg(\domain{\mathcal{A}} \Gamma, x \vdash (x'
+          \colon v') : \textsf{CHOICE} \, \mathcal{F})
+        \end{array}
+        \end{equation*}
+        Appliquons ce lemme à~\textbf{H.3}. Ce faisant nous effectuons
+        la substitution
+        \begin{itemize}
+
+          \item $\mathcal{F} \stackrel{\beta}{\longleftarrow}
+            \mathcal{F}'$
+
+        \end{itemize}
+        Nous obtenons alors:
+        \begin{itemize}
+
+          \item \textbf{H.4}: $\neg(\domain{\mathcal{A}} \Gamma, x
+            \vdash (x' \colon v') : \textsf{CHOICE} \, \mathcal{F}')$
+ 
+        \end{itemize}
+        \textbf{H.4} et \textbf{HF.0} impliquent \textbf{C}. $\triangle$
+
+      \end{itemize}
+
+    \item $\textrm{T} \lhd \textsf{SEQUENCE} \, ([\varphi'] \sqcup
+      \Phi')$ et $\varphi'\lhd \textsf{Field} \, (l', \tau',
+      \textrm{T}', \sigma', s')$ Les autres hypothèses sont
+      \begin{itemize}
+
+        \item \textbf{H.1bis}: $\domain{\mathcal{A}} \Gamma, \{\}
+          \vdashL \textrm{T}$ \\
+
+          La règle~\RefTirName{[5]}
+          (page~\pageref{types_bien_labellises_5}) s'applique:
+          \begin{mathpar}
+            \inferrule
+              {\varphi' \lhd \textsf{Field} \, (l', \tau',
+                \textrm{T}', \sigma', s')\\
+                \domain{\mathcal{A}} \Gamma, \{\} \vdashL \textrm{T}'\\
+                \domain{\mathcal{A}} \Gamma, \{l'\} \uplus \textrm{L}
+                \vdashL \textsf{SEQUENCE} \, \Phi'}
+               %----
+              {\domain{\mathcal{A}} \Gamma, \textrm{L} \vdashL
+                \textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi')}
+            \;\TirName{[5]}
+          \end{mathpar}
+          Appliquons-là directement et étiquetons ses prémisses non
+          redondantes avec les hypothèses de filtre:
+          \begin{itemize}
+ 
+            \item \textbf{H.1bis.0}: $\domain{\mathcal{A}} \Gamma, \{\}
+            \vdashL \textrm{T}'$
+
+            \item \textbf{H.1bis.1}: $\domain{\mathcal{A}} \Gamma,
+                           \{l'\} \uplus \textrm{L} \vdashL
+                           \textsf{SEQUENCE} \, \Phi'$ 
+
+          \end{itemize}
+                  
+        \item \textbf{H.2}: $\domain{\mathcal{A}} \Gamma \vdash v :
+          \textrm{T}$. La forme de~T implique que peuvent s'appliquer
+          les règles~\RefTirName{[15]}
+          (page~\pageref{controle_des_types_15}) et~\RefTirName{[16]}
+          (page~\pageref{controle_des_types_16}):
+          \begin{mathparpagebreakable}
+            \inferrule
+              {\varphi' \lhd \textsf{Field} \, (l', \tau',
+                \textrm{T}', \sigma', s')\\
+                V \lhd [(\textsf{Some} \, l', v')] \sqcup V'\\
+                \domain{\mathcal{A}} \Gamma, \emptyStr \vdash v' :
+                \textrm{T}'\\
+                \domain{\mathcal{A}} \Gamma, x \vdash \bob V' \bcb :
+                \textsf{SEQUENCE} \, \Phi'}
+              %-----
+              {\domain{\mathcal{A}} \Gamma, x \vdash \bob V \bcb :
+                \textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi')}
+            \;\TirName{[15]}
+
+            % Unmatched OPTIONAL field
+            %
+            \inferrule
+              {\varphi' \lhd \textsf{Field} \, (l', \tau',
+                \textrm{T}', \sigma', s')\\
+                s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+                \domain{\mathcal{A}} \Gamma, x \vdash v :
+                \textsf{SEQUENCE} \, \Phi'}
+              %-----
+              {\domain{\mathcal{A}} \Gamma, x \vdash v :
+                \textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi')}
+            \;\TirName{[16]} 
+          \end{mathparpagebreakable}
+          Remarquons d'abord que si $v \nlhd \bob V \bcb$, alors la
+          seule règle éventuellement applicable
+          serait~\RefTirName{[16]}, ce qui démontrerait le
+          théorème. Supposons donc:
+          \begin{itemize}
+
+            \item \textbf{H.3}: $v \lhd \bob V \bcb$
+
+          \end{itemize}
+          Remarquons de plus que si $V \nlhd [(\textsf{Some} \, l',
+          v')] \sqcup V'$, alors la seule règle éventuellement
+          applicable serait~\RefTirName{[16]}, ce qui démontrerait le
+          théorème. Supposons donc:
+          \begin{itemize}
+
+            \item \textbf{H.4}: $V \lhd [(\textsf{Some} \, l', v')]
+              \sqcup V'$
+
+          \end{itemize}
+          Remarquons ensuite que si $s' \nlhd \textsf{Some} \,
+          \textsf{OPTIONAL}$, la seule règle éventuellement applicable
+          serait~\RefTirName{[15]}, ce qui démontrerait le
+          théorème. Supposons donc:
+          \begin{itemize}
+
+            \item \textbf{H.5}: $s' \lhd \textsf{Some} \,
+              \textsf{OPTIONAL}$
+
+          \end{itemize}
+          Maintenant, les règles~\RefTirName{[15]}
+          et~\RefTirName{[16]} peuvent \emph{a priori} être
+          appliquées, mais \emph{nous allons montrer que seule la
+            règle~\RefTirName{[15]} est éventuellement applicable.}
+          Appliquons directement la règle~\RefTirName{[15]} et
+          étiquetons ses prémisses non redondantes avec les hypothèses
+          précédentes:
+          \begin{itemize}
+
+            \item \textbf{H.2.0}: $\domain{\mathcal{A}} \Gamma,
+              \emptyStr \vdash v' : \textrm{T}'$
+
+            \item \textbf{H.2.1}: $\domain{\mathcal{A}} \Gamma, x
+              \vdash \bob V' \bcb : \textsf{SEQUENCE} \, \Phi'$
+
+          \end{itemize}
+          Nous devons considérer deux aspects:
+          \begin{enumerate}
+
+            \item Nous devons prouver que~\textbf{H.0}
+              et~\textbf{H.1bis} permettent de conclure que
+              \begin{itemize}
+
+                \item \textbf{C.0}: $\forall (\textsf{Some} \, x',
+                  \wild\!) \in V'.x'\neq l'$
+
+              \end{itemize}
+              En effet, ainsi \textbf{H.4}, qui est une prémisse
+              de~\textbf{H.2}, serait l'unique projection possible. En
+              d'autres termes:
+              \begin{itemize}
+
+                \item $\textbf{H.4} \Rightarrow \textbf{C.0}$
+
+              \end{itemize}
+              (d'où l'unicité de la projection). Reprenons l'énoncé du
+              lemme~\vref{labels_SEQUENCE_aux} et effectuons-y les
+              renommages suivants:
+              \begin{itemize}
+
+                \item $\textrm{L} \stackrel{\alpha}{\longleftarrow} \{l'\}
+                  \uplus \textrm{L}$
+
+                \item $V \stackrel{\alpha}{\longleftarrow} V'$
+
+                \item $\Phi \stackrel{\alpha}{\longleftarrow} \Phi'$
+
+              \end{itemize}
+              Nous obtenons alors le lemme suivant:
+              \begin{equation*}
+                \begin{array}{ll}
+                  Si & \domain{\mathcal{A}} \Gamma, \{l'\} \uplus
+                  \textrm{L} \vdashL \textsf{SEQUENCE} \, \Phi' \\
+                  et & \domain{\mathcal{A}} \Gamma, x \vdash \bob V'
+                  \bcb : \textsf{SEQUENCE} \, \Phi' \\
+                  alors & \forall l \in \{l'\} \uplus
+                  \textrm{L}.\forall (\textsf{Some} \, x', \wild\!) \in
+                  V'.x' \neq l
+                \end{array}
+              \end{equation*}
+              Évaluons partiellement ce lemme en prenant $l = l'$. Il
+              devient alors:
+              \begin{equation*}
+                \begin{array}{ll}
+                  Si & \domain{\mathcal{A}} \Gamma, \{l'\} \uplus
+                  \textrm{L} \vdashL \textsf{SEQUENCE} \, \Phi' \\
+                  et & \domain{\mathcal{A}} \Gamma, x \vdash \bob V'
+                  \bcb : \textsf{SEQUENCE} \, \Phi' \\
+                  alors & \forall (\textsf{Some} \, x', \wild\!) \in
+                  V'.x' \neq l'
+                \end{array}
+              \end{equation*}
+              Appliquons ce dernier à~\textbf{H.1bis.1}
+              et~\textbf{H.2.1}. Il vient~\textbf{C.0}. $\Diamond$
+
+            \item \emph{Nous devons prouver que la
+                règle~\RefTirName{[16]}
+                (page~\pageref{controle_des_types_16}) ne peut
+                s'appliquer.} Prouvons la négation de sa prémisse,
+              soit à prouver:
+              \begin{itemize}
+
+                \item \textbf{C.1}: $\neg(\domain{\mathcal{A}} \Gamma, x
+                  \vdash v : \textsf{SEQUENCE} \, \Phi')$
+              
+              \end{itemize}
+              Reprenons l'énoncé du lemme~\ref{labels_SEQUENCE} et
+              effectuons-y les renommages suivants:
+              \begin{itemize}
+
+                \item $x' \stackrel{\alpha}{\longleftarrow} l'$
+
+                \item $\Phi \stackrel{\alpha}{\longleftarrow} \Phi'$
+
+              \end{itemize}
+              Nous obtenons alors le lemme équivalent:
+              \begin{equation*}
+                \begin{array}{ll}
+                  Soit & v \lhd \bob [(\textsf{Some} \, l', v')]
+                  \sqcup V' \bcb \\
+                  Si & \domain{\mathcal{A}} \Gamma, \{l'\} \uplus
+                  \textrm{L} \vdashL \textsf{SEQUENCE} \, \Phi' \\
+                  alors & \neg(\domain{\mathcal{A}} \Gamma, x \vdash
+                  v : \textsf{SEQUENCE} \, \Phi')
+                \end{array}
+              \end{equation*}
+              En appliquant ce lemme respectivement à~\textbf{H.4}
+              et~\textbf{H.1bis.1} il vient~\textbf{C.1}. $\Diamond$
+              $\triangle$
+
+          \end{enumerate}
+
+       \end{itemize}
+         
+ \end{itemize}
+
+\noindent $\Box$

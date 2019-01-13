@@ -1,0 +1,94 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \{(\textrm{T}, \sigma)\})\\
+  \domain{\mathcal{B}} \Delta \bouchon{27} \textrm{T} \rightarrow
+  (\overline{\textrm{T}}, \domain{\mathcal{B}_0} \Delta_0)\\
+  \domain{\mathcal{B}_0} \Delta_0 \bouchon{23} \domain{\mathcal{A}}
+  \Gamma \rightarrow (\domain{\overline{\mathcal{A}}} \overline\Gamma,
+  \domain{\mathcal{B}_1} \Delta_1)\\
+  \domain{\overline{\mathcal{A}}_0} \overline\Gamma_0 \triangleq
+  \domain{\overline{\mathcal{A}}} \overline\Gamma \oplus x \mapsto (\alpha,
+  \tau, \{(\overline{\textrm{T}}, \sigma)\})}
+%-----
+  {\domain{\mathcal{B}} \Delta \bouchon{23} \domain{\{x\} \uplus
+      \mathcal{A}} \Gamma \rightarrow (\domain{\overline{\mathcal{A}}_0}
+    \overline\Gamma_0, \domain{\mathcal{B}_1} \Delta_1)}
+
+\inferrule
+  {}
+  {\domain{\mathcal{B}} \Delta \bouchon{23} \domain{\varnothing}
+    \Gamma \rightarrow (\domain{\varnothing} \Gamma, \domain{\mathcal{B}}
+    \Delta)}
+
+% SET
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \emptyL\!, \textsf{TRef} \, x,
+  \{\}, \textsf{Some} \, (\textsf{DEFAULT} \, v'))\\
+  y \not\in \mathcal{B}\\
+  \domain{\mathcal{B}_0} \Delta_0 \triangleq \domain{\mathcal{B}} \Delta
+  \oplus y \mapsto (\emptyL\!, \textsf{TRef} \, x, \{\}, v')\\
+  \domain{\mathcal{B}_0} \Delta_0 \bouchon{27} \textsf{SET} \, \Phi'
+  \rightarrow (\textsf{SET} \, \overline{\Phi}', \domain{\mathcal{B}_1}
+  \Delta_1)\\
+  \overline\varphi' \triangleq \textsf{Field} \, (l', \emptyL\!,
+  \textsf{TRef} \, x, \{\}, \textsf{Some} \, (\textsf{DEFAULT} \,
+  (\textsf{VRef} \, y)))}
+%------
+  {\domain{\mathcal{B}} \Delta \bouchon{27} \textsf{SET} \, (\varphi'
+    \Cons \Phi') \rightarrow (\textsf{SET} \, (\overline\varphi' \Cons
+    \overline{\Phi}'), \domain{\mathcal{B}_1} \Delta_1)}
+
+\inferrule
+  {\varphi' \nlhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma',
+  \textsf{Some} \, (\textsf{DEFAULT} \, v'))\\
+  \domain{\mathcal{B}} \Delta \bouchon{27} \textsf{SET} \, \Phi'
+  \rightarrow (\textsf{SET} \, \overline{\Phi}', \domain{\mathcal{B}_0}
+  \Delta_0)}
+%-----
+  {\domain{\mathcal{B}} \Delta \bouchon{27} \textsf{SET} \, (\varphi'
+    \Cons \Phi') \rightarrow (\textsf{SET} \, (\varphi' \Cons
+    \overline{\Phi}'), \domain{\mathcal{B}_0} \Delta_0)}
+
+% SEQUENCE
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \emptyL\!, \textsf{TRef} \, x,
+    \{\}, \textsf{Some} \, (\textsf{DEFAULT} \, v'))\\
+  y \not\in \mathcal{B}\\
+  \domain{\mathcal{B}_0} \Delta_0 \triangleq \domain{\mathcal{B}}
+  \Delta \oplus y \mapsto (\emptyL\!, \textsf{TRef} \, x, \{\}, v')\\
+  \domain{\mathcal{B}_0} \Delta_0 \bouchon{27} \textsf{SEQUENCE} \,
+  \Phi' \rightarrow (\textsf{SEQUENCE} \, \overline{\Phi}',
+  \domain{\mathcal{B}_1} \Delta_1)\\
+  \overline\varphi' \triangleq \textsf{Field} \, (l', \emptyL\!,
+  \textsf{TRef} \, x, \{\}, \textsf{Some} \, (\textsf{DEFAULT} \,
+  (\textsf{VRef} \, y)))}
+%-----
+  {\domain{\mathcal{B}} \Delta \bouchon{27} \textsf{SEQUENCE} \,
+    (\varphi' \Cons \Phi') \rightarrow (\textsf{SEQUENCE} \,
+    (\overline\varphi' \Cons \overline{\Phi}'), \domain{\mathcal{B}_1}
+    \Delta_1)}
+
+\inferrule
+  {\varphi' \nlhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma',
+    \textsf{Some} \, (\textsf{DEFAULT} \, v'))\\
+  \domain{\mathcal{B}} \Delta \bouchon{27} \textsf{SEQUENCE} \, \Phi'
+  \rightarrow (\textsf{SEQUENCE} \, \overline{\Phi}', \domain{\mathcal{B}_0}
+  \Delta_0)}
+%-----
+  {\domain{\mathcal{B}} \Delta \bouchon{27} \textsf{SEQUENCE} \,
+    (\varphi' \Cons \Phi') \rightarrow (\textsf{SEQUENCE} \, (\varphi'
+    \Cons \overline{\Phi}'), \domain{\mathcal{B}_0} \Delta_0)}
+
+% Others
+%
+\inferrule
+  {\textrm{T} \nlhd \wildSET \mid \wildSEQUENCE}
+%-----
+  {\domain{\mathcal{B}} \Delta \bouchon{27} \textrm{T} \rightarrow
+    (\textrm{T}, \domain{\mathcal{B}} \Delta)}
+
+\end{mathparpagebreakable}

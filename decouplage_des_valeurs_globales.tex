@@ -1,0 +1,37 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\Delta(y) \lhd (\emptyL\!, \wildTRef\!, \{\}, \wild\!)\\
+  \bouchon{10} (\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}}
+  \Delta) \rightarrow (\domain{\overline{\mathcal{A}}}
+  \overline\Gamma, \domain{\overline{\mathcal{B}}} \overline\Delta)\\
+  \overline\delta \triangleq y \mapsto \Delta(y)}
+ {\bouchon{10} (\domain{\mathcal{A}} \Gamma, \domain{\{y\} \uplus
+     \mathcal{B}} \Delta) \rightarrow (\domain{\overline{\mathcal{A}}}
+   \overline\Gamma, \domain{\overline{\mathcal{B}}} \overline\Delta
+   \oplus \overline\delta)}
+
+\inferrule
+  {\Delta(y) \nlhd (\emptyL\!, \wildTRef\!, \{\}, \wild\!)\\
+  \Delta(y) \lhd (\tau, \textrm{T}, \sigma, v)\\
+  \bouchon{10} (\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}}
+  \Delta) \rightarrow (\domain{\overline{\mathcal{A}}}
+  \overline\Gamma, \domain{\overline{\mathcal{B}}} \overline\Delta)\\
+  x \not\in \overline{\mathcal{A}}\\
+  \overline\gamma \triangleq x \mapsto (\emptyL\!, \tau,
+  \{(\textrm{T}, \sigma)\})\\
+  \overline\delta \triangleq y \mapsto (\emptyL\!, \textsf{TRef} \,
+  (x), \{\}, v)}
+ {\bouchon{10} (\domain{\mathcal{A}} \Gamma, \domain{\{y\} \uplus
+     \mathcal{B}} \Delta) \rightarrow (\domain{\overline{\mathcal{A}}}
+   \overline\Gamma \oplus \overline\gamma,
+   \domain{\overline{\mathcal{B}}} \overline\Delta \oplus
+   \overline\delta)} 
+
+\inferrule
+ {}
+ {\bouchon{10} (\domain{\mathcal{A}} \Gamma, \domain{\varnothing}
+   \Delta) \rightarrow (\domain{\mathcal{A}} \Gamma, 
+  \domain{\varnothing} \Delta)}
+\end{mathparpagebreakable}

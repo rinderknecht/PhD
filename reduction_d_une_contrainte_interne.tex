@@ -1,0 +1,241 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+% WITH COMPONENTS
+%
+% ........CHOICE with non empty constraint list
+%
+%         ....... None constraint
+%
+\inferrule
+  {f' \lhd (l', \tau', \textrm{T}', \{\}, s')\\
+   k' \lhd (l', \sigma, \textsf{None})\\
+   \overline{f}' \triangleq (l', \tau', \textrm{T}', \sigma, s')\\
+   \overline{\mathcal{F}} \Append [\overline{f}'], m \bouchon{12}
+   \textsf{CHOICE} \, (\mathcal{F}') \,\|\, \mathcal{K}' \rightarrow
+   \overline{\textrm{T}}}
+  %-----
+  {\overline{\mathcal{F}}, m \bouchon{12} \textsf{CHOICE} \, ([f']
+    \sqcup \mathcal{F}') \,\|\, [k'] \sqcup \mathcal{K}' \rightarrow
+    \overline{\textrm{T}}}
+
+%         .........PRESENT constraint
+%
+\inferrule
+  {(l', \tau', \textrm{T}', \{\}, s') \listin \mathcal{F}\\
+   k' \lhd (l', \sigma, \textsf{Some PRESENT})\\
+   (\wild\!, \wild\!, \textsf{Some PRESENT}) \not\listin
+   \mathcal{K}'\\
+   \overline{f}' \triangleq (l', \tau', \textrm{T}', \sigma, s')}
+  %-----
+  {\overline{\mathcal{F}}, m \bouchon{12} \textsf{CHOICE} \,
+    (\mathcal{F}) \,\|\, [k'] \sqcup \mathcal{K}' \rightarrow
+    \textsf{CHOICE} \, [\overline{f}']}
+
+%         .........ABSENT constraint
+%
+\inferrule
+  {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+   k' \lhd (l', \wild\!, \textsf{Some ABSENT})\\
+   \overline{\mathcal{F}} \nlhd \emptyL \OR \mathcal{F}' \nlhd
+   \emptyL\\
+   \overline{\mathcal{F}}, m \bouchon{12} \textsf{CHOICE} \,
+   (\mathcal{F}') \,\|\, \mathcal{K}' \rightarrow
+   \overline{\textrm{T}}}
+  %------
+  {\overline{\mathcal{F}}, m \bouchon{12} \textsf{CHOICE} \, ([f']
+    \sqcup \mathcal{F}') \,\|\, [k'] \sqcup \mathcal{K}' \rightarrow
+    \overline{\textrm{T}}}
+
+%         ......... ``None'' constraint
+%
+% ........CHOICE with empty constraint list and partial spec
+%
+\inferrule
+  {}
+  {\overline{\mathcal{F}}, \textsf{Partial} \bouchon{12}
+    \textsf{CHOICE} \, (\mathcal{F}) \,\|\, \emptyL \rightarrow
+    \textsf{CHOICE} \, (\overline{\mathcal{F}} \Append \mathcal{F})}
+
+% ........CHOICE with empty constraint list and full spec
+%
+\inferrule
+  {}
+  {\overline{\mathcal{F}}, \textsf{Full} \bouchon{12} \wildCHOICE
+    \,\|\, \emptyL \rightarrow \textsf{CHOICE} \,
+    \overline{\mathcal{F}}}
+
+%......... CHOICE with non empty constraint list but no constraint for the current field
+%
+\inferrule
+  {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+   (l', \wild\!, \wild\!) \not\in \mathcal{K}\\
+   \overline{\mathcal{F}} \Append [f'], m \bouchon{12} \textsf{CHOICE}
+   \, (\mathcal{F}') \,\|\, \mathcal{K} \rightarrow
+   \overline{\textrm{T}}}
+  %-----
+  {\overline{\mathcal{F}}, m \bouchon{12} \textsf{CHOICE} \, ([f']
+    \sqcup \mathcal{F}') \,\|\, \mathcal{K} \rightarrow
+    \overline{\textrm{T}}}
+
+% ........SEQUENCE with non empty constraint list
+%
+%         ........and ABSENT constraint
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma',
+    s')\\
+   s' \lhd \textsf{Some OPTIONAL}\\
+   k' \lhd (l', \sigma, \textsf{Some ABSENT})\\
+   \overline{\mathcal{F}}, m \bouchon{12} \textsf{SEQUENCE} \, \Phi'
+   \,\|\, \mathcal{K}' \rightarrow \overline{\textrm{T}}}
+  %-----
+  {\overline{\mathcal{F}}, m \bouchon{12} \textsf{SEQUENCE} \,
+    (\varphi' \Cons \Phi') \,\|\, k' \Cons \mathcal{K}' \rightarrow
+    \overline{\textrm{T}}}
+
+%         ........ ``None'' constraint AND Partial Spec
+%
+\inferrule
+  {\varphi'\lhd \textsf{Field} \, (l', \tau', \textrm{T}', \{\},
+    s')\\
+   k' \lhd (l', \sigma, \textsf{None})\\
+   \overline{f}' \triangleq (l', \tau', \textrm{T}', \sigma, s')\\
+   \overline{\mathcal{F}} \Append [\overline{f}'], \textsf{Partial}
+   \bouchon{12} \textsf{SEQUENCE} \, (\Phi') \,\|\, \mathcal{K}'
+   \rightarrow \overline{\textrm{T}}}
+  %----
+  {\overline{\mathcal{F}}, \textsf{Partial} \bouchon{12}
+    \textsf{SEQUENCE} \, (\varphi' \Cons \Phi') \,\|\, k' \Cons
+    \mathcal{K}' \rightarrow \overline{\textrm{T}}}
+
+%         ........ ``None'' constraint AND Full Spec
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{SEQUENCE} \, (\varphi' \Cons \Phi')\\
+   \varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \{\}, s')\\
+   s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+   k' \lhd (l', \sigma, \textsf{None})\\
+   \overline{\mathcal{K}} \triangleq (l', \sigma, \textsf{Some
+     PRESENT}) \Cons \mathcal{K}'\\
+   \overline{\mathcal{F}}, \textsf{Full} \bouchon{12} \textrm{T}
+   \,\|\, \overline{\mathcal{K}} \rightarrow \overline{\textrm{T}}}
+  %-----
+  {\overline{\mathcal{F}}, \textsf{Full} \bouchon{12} \textrm{T}
+    \,\|\, k' \Cons \mathcal{K}' \rightarrow \overline{\textrm{T}}}
+
+%         ........and neither ABSENT nor ``None'' constraint
+%
+\inferrule
+  {\varphi'\lhd \textsf{Field} \, (l', \tau', \textrm{T}', \{\},
+    s')\\
+   s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+   k' \lhd (l', \sigma, \textsf{Some} \, \textsf{OPTIONAL})\\
+   \overline{f}' \triangleq (l', \tau', \textrm{T}', \sigma, s')\\
+   \overline{\mathcal{F}} \Append [\overline{f}'], m \bouchon{12}
+   \textsf{SEQUENCE} \, (\Phi') \,\|\, \mathcal{K}' \rightarrow
+   \overline{\textrm{T}}}
+  %----
+  {\overline{\mathcal{F}}, m \bouchon{12} \textsf{SEQUENCE} \,
+    (\varphi' \Cons \Phi') \,\|\, k' \Cons \mathcal{K}' \rightarrow
+    \overline{\textrm{T}}}
+
+%         ........and neither ABSENT nor ``None'' constraint
+%
+\inferrule
+  {\varphi'\lhd \textsf{Field} \, (l', \tau', \textrm{T}', \{\},
+    s')\\
+   s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+   k' \lhd (l', \sigma, \textsf{Some} \, \textsf{PRESENT})\\
+   \overline{f}' \triangleq (l', \tau', \textrm{T}', \sigma,
+   \textsf{None})\\
+   \overline{\mathcal{F}} \Append [\overline{f}'], m \bouchon{12}
+   \textsf{SEQUENCE} \, (\Phi') \,\|\, \mathcal{K}' \rightarrow
+   \overline{\textrm{T}}}
+  %-----
+  {\overline{\mathcal{F}}, m \bouchon{12} \textsf{SEQUENCE} \,
+    (\varphi' \Cons \Phi') \,\|\, k' \Cons \mathcal{K}' \rightarrow
+    \overline{\textrm{T}}}
+
+%......... SEQUENCE with non empty constraint list but no constraint
+%          for the current field 
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (f')\\
+   f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+   \mathcal{K} \lhd (l, \sigma, \hat{\pi}) \Cons \mathcal{K}'\\
+   l \neq l'\\
+   \overline{\mathcal{F}} \Append [f'], m \bouchon{12}
+   \textsf{SEQUENCE} \, (\Phi') \,\|\, \mathcal{K} \rightarrow
+   \overline{\textrm{T}}}
+  %-----
+  {\overline{\mathcal{F}}, m \bouchon{12} \textsf{SEQUENCE} \,
+    (\varphi' \Cons \Phi') \,\|\, \mathcal{K} \rightarrow
+    \overline{\textrm{T}}}
+
+% ........SEQUENCE with empty constraint list and partial spec
+%
+\inferrule
+  {\overline\Phi \triangleq \textrm{List.map} \,\, \textsf{Field} \,\,
+    \overline{\mathcal{F}}}
+  %-----
+  {\overline{\mathcal{F}}, \textsf{Partial} \bouchon{12}
+    \textsf{SEQUENCE} \, (\Phi) \,\|\, \emptyL \rightarrow
+    \textsf{SEQUENCE} \, (\overline\Phi \Append \Phi)}
+
+% ........SEQUENCE with empty constraint list and full spec
+%
+% .............. non empty field list
+%
+% .....................OPTIONAL field
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma',
+    s')\\
+   s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+   \overline{\mathcal{K}} \triangleq [(l', \{\}, \textsf{Some} \,
+     \textsf{ABSENT})]\\
+   \overline{\mathcal{F}}, \textsf{Full} \bouchon{12}
+   \textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi') \,\|\,
+   \overline{\mathcal{K}} \rightarrow \overline{\textrm{T}}}
+  %-----
+  {\overline{\mathcal{F}}, \textsf{Full} \bouchon{12}
+    \textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi') \,|\, \emptyL
+    \rightarrow \overline{\textrm{T}}}
+
+% .....................non OPTIONAL field
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (f')\\
+   f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+   s' \nlhd \textsf{Some} \, \textsf{OPTIONAL}\\
+   \overline{\mathcal{F}} \Append [f'], \textsf{Full} \bouchon{12}
+   \textsf{SEQUENCE} \, (\Phi') \,|\, \emptyL \rightarrow
+   \overline{\textrm{T}}}
+  %-----
+  {\overline{\mathcal{F}}, \textsf{Full} \bouchon{12}
+    \textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi') \,|\, \emptyL
+    \rightarrow \overline{\textrm{T}}}
+
+%............... no field
+%
+\inferrule
+  {\overline\Phi \triangleq \textrm{List.map} \,\, \textsf{Field} \,\,
+    \overline{\mathcal{F}}}
+  %-----
+  {\overline{\mathcal{F}}, \textsf{Full} \bouchon{12}
+    \textsf{SEQUENCE} \, \emptyL \,\|\, \emptyL \rightarrow
+    \textsf{SEQUENCE} \, \overline\Phi}
+
+% SET
+%
+\inferrule
+  {\overline{\mathcal{F}}, m \bouchon{12} \textsf{SEQUENCE} \, (\Phi)
+    \,\|\, \pi \, (\mathcal{K}) \rightarrow \overline{\textrm{T}}\\
+  \perm{\pi}}
+  %------
+  {\overline{\mathcal{F}}, m \bouchon{12} \textsf{SET} \, (\Phi)
+    \,\|\, \mathcal{K} \rightarrow \overline{\textrm{T}}}
+ 
+\end{mathparpagebreakable}
+

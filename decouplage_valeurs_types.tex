@@ -1,0 +1,24 @@
+%%-*-latex-*-
+
+\subsection{Les valeurs par défaut}
+\label{les_valeurs_par_defaut}
+\input{les_valeurs_par_defaut}
+
+\subsection{Les constantes des types}
+\label{les_constantes_des_types}
+\input{les_constantes_des_types}
+
+\subsection{Découplage valeurs/types}
+
+\begin{mathpar}
+\inferrule
+% Les valeurs par défaut
+  {\domain{\mathcal{B}} \Delta \bouchon{23} \domain{\mathcal{A}}
+   \Gamma \rightarrow (\domain{\mathcal{A}_0} \Gamma_0,
+   \domain{\mathcal{B}_0} \Delta_0)\\
+%% Les constantes de types
+   \domain{\mathcal{B}_0} \Delta_0 \bouchon{2} \domain{\mathcal{A}_0}
+   \Gamma_0 \rightarrow r}
+%------
+  {\domain{\mathcal{B}} \Delta \bouchon{48} \domain{\mathcal{A}} \Gamma \rightarrow r}
+\end{mathpar}

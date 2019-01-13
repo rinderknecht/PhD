@@ -1,0 +1,1581 @@
+%%-*-latex-*-
+
+\lettrine{C}{e chapitre} a pour objectif de présenter la première
+phase nécessaire à l'analyse d'un module ASN.1. Nous allons nous
+livrer à une transformation du module de façon à nous assurer d'un
+certain nombre de propriétés prévues par la norme et à faciliter ainsi
+grandement les traitements ultérieurs présentés dans les chapitres
+suivants. Ce chapitre possède une contrepartie formelle en annexe pour
+les lecteurs ayant des connaissances en théorie de la programmation
+(section~\vref{environnements_canoniques}). À chaque étape de ce
+chapitre nous renverrons ces lecteurs à l'étape formelle associée.
+
+Dans une optique de compilation, la présente transformation peut être
+assimilée à une précompilation des sources ASN.1, qui détecte un
+certain nombre d'écarts à la norme et simplifie les phases suivantes,
+comme le contrôle des types, le codage, et même le décodage. Nous
+appellerons \emph{noyau ASN.1} l'ASN.1 résultant de ce processus de
+précompilation.
+
+Mais pourquoi une telle étape de mise en forme est-elle nécessaire?
+Fondamentalement, c'est la très grande dépendance mutuelle entre les
+différents concepts du langage qui l'impose. Nous pouvons, par une
+première analyse, décomposer ASN.1 en trois concepts: les types, les
+sous-types et les valeurs. La syntaxe nous apprend que les types
+dépendent des valeurs (via les valeurs par défaut pour les champs de
+structures, \texttt{DEFAULT}, ou les constantes distinguées du type
+\texttt{INTEGER} par exemple) et dépendent aussi des sous-types (les
+types structurés possèdent des champs qui peuvent contenir des
+sous-types). Similairement, les sous-types dépendent des types via les
+inclusions de types dans les contraintes \texttt{INCLUDES} et des
+valeurs (le sous-typage d'ASN.1 étant ensembliste, une contrainte
+spécifie ultimement des valeurs que doit \emph{contenir} un type). Les
+valeurs quant à elles dépendent indirectement des types en ce sens
+qu'elles sont toutes spécifiées conjointement avec leur type, et que
+leur interprétation en dépend fortement, par exemple via l'emploi des
+constantes distinguées du type \texttt{INTEGER} ou des constantes
+énumérées du type \texttt{ENUMERATED}. Pour résumer la situation, nous
+donnons le graphe de dépendance entre types, valeurs et contraintes à
+la figure~\ref{graph3}.
+\begin{figure}
+\centering
+\includegraphics[scale=0.7]{graph3.eps}
+\caption{Graphe de dépendance entre concepts ASN.1\label{graph3}}
+\end{figure}
+Les arcs pleins sont les dépendance entre termes, c'est-à-dire entre
+les extraits de syntaxe produits par les règles de grammaire
+\texttt{Type}, \texttt{Value} et \texttt{Constraint}, et les arcs en
+pointillés sont les dépendances supplémentaires en tenant compte des
+déclarations: la déclaration d'une valeur implique syntaxiquement la
+présence d'un type et éventuellement d'une contrainte. Il est évident
+que ce graphe est complet. Le lecteur ayant une connaissance du
+langage OCaml et de notions de compilation est invité à se référer au
+chapitre~\vref{formalisme} pour les détails théoriques d'un telle
+présentation (syntaxe abstraite et environnements).
+
+Pour décrire la transformation des spécifications ASN.1, nous
+étendrons un peu la syntaxe du langage pour être à même de définir une
+réécriture, c'est-à-dire la réduction d'un langage vers un
+sous-langage strict. Ainsi nous n'aurons pas besoin de sortir de ce
+cadre purement syntaxique pour en parler (pour les lecteurs familiers
+avec l'informatique fondamentale, cela veut dire que cette étape ne
+possède pas de contrepartie sémantique). Cette réécriture se fera en
+étapes successives, dont l'ordre doit être respecté car ces étapes ne
+commutent pas entre elles.
+
+Pour commencer, il convient de dire quelques mots concernant le type
+\texttt{REAL}: ce sera la \textbf{première étape}. Ce type est défini
+dans une norme~\cite[\S~18]{ASN94}, mais sa définition n'en est pas
+vraiment une. En effet, il est dit~\cite[\S~18.5]{ASN94} qu'on lui
+\emph{associe} la définition
+\begin{sverb}
+SEQUENCE {
+  mantissa INTEGER,
+  base     INTEGER (2|10),
+  exponent INTEGER
+}
+\end{sverb}
+et qu'il possède en plus la particularité de contenir trois valeurs
+spécialement distinguées~\cite[\S~18.6]{ASN94}: \texttt{0},
+\texttt{PLUS-INFINITY} et \texttt{MINUS-INFI\-NITY}, \emph{toutes
+  trois ne pouvant être définies en termes du type \emph{associé}
+  ci-dessus}. Pour clarifier cette situation, nous avons pris la
+décision dans cette thèse de définir implicitement
+\begin{sverb}
+REAL ::= SEQUENCE {
+           mantissa INTEGER,
+           base     INTEGER (2|10),
+           exponent INTEGER
+         }
+\end{sverb}
+et de toujours traiter spécialement les cas des valeurs spéciales
+ci-dessus, lorsqu'elles se présentent, par exemple lors du contrôle
+des types. De cette façon, nous éliminons le concept indéfini
+d'association et nous établissons clairement quels sont les cas
+exceptionnels. Le fait que la définition que nous adoptons soit dite
+implicite signifie qu'elle préexiste au module que nous traitons et en
+fait toujours partie automatiquement. \texttt{REAL} reste un mot-clé,
+donc notre définition n'entrera jamais en conflit lexical avec les
+définitions du spécifieur de protocoles. L'ajout de notre définition
+implicite au module courant est formalisé à la
+section~\vref{ajout_REAL_INTEGER}.
+
+Avant d'aborder la seconde étape, indiquons le sens que nous entendons
+donner à certains termes. Tout d'abord une \emph{étiquette} est une
+annotation de type définie en~\cite[\S~28.1]{ASN94} par la règle de
+grammaire \texttt{Tag}. Nous nommerons \emph{étiquetage} une
+succession d'étiquettes, éventuellement séparées par les
+\emph{attributs d'étiquettes} \texttt{IMPLICIT} ou
+\texttt{EXPLICIT}. Par exemple, dans
+\begin{sverb}
+T ::= [PRIVATE 4] IMPLICIT BOOLEAN
+\end{sverb}
+nous avons une étiquette \texttt{[PRIVATE 4]} dont l'attribut est
+\texttt{IMPLICIT}. Le concept d'étiquetage, quant à lui, n'apparaît
+pas explicitement dans la pratique, mais il est utile pour notre
+présentation. Soit
+\begin{sverb}
+T ::= [PRIVATE 4] IMPLICIT BOOLEAN
+U ::= [5] EXPLICIT T
+\end{sverb}
+Le type~\texttt{U} est une \emph{abréviation} du type~\texttt{T},
+c'est-à-dire que sa définition ci-dessus est équivalente à
+\begin{sverb}
+U ::= [5] EXPLICIT [PRIVATE 4] IMPLICIT BOOLEAN
+\end{sverb}
+Cette autre définition de \texttt{U} est valide, mais il est très peu
+probable qu'elle apparaisse dans la pratique. Dans ce cas, nous dirons
+que le type \texttt{BOOLEAN} (et non le type~\texttt{U}) possède un
+étiquetage qui vaut
+\begin{sverb}
+[5] EXPLICIT [PRIVATE 4] IMPLICIT
+\end{sverb}
+et qui est constitué de deux étiquettes, dans l'ordre attribuées
+\texttt{IMPLICIT} et \texttt{EXPLICIT} (ordre inverse d'écriture).
+
+La \textbf{deuxième étape} (section~\vref{types_bien_fondes}) de la
+mise en forme des modules ASN.1 consiste à définir un concept de
+\emph{type bien fondé} et à s'assurer que tous les types de la
+spécification sont bien fondés. Ce concept a principalement pour
+racine la difficulté que présente la définition des types
+récursifs. La seule indication au sujet des définitions
+récursives~\cite[\S~3.8.42]{ASN94} dit que la validité de telles
+constructions est laissée au jugement du spécifieur de protocoles, la
+seule contrainte étant que les valeurs de ce type aient un codage
+fini. Dans cette thèse nous définissons formellement un codage
+(section~\vref{codage}) qui est inspiré des \emph{Canonical Encoding
+  Rules}, ou CER~\citep{X.690}. Pour guider l'intuition, dans ce
+chapitre le lecteur pourra néanmoins entendre \emph{CER} lorsqu'il
+lira \emph{codage}. Ajoutons que les compilateurs ASN.1 présentent de
+nombreuses déficiences liées aux traitements des types et des valeurs
+récursives. Il s'agit d'empêcher par exemple
+\begin{itemize}
+
+ \item les définitions de types dont toutes les valeurs ont un codage
+   infini. Par exemple:
+\begin{sverb}
+T ::= SET {a [0] T}       
+\end{sverb}
+En effet, \texttt{T}~ne permet que des définitions de valeurs de la
+forme:
+\begin{sverb}
+x T ::= {a x}
+y T ::= {a {a y}}
+z T ::= {a {a {a z}}}
+\end{sverb}
+Toutes les valeurs de~\texttt{T} ont un codage infini, ce qui signifie
+en pratique que le processus de codage ne termine pas en présence de
+telles valeurs.
+
+ \item les déclarations qui ne définissent pas un type unique. Par
+   exemple:
+\begin{sverb}
+T ::= T
+\end{sverb}
+Ici nous avons affaire à une déclaration qui n'est pas une
+définition. Nous nommons \emph{déclaration} un texte qui peut être
+produit par la règle de grammaire
+\texttt{TypeAssignement}~\cite[\S~13.1]{ASN94}. Une \emph{définition},
+par contre, est une déclaration qui vérifie un certain nombre de
+critères de validité. L'analogie mathématique est qu'une déclaration
+est la donnée d'une équation dont la syntaxe est correcte, et la
+définition est l'existence d'une solution de cette équation sous
+certaines conditions, par exemple, l'unicité. Ainsi, dans l'exemple
+ci-dessus, la déclaration \texttt{T ::= T} n'est pas suffisamment
+contrainte pour assurer l'unicité d'une solution \verb+T+: tout type
+peut être défini de la sorte. Nous devons donc rejeter cette
+déclaration.
+
+ \item les définitions de types dont certaines valeurs n'ont pas
+   d'étiquetage (rappelons que les étiquetages participent au codage
+   des valeurs). Soit par exemple:
+\begin{sverb}
+T ::= CHOICE {
+        a T,
+        b [0] INTEGER
+      }
+
+t T ::= a : t
+\end{sverb}
+Le codage de la valeur~\texttt{t} échouera car on ne peut lui associer
+un étiquetage (nous laissons pour l'instant de côté le fait que la
+valeur est récursive elle aussi).
+
+\end{itemize}
+Remarquons que les champs des types structurés pouvaient ne pas avoir
+de label \citep{ASN90}, et que cette dissociation entre label et
+étiquetage pouvait mener à la déclaration de types dont certaines
+valeurs avaient une infinité d'étiquetages. Par exemple:
+\begin{sverb}
+T ::= CHOICE {
+          [0] T,
+        b [1] INTEGER
+      }
+t T ::= b : 7
+\end{sverb}
+Le codage de la valeur~\texttt{t} peut être associé à une infinité
+d'étiquetages: \texttt{[1]}, \texttt{[0][1]}, \texttt{[0][0][1]}, etc.
+
+Le concept de type bien fondé permet d'écarter toutes les déclarations
+que nous avons énumérées. Mais que faut-il alors penser des
+déclarations suivantes:
+\begin{itemize}
+
+   \item 
+\begin{sverb}
+T ::= SET OF T
+\end{sverb}
+
+   \item
+\begin{sverb}
+T ::= SET {a T OPTIONAL}
+\end{sverb}
+
+   \item
+\begin{sverb}
+T ::= SET {a T DEFAULT t}
+\end{sverb}
+
+   \item 
+\begin{sverb}
+T ::= SET {COMPONENTS OF T}
+\end{sverb}
+
+   \item
+\begin{sverb}
+T ::= CHOICE {a [0] T}
+\end{sverb}
+
+   \item 
+\begin{sverb}
+T ::= CHOICE {a [0] a < T}
+\end{sverb}
+
+   \item 
+\begin{sverb}
+T ::= CHOICE {a [0] T, b NULL} (WITH COMPONENTS {b ABSENT})
+\end{sverb}
+
+   \item
+\begin{sverb}
+T ::= INTEGER (INCLUDES T)
+\end{sverb}
+
+\end{itemize}
+
+\noindent Envisageons-les dans l'ordre:
+
+\begin{sverb}
+T ::= SET OF T
+\end{sverb}
+Il existe une infinité de valeurs de ce type dont le codage est
+infini:
+\begin{sverb}
+x T ::= {x}
+y T ::= {{y}}
+z T ::= {{{z}}}
+\end{sverb}
+Mais il possède une unique valeur dont le codage est fini:
+\begin{sverb}
+t T ::= {}
+\end{sverb}
+
+Nous dirons que les types \texttt{SET OF} et \texttt{SEQUENCE OF} sont
+toujours bien fondés, car la valeur \texttt{\{\}} est toujours
+possible. Notons qu'il n'est pas nécessaire d'imposer que le type des
+éléments soit bien fondé, par exemple si~\texttt{A} n'est pas bien
+fondé, alors \texttt{SET OF A} est bien fondé.
+
+Que penser alors de
+\begin{sverb}
+T ::= SET {a T OPTIONAL}
+\end{sverb}
+Les clauses~\cite[\S~22.8]{ASN94} et~\cite[\S~24.8]{ASN94} nous
+permettent d'écrire:
+\begin{sverb}
+t T ::= {}
+\end{sverb}
+Là encore, cette valeur valide du type~\texttt{T} est unique et il
+existe une infinité de valeurs dont le codage est infini:
+\begin{sverb}
+x T ::= {x}
+y T ::= {{y}}
+z T ::= {{{z}}}
+\end{sverb}
+
+Que dire si le champ~\texttt{a} dans l'exemple précédent avait été
+annoté \texttt{DEFAULT}?
+\begin{sverb}
+T ::= SET {a T DEFAULT t}
+\end{sverb}
+Ici encore, il existe une infinité de valeurs dont le codage est
+infini et nous pouvons écrire \emph{a priori}:
+\begin{sverb}
+t T ::= {}
+\end{sverb}
+Mais la clause~\cite[\S~22.9]{ASN94} implique que si la réécriture
+\begin{sverb}
+t T ::= {t}
+\end{sverb}
+est invalide, alors la première aussi. Or cette dernière doit être
+rejetée, comme nous l'avons dit précédemment, donc il faut rejeter la
+première.
+
+Considérons maintenant
+\begin{sverb}
+T ::= SET {COMPONENTS OF T}
+\end{sverb}
+Ici, nous avons une déclaration récursive à travers la construction
+\texttt{COMPO\-NENTS OF}. Nous n'avons à aucun endroit la donnée des
+champs à inclure, donc nous déciderons que, si un type est bien fondé,
+alors il ne présente pas une telle récursivité. Considérons ensuite
+\begin{sverb}
+T ::= CHOICE {a [0] T}
+\end{sverb}
+Il existe une infinité de valeurs pour ce type et elles sont de la
+forme suivante:
+\begin{sverb}
+x T ::= a : x
+y T ::= a : a : y
+z T ::= a : a : a : z
+\end{sverb}
+Toutes ces valeurs auraient un étiquetage différent associé lors du
+codage, mais le fait qu'elles soient toutes récursives implique que le
+processus de codage ne termine pas. Nous aborderons la récursivité des
+valeurs plus loin. Nous décidons en tout cas ici que le
+type~\texttt{T} ci-dessus n'est pas bien fondé.
+
+Faisons intervenir maintenant les types sélectionnés (nous parlerons
+de \emph{sélection}):
+\begin{sverb}
+T ::= CHOICE {a [0] a < T}
+\end{sverb}
+Les seules valeurs possibles sont de la forme suivante:
+\begin{sverb}
+x T ::= a : x
+y T ::= a : a : y
+z T ::= a : a : a : z
+\end{sverb}
+Par rapport au cas précédent, ces valeurs n'ont pas d'étiquetage et,
+de toute façon, leur récursivité suffit à les disqualifier, ainsi que
+le type qui les engendre, car ce sont ses seules valeurs
+possibles. Pour comprendre ce point, ouvrons ici une parenthèse au
+sujet des sélections, définies en~\cite[\S~27]{ASN94}. Il n'est en
+effet pas clair \emph{a priori} si la spécification
+\begin{sverb}
+A ::= [0] i < [1] B
+B ::= [2] CHOICE {i [3] REAL}
+\end{sverb}
+équivaut à
+\begin{sverb}
+A ::= [0] [3] REAL
+B ::= [2] CHOICE {i [3] REAL}
+\end{sverb}
+En fait c'est bien ainsi qu'il faut interpréter la norme. Donc la
+particularité de la sélection est qu'elle ignore toutes les étiquettes
+sauf celle du champ sélectionné. C'est pourquoi dans notre exemple
+\texttt{T ::= CHOICE \{a [0] a < T\}}, l'étiquette ne sert pas au
+codage des valeurs de~\texttt{T}. Examinons ensuite
+\begin{sverb}
+T ::= CHOICE {a [0] T, b NULL} (WITH COMPONENTS {b ABSENT})
+\end{sverb}
+Ici intervient une contrainte de sous-typage, définie
+en~\cite[\S~45.8]{ASN94}. Cette déclaration est équivalente à
+\begin{sverb}
+T ::= CHOICE {a [0] T}
+\end{sverb}
+et nous avons déjà conclu que ce type n'était pas bien fondé. Mais
+cette réécriture des contraintes de sous-typage fait l'objet d'une
+phase à part entière (chapitre~\vref{controle_des_sous-types}), qui
+intervient après la mise en forme liminaire que nous sommes en train
+de décrire ici. Pour le moment, nous ignorerons donc la contrainte de
+sous-typage et conclurons que le type \texttt{CHOICE \{a [0] T, b
+  NULL\}} est bien fondé (ce qui est absolument vrai) et, après la
+réécriture des contraintes de sous-typage, nous devrons à nouveau
+vérifier que les types réécrits sont bien fondés. Cette vérification
+en deux temps semble bien compliquée, mais la réécriture des
+contraintes de sous-typage est extrêmenent complexe et il est de loin
+préférable de procéder ainsi, plutôt que de chercher à définir une
+seule phase englobant tout. Pour résumer: nous acceptons
+temporairement cette déclaration, en attendant la phase de réécriture
+des contraintes de sous-typage après laquelle nous réappliquons notre
+critère de bonne fondation.
+
+Il ne nous reste qu'à envisager notre dernier exemple, lui aussi
+impliquant une contrainte de sous-typage:
+\begin{sverb}
+T ::= INTEGER (INCLUDES T)
+\end{sverb}
+La contrainte \texttt{INCLUDES} est décrite
+en~\cite[\S~45.3]{ASN94}. Ici, la récursivité s'effectue à travers
+cette contrainte, qui est la seule qui le permette. Rappelons, à
+travers un exemple simple le sens d'une telle contrainte:
+\begin{sverb}
+Day ::= ENUMERATED {monday (0), tuesday (1), wednesday (2),
+             thursday (3), friday (4), saturday (5), sunday (6)}
+
+Week-End ::= Day (saturday | sunday)
+
+Long-Week-End ::= Day (INCLUDES Week-End | monday)
+\end{sverb}
+Bien que~\cite[\S~45.3.2]{ASN94} ne dise pas les choses de cette
+manière, nous dirons dans cette thèse que la sémantique de
+\texttt{INCLUDES} implique que \texttt{Long-Week-End} doit être
+réécrit en
+\begin{sverb}
+Long-Week-End ::= Day (saturday | sunday | monday)
+\end{sverb}
+Il faut aussi, comme le dit cette fois
+explicitement~\cite[\S~45.3.2]{ASN94}, que \texttt{Week-End} et
+\texttt{Day} aient même sur-type, soit le même type à partir duquel
+ils sont produits par sous-typages successifs. Quel est alors le
+problème avec notre déclaration ci-dessous?
+\begin{sverb}
+T ::= INTEGER (INCLUDES T)
+\end{sverb}
+D'après~\cite[\S~45.3.2]{ASN94}, il n'y a aucun problème, car
+\texttt{INTEGER} et~\texttt{T} sont dérivés du même type prédéfini
+\texttt{INTEGER}. Cependant, cette clause n'est pas assez
+restrictive. En effet, de façon ensembliste (et non opérationnelle,
+comme nous l'avons fait précédemment) une telle déclaration signifie
+que nous avons l'équation:
+\begin{equation*}
+\mathcal{S}(\texttt{T}) = \mathcal{S}(\texttt{INTEGER}) \cap \mathcal{S}(\texttt{T}),
+\end{equation*}
+où~$\mathcal{S}(x)$ désigne l'ensemble (au sens mathématique) des
+valeurs du type~$x$. Il est évident que cette équation est satisfaite
+pour tout sous-type, c'est-à-dire sous-ensemble, de \texttt{INTEGER},
+donc ne possède pas de solution unique. Pour cette raison, nous devons
+rejeter cette déclaration, mais nous ne le ferons pas ici, car notre
+relation de type bien fondé n'examine pas les contraintes de
+sous-typage. Nous accepterons donc~\texttt{T} comme bien fondé,
+jusqu'à ce que la phase de contrôle des sous-types le rejette. Le
+lecteur attentif remarquera qu'il y a unicité si, au lieu de
+\texttt{INTEGER}, nous avions eu un type qui ne contienne qu'une
+valeur. Par exemple:
+\begin{sverb}
+T ::= NULL (INCLUDES T)
+\end{sverb}
+Il est exact dans ce cas que cette déclaration a un sens: elle est
+équivalente à
+\begin{sverb}
+T ::= NULL
+\end{sverb}
+car \texttt{NULL} est la seule solution non vide à l'équation
+\begin{equation*}
+\mathcal{S}(\texttt{T}) = \mathcal{S}(\texttt{NULL}) \cap
+\mathcal{S}(\texttt{T}).
+\end{equation*}
+Il serait néanmoins très compliqué de détecter ces cas, et nous nous
+tiendrons donc à notre résolution de les rejeter en bloc lors de la
+phase de contrôle des sous-types.
+
+Après avoir étudié divers cas extrêmes, tentons maintenant de dégager
+une définition informelle de notre critère de bonne fondation. Pour
+cela, nous proposons de concevoir les déclarations de types comme la
+donnée d'un graphe. Chaque nom de type apparaissant à gauche du
+symbole \texttt{::=} est un sommet et chaque type à droite de ce même
+symbole aussi. De même, chaque type apparaissant dans d'autres types
+est un sommet. Par exemple:
+\begin{sverb}
+A ::= SET OF A
+B ::= SET {
+        i REAL,
+        j A 
+      }
+\end{sverb}
+définit le graphe à la figure~\ref{graph0}
+\begin{figure}
+\centering
+\includegraphics[scale=0.7]{graph0.eps}
+\caption{Graphe modélisant des déclarations de type\label{graph0}}
+\end{figure}
+
+Avec ce modèle intuitif en tête, nous définissons alors le prédicat
+«~\emph{est bien fondé}~» par cas comme suit:
+\begin{itemize}
+ 
+  \item Un type non récursif est bien fondé. (Un type non récursif
+    correspond à un graphe sans circuit.)
+
+  \item Un type récursif est bien fondé si et seulement si il existe
+    le long de chaque circuit du graphe associé
+    \begin{itemize}
+       
+       \item soit un sommet \texttt{SET OF} ou \texttt{SEQUENCE OF};
+
+       \item soit un sommet \texttt{SET} ou \texttt{SEQUENCE} dont
+         l'arc sortant sur le circuit est annoté \texttt{OPTIONAL};
+
+        \item soit un sommet \texttt{CHOICE} dont l'arc entrant ne
+          provient pas d'un sommet~\texttt{<}, même à travers des arcs
+          d'abréviation, \emph{et} dont au moins un des arcs sortants
+          n'appartient pas à un circuit.
+
+    \end{itemize}
+
+\end{itemize}
+Nous pensons qu'il est utile de détailler le troisième point du second
+cas, soit le sommet \texttt{CHOICE}. La condition est une
+conjonction. Tout d'abord, qu'est-ce qu'un arc entrant provenant d'un
+sommet~\texttt{<} même à travers des arcs d'abréviation? Prenons un
+exemple:
+\begin{sverb}
+A ::= i < B
+B ::= C
+C ::= CHOICE {
+        i A,
+        j REAL
+      }
+\end{sverb}
+Cette spécification est mal fondée car elle s'interprète en le graphe à la figure~\ref{graph1}.
+\begin{figure}
+\centering
+\includegraphics[scale=0.7]{graph1.eps}
+\caption{Graphe mal fondé\label{graph1}}
+\end{figure}
+Un arc d'abréviation est un arc correspondant à une abréviation de
+type, ici: \texttt{B ::= C}. Le sommet \texttt{CHOICE} de notre
+exemple possède donc un arc entrant qui correspond à une abréviation
+et l'arc précédant sur le circuit provient d'un
+sommet~\texttt{<}. C'est ce que nous interdisons dans la première
+partie de la conjonction du troisième cas des types récursifs.
+
+Que signifie maintenant le second terme de la conjonction: un sommet
+\texttt{CHOICE} dont au moins un des arcs n'appartient pas à un
+circuit? Prenons un exemple:
+\begin{sverb}
+A ::= CHOICE {
+        i [0] A,
+        j [1] A
+      }
+\end{sverb}
+Le type~\texttt{A} n'est pas bien fondé car il correspond au graphe à la figure~\ref{graph2}.
+\begin{figure}
+\centering
+\includegraphics[scale=0.7]{graph2.eps}
+\caption{Un autre graphe mal fondé\label{graph2}}
+\end{figure}
+Tous les arcs sortants du sommet \texttt{CHOICE} sont sur un
+circuit. Donc toutes les valeurs de ce type auront un codage infini
+(condition suffisante), ce qu'il faut interdire. Voilà pour le cas du
+sommet \texttt{CHOICE} et de notre définition de la bonne fondation
+des types.
+
+Terminons en soulignant l'importance de la bonne fondation des
+types. En effet, même si elle n'empêche pas la définition de valeurs
+récursives, \emph{elle permet d'écarter les types dont toutes les
+  valeurs ont un codage infini}, donc qui ne termine pas. Ce critère
+est donc intimement en relation avec le codage et ses
+propriétés. Rappelons aussi que les contraintes de sous-typage ne sont
+pas prises en compte ici, en attendant la fin de la phase qui les
+traite (chapitre~\vref{controle_des_sous-types}), pour réappliquer
+ensuite notre critère de bonne fondation ---~ceci dans le but de
+découpler au maximum les différentes phases d'analyse.
+
+La \textbf{troisième étape}
+(section~\vref{decouplage_des_valeurs_globales}) s'inscrit dans la
+lutte contre la dépendance mutuelle entre types, valeurs et
+contraintes de sous-typage, que nous avons déjà évoquée. Nous
+commençons par découpler les valeurs globales, c'est-à-dire qui ont un
+nom, introduit à gauche d'un symbole~\texttt{::=} de leur type, dans
+le but de parvenir à une spécification sur laquelle nous pourrons
+traiter séparément les types, les valeurs et les contraintes de
+sous-typage. Par exemple
+\begin{sverb}
+x [0] SET {a INTEGER} (WITH COMPONENTS {a (0|1)}) ::= {a 0}
+\end{sverb}
+est réécrite en
+\begin{sverb}
+x T ::= {a 0}
+T ::= [0] SET {a INTEGER} (WITH COMPONENTS {a (0|1)})
+\end{sverb}
+Ainsi les déclarations de valeurs ne dépendent de leur type,
+éventuellement étiqueté et sous-typé, qu'à travers une abréviation,
+ici~\texttt{T}. Nous devons donc produire un nom de type qui n'entre
+pas en collision avec les noms des types présents initialement et
+aussi qui n'entrera jamais en conflit avec les futurs noms
+engendrés. Pour illustrer ce fait, nous étendons le lexique d'ASN.1 en
+admettant qu'un nom de type puisse débuter par le
+caractère~\texttt{\#}, tout en interdisant au spécifieur cette
+possibilité (qui n'est pas permise par la norme). Ainsi, nous
+réécrirons à l'avenir:
+\begin{sverb}
+x #1 ::= {a 0}
+#1 ::= [0] SET {a INTEGER} (WITH COMPONENTS {a (0|1)})
+\end{sverb}
+Ce choix de notation est proche de ce que ferait un compilateur en
+interne à l'aide d'un générateur de symboles globaux et uniques. Nous
+ferons suivre le symbole~\texttt{\#} d'un nombre entier unique le
+temps de l'analyse.
+
+La \textbf{quatrième étape} consiste à découpler les contraintes de
+sous-typage et les types (nous venons de découpler les valeurs
+globales et leur type). La syntaxe nous dit que la seule dépendance
+possible est à travers l'emploi de la contrainte
+\texttt{INCLUDES}. Par exemple:
+\begin{sverb}
+T ::= SET (INCLUDES [0] SET OF INTEGER (0|1)) OF INTEGER
+\end{sverb}
+Cet usage de \texttt{INCLUDES} est exotique et hautement improbable en
+pratique, mais nous devons néanmoins l'envisager si nous voulons un
+modèle complet d'ASN.1, car un modèle s'intéresse au possible et non
+au probable. Ainsi nous réécrirons
+(section~\ref{globalisation_des_types_inclus}):
+\begin{sverb}
+T  ::= SET (INCLUDES #1) OF INTEGER
+#1 ::= [0] SET OF INTEGER (0|1)
+\end{sverb}
+On notera que, contrairement à la règle générale, les éventuelles
+étiquettes du types inclus, soit celui introduit par
+\texttt{INCLUDES}, seront déplacées avec la nouvelle abréviation. Pour
+les lecteurs de la contrepartie formelle, cette étape apparaît juste
+après la cinquième étape qui suit, ceci pour des raisons très
+techniques. Néanmoins, la présentation de ce chapitre est la plus
+intuitive et elle doit guider la compréhension.
+
+La \textbf{cinquième étape} consiste à réécrire les types structurés,
+c'est-à-dire construits à partir d'autres types, de telle sorte que
+les types résultants ne contiennent, au sens syntaxique, que des
+abréviations de type non contraintes
+(section~\ref{globalisation_des_types_locaux_sans_leur_etiquetage}). En d'autres termes, il s'agit de donner un nom à tous les types qui
+apparaissent dans la définition d'autres types (on dira aussi
+\emph{rendre globaux les types internes}), et de rendre globales les
+contraintes de ces types, c'est-à-dire que toutes les contraintes
+apparaissent au niveau le plus haut dans leur déclaration. Commençons
+par:
+\begin{sverb}
+A ::= SET OF SET OF SET {a REAL}
+\end{sverb}
+qui est réécrite en
+\begin{sverb}
+A  ::= SET OF #1
+#1 ::= SET OF #2
+#2 ::= SET {a #3}
+#3 ::= REAL
+\end{sverb}
+Rappelons que dans cette thèse le type \texttt{REAL} est une
+abréviation, mais elle est néanmoins extraite du type~\texttt{\#2}. Un
+autre exemple est
+\begin{sverb}
+A ::= SET {COMPONENTS OF [1] SET {i [0] REAL}}
+\end{sverb}
+qui devient
+\begin{sverb}
+A  ::= SET {COMPONENTS OF [1] #1}
+#1 ::= SET {i [0] #2}
+#2 ::= REAL
+\end{sverb}
+Cet usage de \texttt{COMPONENTS OF} est plutôt exotique et fort
+improbable en pratique, mais nous devons le prendre en compte pour
+faire ressortir la règle sous-jacente qui nous guide. Et si nous
+avions eu
+\begin{sverb}
+A ::= SET OF SET OF SET {a REAL (0 | PLUS-INFINITY)} 
+\end{sverb}
+alors nous aurions réécrit en
+\begin{sverb}
+A  ::= SET OF #1
+#1 ::= SET OF #2
+#2 ::= SET {a #3}
+#3 ::= REAL (0 | PLUS-INFINITY)
+\end{sverb}
+L'idée est de «~remonter~» les contraintes éventuelles des types
+internes, soit celles servant à bâtir d'autres types, au niveau des
+déclarations. Mais si les types internes sont étiquetés, alors ces
+étiquettes restent en place:
+\begin{sverb}
+A ::= SET {
+        a [0] SET OF [2] REAL,
+        b [1] INTEGER (0|1)
+      }
+\end{sverb}
+est réécrite en
+\begin{sverb}
+A  ::= SET {
+         a [0] #1,
+         b [1] #2
+       }
+#1 ::= SET OF [2] #3
+#2 ::= INTEGER (0|1)
+#3 ::= REAL
+\end{sverb}
+Rappelons que tous les types internes sont déplacés et remplacés par
+une abréviation, même si ce sont déjà des abréviations.  Ce n'est pas
+une optimisation que de ne pas les déplacer: nous avons besoin de la
+propriété que les abréviations internes sont uniques ---~voir
+quatorzième étape. Ce choix est lié, comme nous le verrons plus loin,
+à la raison qui nous oblige à laisser en place les étiquettes, qui est
+liée aux transformations qui leur sont spécifiques, et qui auront lieu
+plus tard. Remarquons de plus que l'étape que nous venons de décrire
+doit avoir lieu après celle consistant à découpler les valeurs
+globales de leur type, et celle qui découple les contraintes des
+types, via \texttt{INCLUDES}: après ces dernières toutes les
+réécritures sur les types portent bien sur tous les types du module
+ASN.1.
+
+La \textbf{sixième étape}
+(section~\vref{depliage_des_abreviations_et_selections_globales})
+consiste à déplier les abréviations et sélections globales. Le
+dépliage est l'opération qui consiste à remplacer une abréviation ou
+une sélection par sa définition ---~on parle de dépliage
+\emph{partiel} si la définition est elle-même une abréviation ou une
+sélection, sinon on le dit \emph{complet}. Par exemple, négligeons
+l'étape précédente (la cinquième), et supposons que nous ayons:
+\begin{sverb}
+A ::= i < B
+B ::= C
+C ::= CHOICE {i D}
+D ::= INTEGER
+\end{sverb}
+Alors cette spécification est réécrite en
+\begin{sverb}
+A ::= INTEGER
+B ::= CHOICE {i D}
+C ::= CHOICE {i D}
+D ::= INTEGER
+\end{sverb}
+Cette transformation a donc pour effet d'éliminer les déclarations
+d'abréviations et de sélections. Qu'est-ce qui nous motive? Tout
+d'abord, les sélections sont des types très difficiles à parcourir car
+ils nécessitent de conserver la trace des noms des champs sélectionnés
+(ici~\texttt{i}), jusqu'à trouver un \texttt{CHOICE} qui nous permet
+d'en éliminer un, et ainsi de suite, jusqu'à trouver un type qui ne
+soit ni une sélection ni une abréviation. Ce procédé est fastidieux et
+c'est pourquoi nous préférons nous débarrasser une fois pour toute de
+toutes les sélections de notre spécification (elles sont en effet
+toutes au niveau des déclarations, grâce à l'étape précédente). Il est
+aussi commode de ne pas avoir de déclarations d'abréviations, et donc
+de seulement les conserver comme types internes, soit ceux servant à
+construire d'autres types ---~puisque l'étape précédente a posé des
+abréviations partout à la place des types internes. Remarquons que
+notre démarche bien ordonnée nous permet d'éviter l'écueil qui
+toujours menace dans l'analyse d'un module ASN.1: la non-terminaison
+due aux dépendances mutuelles. Par exemple, le fait que tous nos types
+soient bien fondés nous permet de déplier nos abréviations sans
+crainte de boucles. Idem pour les sélections. Voyons ce qu'il advient
+alors d'un type récursif bien fondé:
+\begin{sverb}
+A ::= CHOICE {
+        i [0] A (WITH COMPONENTS {..., j (0)}),
+        j [1] INTEGER
+      } (WITH COMPONENTS {..., j (0|1)})
+\end{sverb}
+Cette déclaration est réécrite à la cinquième et précédente étape en:
+\begin{sverb}
+A  ::= CHOICE {
+         i [0] #1,
+         j [1] #2
+       } (WITH COMPONENTS {..., j (0|1)})
+
+#1 ::= A (WITH COMPONENTS {..., j (0)})
+
+#2 ::= INTEGER
+\end{sverb}
+Maintenant nous produisons
+\begin{sverb}
+A  ::= CHOICE {
+         i [0] #1,
+         j [1] #2
+       } (WITH COMPONENTS {..., j (0|1)})
+
+#1 ::= CHOICE {
+         i [0] #1,
+         j [1] #2
+       } (WITH COMPONENTS {..., j (0|1)})
+         (WITH COMPONENTS {..., j (0)})
+
+#2 ::= INTEGER
+\end{sverb}
+Pour conclure cette sixième étape, il est très important de noter
+qu'ASN.1 viole la propriété de \emph{substitutivité}, c'est-à-dire que
+si l'on remplace directement une abréviation par sa définition nous
+pouvons modifier la sémantique de la spécification ---~ce qui est
+inadmissible. Est-ce à dire que ce qui précède est invalidé?  Non. Le
+cas pathologique qui doit être traité spécialement est celui des types
+\texttt{SET OF} et \texttt{SEQUENCE OF} dans le cas où une contrainte
+peut leur être appliquée en même temps qu'elle peut l'être au type des
+éléments qu'ils spécifient. Reprenons l'exemple donné
+par~\cite{Steedman0}:
+\begin{sverb}
+A ::= SET OF PrintableString
+B ::= A (SIZE (7))
+\end{sverb}
+Nous ne pouvons pas le réécrire en
+\begin{sverb}
+A ::= SET OF PrintableString
+B ::= SET OF PrintableString (SIZE (7))
+\end{sverb}
+En effet, dans le premier cas la contrainte \texttt{SIZE} s'applique
+au type \texttt{SET OF}, alors que, dans le deuxième, elle s'applique
+à \texttt{PrintableString}. (Les théoriciens des langages parlent
+alors de \emph{capture}.) Nous traiterons donc spécialement ce cas en
+réécrivant ainsi:
+\begin{sverb}
+A ::= SET OF PrintableString
+B ::= SET (SIZE (7)) OF PrintableString 
+\end{sverb}
+
+La \textbf{septième étape}
+(section~\vref{resolution_de_AUTOMATIC_TAGS_et_COMPONENTS_OF}) traite
+des insertions de champs via la clause \texttt{COMPONENTS OF}, et du
+mode d'étiquetage par défaut \texttt{AUTOMATIC TAGS}. Ces deux
+concepts sont intrinsèquement liés comme le dit~\cite[\S~22.3]{ASN94}:
+la décision d'appliquer la production automatique d'étiquettes se fait
+\emph{avant} l'insertion des champs, mais est appliquée
+\emph{après}~\cite[\S~22.7]{ASN94}. La décision d'appliquer ou non la
+production automatique d'étiquettes se fonde sur la présence
+d'étiquettes sur les champs, c'est pourquoi nous avons précédemment
+laissé en place celles-ci, alors que nous avions extrait les types des
+champs avec leurs contraintes de sous-typage. Illustrons le
+fonctionnement des clauses \texttt{AUTOMATIC TAGS} et
+\texttt{COMPONENTS OF}, en laissant de côté la cinquième étape qui
+réécrit les types internes. Par exemple,
+\begin{sverb}
+SAMPLE DEFINITIONS AUTOMATIC TAGS ::=
+BEGIN
+A ::= SET {
+        a SET OF [2] REAL,
+        b [1] INTEGER (0|1)
+      }
+END 
+\end{sverb}
+reste invariant car le champ de label~\texttt{b} possède une
+étiquette. Cependant
+\begin{sverb}
+SAMPLE DEFINITIONS AUTOMATIC TAGS ::=
+BEGIN
+A ::= SET {
+        a SET OF [2] REAL,
+        b INTEGER (0|1)
+      }
+END 
+\end{sverb}
+est, conformément à la norme, réécrit en
+\begin{sverb}
+SAMPLE DEFINITIONS AUTOMATIC TAGS ::=
+BEGIN
+A ::= SET {
+        a [0] SET OF [2] REAL,
+        b [1] INTEGER (0|1)
+      }
+END 
+\end{sverb}
+
+Un exemple d'interaction avec la clause \texttt{COMPONENTS OF} est le
+suivant:
+\begin{sverb}
+SAMPLE DEFINITIONS AUTOMATIC TAGS ::=
+BEGIN
+A ::= SET {
+        a SET OF [2] REAL,
+        COMPONENTS OF B
+      }
+B ::= SET {b [1] INTEGER (0|1)}
+END 
+\end{sverb}
+Ici, il est incorrect de remplacer l'indication \texttt{COMPONENTS OF}
+par le texte du champ de label~\texttt{b} du type~\texttt{B}, et
+\emph{ensuite} de conclure que \texttt{AUTOMATIC TAGS} ne s'applique
+pas à cause de l'étiquette \texttt{[1]}. Il faut au contraire décider
+\emph{avant} le traitement de la clause \texttt{COMPONENTS OF} si la
+substitution potentiellement induite par \texttt{AUTOMATIC TAGS} doit
+avoir lieu ou non. Ici, elle doit avoir lieu. Ensuite nous pouvons
+effectivement traiter \texttt{COMPONENTS OF} et appliquer juste après
+ce qui était prévu par \texttt{AUTOMATIC TAGS}. Ainsi notre exemple
+doit être réécrit en
+\begin{sverb}
+SAMPLE DEFINITIONS AUTOMATIC TAGS ::=
+BEGIN
+A ::= SET {
+        a [0] SET OF [2] REAL,
+        b [1] [1] INTEGER (0|1)
+      }
+B ::= SET {b [1] INTEGER (0|1)}
+END 
+\end{sverb}
+
+La \textbf{huitième étape} s'attaque à la dépendance qui existe entre
+les valeurs et les types, autrement qu'à travers les déclarations de
+valeurs, qui sont toujours typées. Cette dépendance prend deux
+aspects: d'une part les valeurs par défaut (annotation des champs
+\texttt{DEFAULT}) et d'autre part les constantes entières, énumérées
+et de chaînes de bits. Examinons le premier cas
+(section~\vref{les_valeurs_par_defaut}). Par exemple:
+\begin{sverb}
+A  ::= SET {i #1 DEFAULT 7}
+#1 ::= INTEGER
+\end{sverb}
+Nous réécrivons en:
+\begin{sverb}
+A  ::= SET {i #1 DEFAULT $1}
+#1 ::= INTEGER
+$1 #1 ::= 7
+\end{sverb}
+Les noms de valeurs que nous créons sont préfixés par le
+symbole~\texttt{\$}, et sont absolument uniques le temps de
+l'analyse. Le principe est donc de mettre au lieu des valeurs par
+défaut des abréviations de valeurs dont nous introduisons la
+déclaration. Notons que le monde est bien fait, car depuis la
+cinquième étape les types des champs sont des abréviations, ici
+\texttt{\#1}, donc la nouvelle déclaration de valeur, ici
+\texttt{\$1}, est bien découplée de son type, c'est-à-dire que son
+type est une abréviation. Nous profitons ainsi de toutes les
+réécritures précédentes sur les types et les déclarations de
+valeurs. Remarquons que si les valeurs par défaut sont déjà des
+abréviations, une nouvelle abréviation est tout de même introduite,
+l'optimisation consistant à ne pas le faire étant un rafinement
+inutile pour l'instant. Maintenant nous pouvons nous attacher à
+traiter les constantes entières
+(section~\vref{les_constantes_des_types}):
+\begin{sverb}
+A ::= INTEGER {x(0), y(1)}
+\end{sverb}
+est réécrite en:
+\begin{sverb}
+A ::= INTEGER {x($1), y($2)}
+$1 #1 ::= 0
+$2 #2 ::= 1
+#1 ::= INTEGER
+#2 ::= INTEGER
+\end{sverb}
+De même que
+\begin{sverb}
+Tao ::= ENUMERATED {yin(0), yang(1)}
+T   ::= BIT STRING {lsb(0), msb(7)}
+\end{sverb}
+est réécrit en:
+\begin{sverb}
+Tao ::= ENUMERATED {yin($1), yang($2)}
+$1 #1 ::= 0
+$2 #2 ::= 1
+#1 ::= INTEGER
+#2 ::= INTEGER
+
+T ::= BIT STRING {lsb($3), msb($4)}
+$3 #3 ::= 0
+$4 #4 ::= 7
+#3 ::= INTEGER
+#4 ::= INTEGER
+\end{sverb}
+Nous reparlerons en détail de ces constantes lors de la mise en forme
+des valeurs, car elles présentent des subtilités que la norme
+n'envisage pas.
+
+La \textbf{neuvième étape} découple les valeurs des contraintes de
+sous-typage (section~\vref{decouplage_valeurs_contraintes}). En effet,
+les contraintes de sous-typage contiennent de nombreuses valeurs, car
+le paradigme ensembliste sous-tend le sous-typage d'ASN.1. Un exemple
+extrêmement simple est le suivant:
+\begin{sverb}
+T ::= INTEGER (0|1)
+\end{sverb}
+Il est réécrit en
+\begin{sverb}
+T ::= INTEGER ($1 | $2)
+$1 T ::= 0
+$2 T ::= 1
+\end{sverb}
+Notons que le type des valeurs ainsi extraites des contraintes est
+toujours une abréviation du type contraint, car la cinquième étape a
+fait \emph{remonter} les contraintes au niveau des déclarations (nous
+avons donc toujours un nom de type à portée de la main). Les
+contraintes étant très complexes, cette réécriture est très longue et
+délicate à formaliser.
+
+L'étape suivante met en forme les valeurs, de la même façon que nous
+avons mis en forme les types au préalable. Le danger qu'il y a à
+mettre en {\oe}uvre cette étape est la non-terminaison à cause de la
+possibilité des valeurs récursives. Nous allons procéder en deux
+temps. Tout d'abord nous allons résoudre le problème posé par
+l'ambigüité du lexème~\texttt{0}
+(section~\vref{desambiguation_du_zero}). Ce sera la \textbf{dixième
+  étape}. Nous pouvons écrire:
+\begin{sverb}
+x INTEGER ::= 0
+y REAL ::= 0
+\end{sverb}
+Cette ambigüité poserait des problèmes dans le modèle si elle n'était
+pas levée ici. Pour ce faire, nous étendons la syntaxe normalisée par
+un nouveau mot-clé, \texttt{0.0}, qui distingue le zéro de type
+\texttt{REAL}. On remarquera que la levée de cette ambigüité suppose
+un contrôle partiel des types du module, alors que le
+chapitre~\vref{controle_des_types} est spécifiquement consacré au
+contrôle de types. Nous retrouvons le problème qui charrie à travers
+cette thèse: la très grande dépendance mutuelle des concepts d'ASN.1,
+donc le manque de distinction entre les phases de l'analyse, qui
+explique la piètre qualité de beaucoup d'outils. Nous réécrirons donc:
+\begin{sverb}
+x INTEGER ::= 0
+y REAL ::= 0.0
+\end{sverb}
+
+La \textbf{onzième étape} clos la mise en forme des valeurs par une
+foule de réécritures. Citons peut-être la plus importante: le dépliage
+des valeurs et l'interdiction de toutes les valeurs récursives. Ainsi
+nous acceptons le type bien fondé:
+\begin{sverb}
+T ::= SET OF T
+\end{sverb}
+mais nous refusons dorénavant
+\begin{sverb}
+x T ::= {x}
+y T ::= {{y}}
+z T ::= {{{z}}}
+\end{sverb}
+Le dépliage a pour conséquence que les valeurs ne contiennent plus du
+tout d'abréviations. En effet, les types, bien que dépliés,
+contiennent des abréviations de types s'ils sont structurés:
+\begin{sverb}
+#1 ::= SET OF #2
+#2 ::= INTEGER
+x #1 ::= {y, 2, y}
+y #3 ::= 3
+#3 ::= INTEGER
+\end{sverb}
+devient:
+\begin{sverb}
+#1 ::= SET OF #2
+#2 ::= INTEGER
+x #1 ::= {3, 2, 3}
+y #3 ::= 3
+#3 ::= INTEGER
+\end{sverb}
+Le lecteur de la partie formelle associée comprendra que l'intérêt
+d'un tel dépliage, en interdisant les valeurs récursives, permet de
+s'affranchir des environnements de valeurs en contexte des règles
+d'inférence. Nous noterons d'autre part que l'interdiction des valeurs
+récursives ne figure pas encore dans la norme, mais que cette décision
+est en voie d'être adoptée par l'ISO sur notre proposition. Cette
+interdiction est essentiellement fondée sur le fait que les codages
+normalisés sont fondés sur une sémantique stricte, et donc ne
+termineraient pas en présence de valeurs récursives. Nous montrerons
+cependant que ces valeurs ne présentent pas de problèmes pour le
+contrôle de types, dans le chapitre consacré au contrôle de types. Le
+choix de déplier les valeurs \emph{avant} le contrôle des types
+reflète un choix d'interprétation profond. En effet la spécification:
+\begin{sverb}
+T1 ::= SET {a BOOLEAN, b INTEGER OPTIONAL} 
+T2 ::= SET {a BOOLEAN}
+x T1 ::= {a TRUE}
+y T2 ::= x
+\end{sverb}
+doit-elle être rejetée ou bien réécrite en:
+\begin{sverb}
+T1 ::= SET {a BOOLEAN, b INTEGER OPTIONAL} 
+T2 ::= SET {a BOOLEAN}
+x T1 ::= {a TRUE}
+y T2 ::= {a TRUE}
+\end{sverb}
+Dans le premier cas, cela suppose que nous retardions le dépliage des
+valeurs jusqu'après le contrôle des types qui poserait la question:
+\texttt{T1}~est-il \emph{équivalent} (ou \emph{compatible})
+avec~\texttt{T2}? Et, selon la réponse, nous déplirions ou non la
+valeur~\texttt{y}. Nous préférons défendre notre position consistant à
+ne pas attendre le contrôle des types pour déplier les valeurs. En
+effet, nous évitons ainsi la définition délicate d'une relation
+d'équivalence entre types, qui devra prendre en compte des propriétés
+générales (à définir) de tous les codages admissibles, sans dépendre
+de l'un en particulier. De plus, la formalisation en est grandement
+simplifiée. N'oublions pas que, d'une part, les abréviations de
+valeurs sont lexicalement identiques aux constantes distinguées
+entières et aux valeurs d'énumération, et, d'autre part, que les
+valeurs récursives ne peuvent être éliminées que lors du dépliage des
+valeurs. Ce choix de la simplicité a pour conséquence que nous
+acceptons plus de spécifications que dans l'autre possibilité (voir le
+dernier exemple). Pour être complet, notons que dans la sous-phase
+précédente, nous avons levé l'ambigüité du lexème~\texttt{0}, donc
+\begin{sverb}
+x REAL ::= 0
+y INTEGER ::= x
+\end{sverb}
+aura été réécrit en
+\begin{sverb}
+x REAL ::= 0.0
+y INTEGER ::= x
+\end{sverb}
+puis à cette étape
+\begin{sverb}
+x REAL := 0.0
+y INTEGER ::= 0.0
+\end{sverb}
+ce qui sera rejeté par le contrôle des types. Nous ne réécrivons donc
+pas
+\begin{sverb}
+x REAL ::= 0
+y INTEGER ::= x
+\end{sverb}
+en
+\begin{sverb}
+x REAL ::= 0
+y INTEGER ::= 0
+\end{sverb}
+ce qui serait tout à fait incorrect.
+
+Une autre remarque concerne le traitement des types
+\texttt{ENUMERATED} lors du dépliage des valeurs. Nous prenons le
+parti de traiter les valeurs de ces types de façon spéciale: nous
+accepterons une abréviation de valeur d'un type énuméré si et
+seulement si les deux types (celui de l'abréviation et celui de la
+valeur abrégée) sont nominalement identiques ou obtenus par
+sous-typage d'un même type, c'est-à-dire d'une même déclaration de
+type. Par exemple la spécification
+\begin{sverb}
+A ::= ENUMERATED {a(0), b(1)}
+B ::= A
+x A ::= b
+y B ::= x
+\end{sverb}
+sera acceptée, et
+\begin{sverb}
+A ::= ENUMERATED {a(0), b(1)}
+B ::= A (b)
+x A ::= b
+y B ::= x
+\end{sverb}
+aussi, mais
+\begin{sverb}
+A ::= ENUMERATED {a(0), b(1)}
+B ::= ENUMERATED {a(0), b(1)}
+x A ::= b
+y B ::= x
+\end{sverb}
+sera \emph{rejetée} parce que~\texttt{A} et~\texttt{B}, bien que
+structurellement identiques, sont nominalement différents,
+c'est-à-dire qu'ils sont définis par différentes déclarations. Nous
+voulons croire que cette décision, en plus d'être théoriquement très
+simple (sinon la plus simple), est également pragmatique, c'est-à-dire
+qu'elle n'invaliderait pas de spécifications actuellement normalisées
+ou en cours d'utilisation dans l'industrie.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% ATTENTION: Ce qui suit manque dans la partie formelle...
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Toujours au sujet des énumérés, nous donnons une valeur aux constantes
+qui n'en déclarent pas. Par exemple
+\begin{sverb}
+T ::= ENUMERATED {x($1), y, z($2)}
+$1 INTEGER ::= 7
+$2 INTEGER ::= 3
+\end{sverb}
+sera réécrit en:
+\begin{sverb}
+T ::= ENUMERATED {x($1), y($3), z($2)}
+$1 INTEGER ::= 7
+$2 INTEGER ::= 3
+$3 INTEGER ::= 0
+\end{sverb}
+Nous suivons en cela la règle~\cite[\S~17.3]{ASN94} qui veut que nous
+donnions un entier en comptant à partir de zéro, en augmentant de un
+pour chaque constante et en sautant les entiers qui seraient déjà
+utilisés.
+
+Pour revenir aux types autres que \texttt{ENUMERATED}, ajoutons que ce
+choix du dépliage n'entraine pas de surcoût pour le codage. En effet,
+le coût du codage étant négligeable par rapport à celui de la
+transmission sur la ligne, le dépliage des valeurs, qui peut donc
+entrainer le codage répété d'une même valeur abrégée, est
+négligeable. Par exemple la réécriture de
+\begin{sverb}
+x INTEGER ::= 7
+y INTEGER ::= x
+\end{sverb}
+en 
+\begin{sverb}
+x INTEGER ::= 7
+y INTEGER ::= 7
+\end{sverb}
+entraîne que les codages de~\texttt{x} et~\texttt{y} soient les mêmes,
+car on effectue alors deux fois le même traitement, mais ce doublon
+est tout à fait négligeable devant la vitesse de transmission. Ceci
+dit, il est imaginable de ne pas déplier les valeurs et de conserver
+les abréviations jusqu'au codage, dans le but de partager les codages
+des valeurs.
+
+Une autre réécriture, toujours lors de la mise en forme des valeurs,
+consiste à insérer les valeurs par défaut dépliées lorsqu'aucune
+valeur pour le champ n'est spécifiée. Par exemple:
+\begin{sverb}
+T  ::= SET {i #1 DEFAULT $1}
+#1 ::= INTEGER
+$1 #1 ::= 7
+t T ::= {}
+\end{sverb}
+sera réécrit en:
+\begin{sverb}
+T  ::= SET {i #1 DEFAULT $1}
+#1 ::= INTEGER
+$1 #1 ::= 7
+t T ::= {7}
+\end{sverb}
+En ceci, nous accomplissons l'exigence~\cite[\S~22.9]{ASN94}.
+
+Une autre réécriture importante est relative aux constantes entières
+et énumérées. Il convient d'abord de poser le problème. Il est
+possible de distinguer des valeurs entières lors de la définition du
+type \texttt{INTEGER}:
+\begin{sverb}
+T ::= INTEGER {zero(0), un(1)}
+\end{sverb}
+de façon à permettre des définitions de valeurs de la façon suivante:
+\begin{sverb}
+x T ::= zero
+y T ::= un
+\end{sverb}
+tout en permettant les habituelles:
+\begin{sverb}
+z T ::= 0
+t T ::= 1
+u T ::= 7
+\end{sverb}
+
+La difficulté qui apparaît ici est d'ordre lexical: on ne peut
+distinguer en examinant seulement la syntaxe de la valeur si cette
+dernière est une abréviation ou bien une constante distinguée des
+types \texttt{INTEGER} ou \texttt{ENUMERATED}. La
+clause~\cite[\S~16.4]{ASN94} précise la portée des constantes par
+rapport aux abréviations à l'aide de l'exemple qui suit:
+\begin{sverb}
+a INTEGER ::= 1
+T1 ::= INTEGER {a(2)}
+T2 ::= INTEGER {a(3), b(a)}
+c T2 ::= b
+d T2 ::= a
+\end{sverb}
+La définition ci-dessus de~\texttt{c} est équivalente à~\texttt{c T2
+  ::= 1} car, dans la définition de~\texttt{T2}, la valeur~\texttt{a}
+définissant la constante~\texttt{b} est forcément une abréviation
+(c'est la règle). Et la définition de~\texttt{d} est équivalente à
+\texttt{d T2 ::= 3}, ce qui signifie que l'interprétation en tant que
+constante entière est prioritaire sur l'interprétation en tant
+qu'abréviation (l'autre possibilité était \texttt{d T2 ::= 1}). C'est
+donc cette clause de la norme que nous formalisons en réécrivant la
+spécification ci-dessus en:
+\begin{sverb}
+a #4 ::= 1
+#4 ::= INTEGER
+
+T1 ::= INTEGER {a($1)}
+$1 #1 ::= 2
+#1 ::= INTEGER
+
+T2 ::= INTEGER {a($2), b($3)}
+$2 #2 ::= 3
+$3 #3 ::= 1
+#2 ::= INTEGER
+#3 ::= INTEGER
+
+c T2 ::= 1
+d T2 ::= 3
+\end{sverb}
+
+Mais que faut-il comprendre par:
+\begin{sverb}
+x INTEGER {c(x)} ::= c
+\end{sverb}
+Si nous appliquons nos réécritures, il vient:
+\begin{sverb}
+x #0 ::= c
+#0 ::= INTEGER {c(x)}
+\end{sverb}
+puis:
+\begin{sverb}
+x #0 ::= $1
+#0 ::= INTEGER {c($1)}
+
+$1 #1 ::= x
+#1 ::= INTEGER
+\end{sverb}
+et
+\begin{sverb}
+x #0 ::= x
+#0 ::= INTEGER {c($1)}
+
+$1 #1 ::= $1
+#1 ::= INTEGER
+\end{sverb}
+Il est clair que~\texttt{x} et~\texttt{\$1} sont incorrectes. Notre
+définition exotique ci-dessus doit donc être rejetée car récursive (à
+travers un type), et notre réécriture la rejette effectivement (une
+trace est conservée au long des dépliages pour détecter les
+boucles).
+
+Lors de la même phase de mise en forme des valeurs, nous vérifions que
+les valeurs des types \texttt{SEQUENCE} sont bien présentes dans
+l'ordre des champs de leur type. Ainsi la spécification
+\begin{sverb}
+T ::= SEQUENCE {a BOOLEAN, b INTEGER}
+x T ::= {b 7, a TRUE}  -- Invalide
+\end{sverb}
+est incorrecte car les valeurs dans~\texttt{x} correspondant aux
+champs de~\texttt{T} doivent être dans l'ordre de ces champs
+(ici~\texttt{a} d'abord, puis~\texttt{b}). Nous effectuons cette
+vérification avant le contrôle des types car elle ne relève pas
+conceptuellement de celui-ci ni du contrôle des sous-types. En effet,
+le contrôleur de types se sert des labels pour mettre en
+correspondance les valeurs et les champs ---~pas de la position des
+premières. Nous affirmons donc l'inutilité de cette contrainte, la
+distinction entre \texttt{SET} et \texttt{SEQUENCE} n'étant
+fondamentalement pertinente que pour le codage, c'est-à-dire la
+sémantique, elle ne devrait se manifester qu'à ce niveau. L'usage d'un
+mot-clé plutôt que de l'autre deviendrait ainsi une annotation pour le
+codage. La norme exigeant néanmoins un tel
+ordonnancement~\cite[\S~22.14]{ASN94}, nous l'avons placé ici. Ainsi
+s'achève la description de la onzième étape de mise en forme des
+spécifications ASN.1. Elle correspond globalement à la
+section~\vref{normalisation_des_valeurs}.
+
+La \textbf{douzième étape} est très simple: elle consiste à déplier
+dans les types \texttt{INTEGER}, \texttt{ENUMERATED} et \texttt{BIT
+  STRING} les valeurs associées aux éventuelles constantes. À la
+huitième étape nous avions effectué l'opération quasiment inverse:
+\begin{sverb}
+A ::= INTEGER {x(0), y(z)}
+z INTEGER ::= 1
+\end{sverb}
+était réécrite en:
+\begin{sverb}
+A ::= INTEGER {x($1), y(z)}
+$1 #1 ::= 0
+#1 ::= INTEGER
+
+z #2 ::= 1
+#2 ::= INTEGER
+\end{sverb}
+Nous réécrivons maintenant:
+\begin{sverb}
+A ::= INTEGER {x(0), y(1)}
+$1 #1 ::= 0
+#1 ::= INTEGER
+
+z #2 ::= 1
+#2 ::= INTEGER
+\end{sverb}
+L'intérêt de cette réécriture est que le terme de type est maintenant
+indépendant des déclarations de valeurs (ici la dépendance
+était~\texttt{z}) et surtout que les constantes qu'il déclarait
+implicitement (dans notre example, \texttt{0}) ont maintenant une
+déclaration explicite qui permettra au contrôleur de types de les
+inspecter, et évitera au codage d'avoir à déplier partiellement ces
+valeurs, et donc de posséder en contexte l'ensemble des déclarations
+de valeurs. Rappelons aussi que les étapes précédentes ont supprimé
+les définitions de valeurs récursives exotiques de la forme:
+\begin{sverb}
+x INTEGER {c(x)} ::= c
+\end{sverb}
+grâce à la huitième étape. Dorénavant nous pouvons faire l'hypothèse
+en manipulant les types \texttt{INTEGER}, \texttt{ENUMERATED} et
+\texttt{BIT STRING} que leurs éventuelles constantes sont bien typées
+(cette assertion étant inévitablement vérifiée lors du contrôle de
+type, nous pouvons l'introduire en tant qu'hypothèse).
+
+La \textbf{treizième étape}
+(section~\vref{unicite_et_positivite_de_constantes}) porte aussi sur
+les constantes des types \texttt{INTEGER}, \texttt{ENUMERATED} et
+\texttt{BIT STRING}. Pour le type \texttt{INTEGER}, nous devons
+vérifier que toutes les constantes possèdent des noms
+différents~\cite[\S~16.6]{ASN94}. Par exemple, après l'étape
+précédente, nous pouvions avoir:
+\begin{sverb}
+T ::= INTEGER {x(0), x(1)}  -- Invalide
+\end{sverb}
+qui est incorrect. Pour le type \texttt{ENUMERATED}, la contrainte
+est la même~\cite[\S~17.2]{ASN94}. En plus nous devons nous assurer
+que les entiers sont positifs ou nuls~\cite[\S~17.3]{ASN94}. Ainsi la
+spécification
+\begin{sverb}
+T ::= ENUMERATED {x($1)}
+$1 INTEGER ::= -1    -- Invalide
+\end{sverb}
+sera rejetée à cette étape.
+
+Pour le type \texttt{BIT STRING}, nous avons aussi la contrainte de
+positivité sur les constantes (voir~\cite[\S~19.3]{ASN94} et la règle
+de grammaire \texttt{NamedBit}~\cite[\S~19.1]{ASN94}) et
+d'unicité~\cite[\S~19.4]{ASN94}.
+
+La \textbf{quatorzième étape} débute une série qui clôt ce chapitre de
+mise en forme des spécifications ASN.1. Cette série finale
+(section~\vref{normalisation_des_etiquetages}) traite les
+étiquettes. En examinant la syntaxe d'ASN.1, il apparaît des
+dépendances supplémentaires entre types, contraintes, valeurs et
+maintenant étiquettes, comme on peut le voir à la figure~\ref{graph4}.
+\begin{figure}
+\centering
+\includegraphics[scale=0.7]{graph4.eps}
+\caption{Dépendances mutuelles entre concepts\label{graph4}}
+\end{figure}
+Les dépendances supplémentaires intrinsèques aux étiquettes sont la
+raison fondamentale de certains choix faits dans les étapes
+précédentes et de la série de réécritures débutant ici (la quatorzième
+étape). Il s'agit, comme depuis le début, de découpler les différents
+concepts les uns des autres pour les traiter plus facilement, car
+indépendamment. Ici, ce sont les étiquettes que nous découplons et
+traitons.
+
+Rappelons que la cinquième étape avait rendus globaux les types
+servant à construire d'autres types. Par exemple la spécification
+\begin{sverb}
+A ::= SET {
+        a [0] SET OF [2] REAL,
+        b [1] INTEGER (0|1)
+      }
+\end{sverb}
+était réécrite en
+\begin{sverb}
+A  ::= SET {
+         a [0] #1,
+         b [1] #2
+       }
+#1 ::= SET OF [2] #3
+#2 ::= INTEGER (0|1)
+#3 ::= REAL
+\end{sverb}
+Nous laissions alors les étiquettes des champs où elles étaient
+spécifiées car nous avions besoin d'elles là pour ensuite résoudre
+l'éventuel mode d'étiquetage par défaut \texttt{AUTOMATIC TAGS} (vois
+la septième étape). Nous allons maintenant hisser les étiquetages (ici
+\texttt{[0]}, \texttt{[1]} et~\texttt{[2]}) au niveau des déclarations
+de types: ainsi tous les étiquetages apparaîtront à ce niveau. Pour
+parvenir à nos fins, nous allons nous servir de la propriété d'unicité
+des abréviations internes que nous avons produites à la cinquième
+étape. Ce qui pouvait à tort paraître un choix inefficace (en effet,
+on aurait pu penser laisser en place les abréviations initialement
+présentes) ne l'était pas: nous pouvons maintenant simplement pousser
+nos étiquetages internes vers les déclarations dénotées par nos
+abréviations internes. Notre exemple précédent devient alors:
+\begin{sverb}
+A  ::= SET {
+         a #1,
+         b #2
+       }
+#1 ::= [0] SET OF #3
+#2 ::= [1] INTEGER (0|1)
+#3 ::= [2] REAL
+\end{sverb}
+Cette réécriture particulièrement simple est correcte car les
+abréviations internes (ici \texttt{\#1}, \texttt{\#2} et \texttt{\#3})
+sont uniques ---~donc non partagées. Pourquoi ne pas avoir déplacé les
+étiquetages lors de la mise en place des abréviations internes (qui
+abrégeaient pourtant les contraintes, c'est-à-dire que ces dernières
+remontaient au niveau des déclarations)? Prenons l'exemple du module suivante:
+\begin{sverb}
+SAMPLE DEFINITIONS AUTOMATIC TAGS ::=
+BEGIN
+A ::= SET {
+        a [0] SET OF [2] REAL,
+        b [1] INTEGER (0|1)
+      }
+END 
+\end{sverb}
+Alors, en supposant que la cinquième étape déplace aussi les
+étiquetage vers le haut, nous aurions réécrit:
+\begin{sverb}
+SAMPLE DEFINITIONS AUTOMATIC TAGS ::=
+BEGIN
+A  ::= SET {
+         a #1,
+         b #2
+       }
+#1 ::= [0] SET OF #3
+#2 ::= [1] INTEGER (0|1)
+#3 ::= [2] REAL
+END 
+\end{sverb}
+\emph{Mais} la septième étape alors aurait réécrit cette dernière
+spécification en:
+\begin{sverb}
+SAMPLE DEFINITIONS AUTOMATIC TAGS ::=
+BEGIN
+A  ::= SET {
+         a [0] #1,
+         b [1] #2
+       }
+#1 ::= [0] SET OF #3
+#2 ::= [1] INTEGER (0|1)
+#3 ::= [2] REAL
+END 
+\end{sverb}
+ce qui est erroné, car la clause \texttt{AUTOMATIC TAGS} n'aurait rien
+changé à la spécification initiale, et nos réécritures doivent avoir
+pour invariant l'application ou la non-application de cette clause.
+
+La \textbf{quinzième étape}
+(section~\ref{ajout_des_etiquettes_UNIVERSAL_implicites}) consiste à
+introduire explicitement dans la spécification les étiquettes
+\texttt{UNIVERSAL} des types prédéfinis du langage, et qui ne sont
+jamais écrites par le spécifieur. Par exemple
+\begin{sverb}
+T ::= INTEGER
+\end{sverb}
+est réécrit en
+\begin{sverb}
+T ::= [UNIVERSAL 2] IMPLICIT INTEGER
+\end{sverb}
+Cette réécriture laisse invariante la sémantique de la
+spécification. Elle est justifiée par le fait que la définition du
+concept d'étiquette est floue dans la norme. D'un côté les étiquettes
+sont des annotations de types (\emph{tagged types}), et d'un autre
+côté les types prédéfinis ont une étiquette, prédéfinie elle
+aussi. Nous avons décidé de séparer clairement le concept d'étiquette,
+donc d'étiquetage, de celui de type: nous insérons ici les étiquettes
+de type et nous oublions par la suite leur origine particulière.
+
+La \textbf{seizième étape} (section~\vref{calcul_des_etiquetages}) est
+consacrée au calcul des étiquetages. Nous procédons en deux
+temps. D'abord nous déplions les éventuelles abréviations de valeurs
+dans les étiquettes. Par exemple la spécification
+\begin{sverb}
+T ::= [e] INTEGER
+e INTEGER ::= 7
+\end{sverb}
+est réécrite en
+\begin{sverb}
+T ::= [7] INTEGER
+e INTEGER ::= 7
+\end{sverb}
+Au passage, nous vérifions que les valeurs d'étiquettes sont bien
+positives ou nulles (conformément à~\cite[\S~28.2]{ASN94} et à la
+règle de grammaire \texttt{ClassNumber}~\cite[\S~28.1]{ASN94}):
+\begin{sverb}
+T ::= [e] INTEGER
+e INTEGER ::= -7    -- Invalide
+\end{sverb}
+est rejetée.
+
+Par la suite, les attributs d'étiquette \texttt{IMPLICIT} et
+contextuels sont résolus, en fonction notamment du mode d'étiquetage
+par défaut du module: \texttt{EXPLICIT TAGS}, \texttt{IMPLICIT TAGS},
+\texttt{AUTOMATIC TAGS} ou pas d'indication particulière. À ce point,
+la spécification ne possède alors plus que des étiquettes
+\texttt{EXPLICIT}~\cite[\S~28]{ASN94}. Par exemple la spécification
+\begin{sverb}
+EXAMPLE DEFINITIONS ::=
+BEGIN
+A ::= [7] INTEGER
+B ::= [5] IMPLICIT [3] IMPLICIT BOOLEAN
+C ::= [3] EXPLICIT REAL
+END
+\end{sverb}
+est réécrite en 
+\begin{sverb}
+EXAMPLE DEFINITIONS ::=
+BEGIN
+A ::= [7] EXPLICIT INTEGER
+B ::= [5] EXPLICIT BOOLEAN
+C ::= [3] EXPLICIT REAL
+END
+\end{sverb}
+Insistons sur le fait que cette étape n'est correcte que si l'on
+oublie que dans la norme les types ont des étiquettes prédéfinies, ce
+que nous incite à faire la quinzième étape (la précédente). Considérez
+le cas du type~\texttt{B} ci-dessus pour mieux comprendre.
+
+Nous vérifions au passage que l'étiquette précédant immédiatement un
+\texttt{CHOICE} n'est pas marquée \texttt{IMPLICIT}, suivant en
+cela~\cite[\S~28.8]{ASN94}. Ainsi
+\begin{sverb}
+T ::= [2] IMPLICIT CHOICE {a REAL}   --- Invalide
+\end{sverb}
+est illégale et rejetée lors de cette dernière étape.

@@ -1,0 +1,39 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \{(\textrm{T}, \sigma)\})\\
+  \bouchon{28} \textrm{T}\\
+  \bouchon{30} \domain{\mathcal{A}} \Gamma}
+%------
+  {\bouchon{30} \domain{\{x\} \uplus \mathcal{A}} \Gamma}
+
+\inferrule
+  {}
+  {\bouchon{30} \domain{\varnothing} \Gamma}
+
+% ENUMERATED
+%
+\inferrule
+  {\forall j \in [1..p].n_j \geqslant 0\\
+  \forall (i,j) \in [1..p]^2.(c_i = c_j \Rightarrow i = j)\\
+  \forall (i,j) \in [1..p]^2.(n_i = n_j \Rightarrow i = j)}
+%-----
+  {\bouchon{28} (\textsf{ENUMERATED} \mid \textsf{BIT STRING}) \,
+    \OList{$(c_j, \textsf{Int} \, n_j)$}{j}{p}}
+\;\TirName{[1]}\label{unicite_et_positivite_de_constantes_1}
+
+\inferrule
+  {\forall (i, j) \in [1..p]^2.(c_i = c_j \Rightarrow i = j)}
+%-----
+  {\bouchon{28} \textsf{INTEGER} \, \OList{$(c_j, v_j)$}{j}{p}}
+\;\TirName{[2]}\label{unicite_et_positivite_de_constantes_2}
+
+\inferrule
+  {\textrm{T} \nlhd \textsf{INTEGER} \, (\wild\!\Cons\wild\!) \mid
+    \wildENUMERATED \mid \wildBITSTRING}
+%-----
+  {\bouchon{28} \textrm{T}}
+\;\TirName{[3]}\label{unicite_et_positivite_de_constantes_3}
+
+\end{mathparpagebreakable}

@@ -1,0 +1,102 @@
+%%-*-latex-*-
+
+\lettrine{S}{yntaxe et sémantique} sont généralement apposées. La
+syntaxe ne suppose aucune interprétation, autrement dit elle ne fait
+qu'exprimer, sans dire ce qu'elle exprime. En aucun cas elle ne
+définit des concepts: elle ne les dénote que si elle est complétée par
+une sémantique. La sémantique s'exprime aussi, donc est syntaxique de
+ce point de vue; c'est son apposition avec ce que l'on dénomme
+simplement syntaxe qui la rend «~sémantique~» à proprement parler. En
+principe la sémantique dénote des concepts de haut niveau, souvent
+mathématiques (c'est-à-dire que la sémantique de la sémantique est les
+mathématiques), donc plus abstrait que la (simple) syntaxe. Par
+exemple, en théorie de la programmation, la sémantique (dynamique) est
+les valeurs mathématiques et le mécanisme d'évaluation. (Il faut
+distinguer le caractère~\texttt{1}, syntaxique, du nombre
+mathématique~$1$. Idem pour les opérations arithmétiques, etc.) Dans
+le cas d'ASN.1, nous n'avons pas d'évaluation, car nous ne spécifions
+pas de calculs (opérations arithmétiques, fonctions, procédures,
+etc.). Nous dirons que la sémantique du noyau d'ASN.1 est, au sens
+large, le codage des valeurs et l'ensemble des codes possibles, et au
+sens strict seulement l'ensemble des codes possibles. Notons qu'il
+peut y avoir plus de codes possibles que de valeurs codables et que ce
+n'est pas un problème.
+
+\section{Définition}
+\label{definition_semantique_informelle}
+
+Nous noterons $\semb{$v$}{T}$ le code d'une valeur~$v$ dont on suppose
+qu'elle est de type~T. La première remarque est qu'\emph{a priori} il
+n'est pas nécessaire que la valeur $v$ soit effectivement du type T
+---~ce que certifie le contrôle des types présenté au
+chapitre~\vref{controle_des_types_informel}~--- même si dans la
+pratique l'émetteur s'assurera d'abord de cette propriété avant de
+coder~$v$. La seconde remarque concerne le receveur. Son univers du
+discours est constitué de codes et non de valeurs. Ainsi, lorsqu'il
+reçoit un code~$c$, il doit se demander, puisque par hypothèse il
+partage avec l'émetteur la même spécification (c'est-à-dire la
+définition de~T), si ce code est un code possible pour une valeur du
+type~T, autrement dit si $\exists v.\semb{$v$}{T} = c$. Une preuve
+constructive de cette dernière proposition serait un décodage, mais
+nous nous contenterons ici d'établir une propriété qui, si elle est
+satisfaite, implique la possibilité d'un décodage: \emph{c'est le
+  contrôle sémantique des types}. Cette relation ressemble à celle de
+contrôle des types vue au chapitre~\vref{controle_des_types_informel},
+sauf qu'elle confronte types et codes, et non types et valeurs.
+
+Dans ce chapitre, nous présenterons d'abord un codage de
+référence. Nous employons le terme «~codage~» pour désigner le
+processus ou l'algorithme qui produit un \emph{code} à partir de la
+donnée d'une \emph{valeur} et d'un \emph{type}. Ensuite, nous
+introduirons le contrôle sémantique des types. Nous pourrons alors
+présenter à grands traits un théorème important: \emph{la correction
+  sémantique du codage}. Cela signifie \emph{grosso modo} que si, dans
+le noyau d'ASN.1, une valeur est bien typée, alors le code de cette
+valeur sera lui aussi bien typé. D'une certaine façon, cela peut être
+compris comme la conservation du type des valeurs par le codage de
+référence. Nous ajouterons à cet important résultat (qui concerne la
+sûreté de la transmission) deux autres concernant l'unicité des
+exécutions du codage et du contrôle sémantique des types: si les types
+du noyau d'ASN.1 possèdent des étiquetages de champs «~suffisamment
+  distincts entre eux~», alors nous obtenons l'unicité du contrôle
+sémantique des types; et, d'autre part, s'ils possèdent des noms de
+champs tous distincts entre eux, alors le codage sera unique. Ces deux
+derniers résultats affirment le \emph{déterminisme} de la
+transmission, complétant ainsi celui de sa correction.
+
+Note: Dans les exemples de ce chapitre, et les suivants, le mode
+d'étiquetage par défaut est \texttt{EXPLICIT}, à moins d'indication
+contraire.
+
+
+\section{Codage}
+\label{codage_informel}
+\input{codage_informel}
+
+\section{Comparaison des champs}
+\label{inclusion_d_etiquetages_informelle}
+\input{inclusion_d_etiquetages_informelle}
+
+\section{Contrôle sémantique des types}
+\label{controle_semantique_des_types_informel}
+\input{controle_semantique_des_types_informel}
+
+\section{Correction du codage}
+\label{correction_du_codage_informelle}
+\input{correction_du_codage_informelle}
+
+\section{Unicité du codage}
+\label{unicite_du_codage_informel}
+\input{unicite_du_codage_informel}
+
+\section{Types bien étiquetés}
+\label{types_bien_etiquetes_informel}
+\input{types_bien_etiquetes_informel}
+
+\section{Unicité du contrôle sémantique des types}
+\label{unicite_du_controle_semantique_des_types_informelle}
+\input{unicite_du_controle_semantique_des_types_informelle}
+
+\section{Correction de la réécriture vers le noyau}
+\label{correction_de_la_reecriture_vers_le_noyau}
+\input{correction_de_la_reecriture_vers_le_noyau}

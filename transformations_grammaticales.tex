@@ -1,0 +1,1994 @@
+%%%-*-latex-*-
+
+\section{Transformations grammaticales}
+\label{transformations_grammaticales}
+
+\subsection{Transformations de la grammaire des modules} \label{MODULES}
+
+\subsubsection{Étape 0}
+
+Nous présentons d'abord la partie correspondant à la spécification des
+modules ASN.1 Nous introduisons le découpage et les regroupements de
+règles.
+
+\begin{longtable}{lrl} \\ \hline \\
+\textbf{ModuleDefinition} & $\rightarrow$ & ModuleIdentifier \\
+                 &               & DEFINITIONS \\
+                 &               & TagDefault \\
+                 &               & ``\textsf{::=}'' \\
+                 &               & BEGIN \\
+                 &               & ModuleBody \\
+                 &               & END \\ 
+\\ \hline \\
+
+\emph{ModuleIdentifier} & $\rightarrow$ & \texttt{modulereference} AssignedIdentifier \\
+AssignedIdentifier & $\rightarrow$ & ObjectIdentifierValue \\
+                   & $\mid$        & $\varepsilon$ \\ 
+\emph{\underline{ObjectIdentifierValue}} & $\rightarrow$ & ``\textsf{\{}'' ObjIdComponentList ``\textsf{\}}'' \\
+                   & $\mid$        &  ``\textsf{\{}'' DefinedValue ObjIdComponentList ``\textsf{\}}'' \\
+ObjIdComponentList & $\rightarrow$ & ObjIdComponent \\
+                   & $\mid$        & ObjIdComponent ObjIdComponentList \\
+ObjIdComponent     & $\rightarrow$ & NameForm \\
+                   & $\mid$        & NumberForm \\
+                   & $\mid$        & NameAndNumberForm \\
+NameForm           & $\rightarrow$ & \texttt{identifier} \\
+NumberForm         & $\rightarrow$ & \texttt{number} \\
+                   & $\mid$        & DefinedValue \\
+NameAndNumberForm  & $\rightarrow$ & \texttt{identifier} ``\textsf{(}'' NumberForm ``\textsf{)}'' \\
+\\ \hline \\
+
+\emph{TagDefault} & $\rightarrow$ & EXPLICIT TAGS \\
+           & $\mid$        & IMPLICIT TAGS \\
+           & $\mid$        & $\varepsilon$ \\ 
+
+\\ \hline \\
+
+\emph{ModuleBody} & $\rightarrow$ & Exports Imports AssignmentList \\
+           & $\mid$        & $\varepsilon$ \\
+Exports    & $\rightarrow$ & EXPORTS SymbolsExported ``\textsf{;}'' \\
+           & $\mid$        & $\varepsilon$ \\
+Imports    & $\rightarrow$ & IMPORTS SymbolsImported ``\textsf{;}'' \\
+           & $\mid$        & $\varepsilon$ \\
+SymbolsExported & $\rightarrow$ & SymbolList \\
+           & $\mid$        & $\varepsilon$ \\
+SymbolsImported & $\rightarrow$ & SymbolsFromModuleList \\
+           & $\mid$        & $\varepsilon$ \\
+SymbolList & $\rightarrow$ & Symbol \\
+           & $\mid$        & Symbol ``\textsf{,}'' SymbolList \\
+SymbolsFromModuleList & $\rightarrow$ & SymbolsFromModule \\
+           & $\mid$        & SymbolsFromModuleList SymbolsFromModule
+\\
+Symbol     & $\rightarrow$ & \texttt{typereference} \\
+           & $\mid$        & \texttt{valuereference} \\
+SymbolsFromModule & $\rightarrow$ & SymbolList FROM ModuleIdentifier
+\\
+
+\\ \hline \\
+
+\emph{AssignmentList}  & $\rightarrow$ & Assignment \\
+                & $\mid$        & AssignmentList Assignment \\
+Assignment      & $\rightarrow$ & TypeAssignment \\
+                & $\mid$        & ValueAssignment \\
+TypeAssignment  & $\rightarrow$ & \texttt{typereference} ``\textsf{::=}''
+Type \\
+ValueAssignment & $\rightarrow$ & \texttt{valuereference} Type ``{\sf
+::=}'' Value \\ 
+
+\\ \hline \\
+
+\underline{DefinedType}  & $\rightarrow$ & Externaltypereference \\
+             & $\mid$        & \texttt{typereference} \\
+\emph{\underline{DefinedValue}} & $\rightarrow$ & Externalvaluereference \\
+             & $\mid$        & \texttt{valuereference} \\ 
+Externaltypereference & $\rightarrow$ & \texttt{modulereference} ``{\sf
+.}'' \texttt{typereference} \\
+Externalvaluereference & $\rightarrow$ & \texttt{modulereference} ``{\sf
+.}'' \texttt{valuereference} \\ \\ \hline
+\end{longtable}
+
+\subsubsection{Étape 1}
+
+Nous substituons les identificateurs de terminaux (lexicalement)
+ambigus, en conservant si possible l'information sur leur sémantique
+originelle (qui apparaît alors en indice).  D'autre part, nous
+appliquons l'option jusqu'à faire disparaître tous les~$\varepsilon$,
+et nous utilisons le lemme d'Arden pour introduire les opérateurs
+rationnels.
+
+\begin{longtable}{lrl} \hline \\
+\textbf{ModuleDefinition} & $\rightarrow$ & ModuleIdentifier \\
+                 &               & DEFINITIONS \\
+                 &               & [TagDefault TAGS] \\
+                 &               & ``\textsf{::=}'' \\
+                 &               & BEGIN \\
+                 &               & [ModuleBody] \\
+                 &               & END \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+ \scriptsize Cf. `TagDefault' et `ModuleBody'. \\ \hline
+\end{tabular}
+} \\ 
+
+\\ \hline \\
+
+\emph{ModuleIdentifier} & $\rightarrow$ & \texttt{upper$_{mod}$} [``\textsf{\{}'' ObjIdComponent$^+$ ``\textsf{\}}''] \\
+\emph{ObjIdComponent}     & $\rightarrow$ & \texttt{lower$_{id}$} \\
+                   & $\mid$        & NumberForm \\
+                   & $\mid$        & \texttt{lower$_{id}$} ``\textsf{(}'' NumberForm ``\textsf{)}'' \\
+NumberForm         & $\rightarrow$ & \texttt{number} \\
+                   & $\mid$        & DefinedValue \\  \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+ \scriptsize Option puis expansion globale de `AssignedIdentifier'. \\ 
+ \scriptsize Arden de `ObjIdComponentList'. \\
+ \scriptsize Expansion globale de `NameForm'. \\
+ \scriptsize Expansion globale de `NameAndNumberForm'. \\
+ \scriptsize Élimination de la seconde production de `ObjectIdentifierValue' car:\\
+ \scriptsize \ \ \ ObjIdComponentList $\Rightarrow$ ObjIdComponent ObjIdComponentList \\
+ \scriptsize \ \ \ $\Rightarrow$ NumberForm ObjIdComponentList $\Rightarrow$ DefinedValue ObjIdComponentList. \\
+ \scriptsize Expansion globale de `ObjIdComponentList'. \\
+ \scriptsize Expansion globale de \emph{`\underline{ObjectIdentifierValue}'}. \\
+ \scriptsize \ \ \ Attention! Nous conservons \ \ ObjectIdentifierValue $\rightarrow$ ``\textsf{\{}'' ObjIdComponent$^+$ ``\textsf{\}}'' \\
+ \scriptsize \ \ \ dans la section (\ref{VALUES}). \\ \hline 
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{\underline{TagDefault}} & $\rightarrow$ & EXPLICIT \\
+                 & $\mid$        & IMPLICIT \\ \\ 
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+ \scriptsize Option puis expansion suffixe de `TagDefault'. \\ \hline
+\end{tabular} 
+} \\
+
+\\ \hline \\
+
+\emph{ModuleBody} & $\rightarrow$ & [Exports] [Imports] AssignmentList
+\\
+Exports          & $\rightarrow$ & EXPORTS [SymbolList] ``\textsf{;}'' \\
+Imports          & $\rightarrow$ & IMPORTS [SymbolsFromModuleList] ``{\sf
+;}'' \\
+SymbolList & $\rightarrow$ & \{Symbol ``\textsf{,}'' \ldots \}$^+$ \\
+SymbolsFromModuleList & $\rightarrow$ & SymbolsFromModule$^+$ \\
+Symbol     & $\rightarrow$ & \texttt{typereference} \\
+           & $\mid$        & \texttt{valuereference} \\
+SymbolsFromModule & $\rightarrow$ & SymbolList FROM ModuleIdentifier \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+ \scriptsize Option de `Exports' et de `Imports'. \\ 
+ \scriptsize Option puis expansion globale de `SymbolsExported'. \\
+ \scriptsize Option puis expansion globale de `SymbolsImported'. \\
+ \scriptsize Arden de `SymbolList' et `SymbolsFromModuleList'. \\ \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{AssignmentList}  & $\rightarrow$ & Assignment$^+$ \\
+Assignment      & $\rightarrow$ & \texttt{upper$_{typ}$} ``\textsf{::=}'' Type \\
+                & $\mid$        & \texttt{lower$_{val}$} Type ``\textsf{::=}'' Value \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+ \scriptsize Arden de \emph{`AssignmentList'}. \\
+ \scriptsize Expansion globale de `TypeAssignment' et `ValueAssignment'. \\ \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\underline{DefinedType}  & $\rightarrow$ & \texttt{upper$_{mod}$} ``\textsf{.}'' \texttt{upper$_{typ}$} \\
+             & $\mid$        & \texttt{upper$_{typ}$} \\
+\emph{\underline{DefinedValue}} & $\rightarrow$ & \texttt{upper$_{mod}$} ``\textsf{.}'' \texttt{lower$_{val}$} \\ 
+                   & $\mid$        & \texttt{lower$_{val}$} \\ \\ 
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+ \scriptsize Expansion globale de `ExternalTypeReference' et `ExternalValueReference'. \\ \hline
+\end{tabular}
+} \\
+
+\\ \hline
+\end{longtable}
+
+\subsubsection{Étape 2}
+\label{CLASS}
+
+\begin{longtable}{lrl} \hline \\
+\textbf{ModuleDefinition} & $\rightarrow$ & ModuleIdentifier \\
+                 &               & DEFINITIONS \\
+                 &               & [TagDefault TAGS] \\
+                 &               & ``\textsf{::=}'' \\
+                 &               & BEGIN \\
+                 &               & [ModuleBody] \\
+                 &               & END \\
+
+\\ \hline \\
+
+\emph{ModuleIdentifier} & $\rightarrow$ & \texttt{upper$_{mod}$} [``\textsf{\{}'' ObjIdComponent$^+$ ``\textsf{\}}''] \\
+\emph{ObjIdComponent} & $\rightarrow$ & \texttt{number} \\
+                   & $\mid$        & \texttt{upper$_{mod}$} ``.'' \texttt{lower$_{val}$} \\
+                   & $\mid$        & \texttt{lower} [``\textsf{(}'' ClassNumber ``\textsf{)}''] \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+ \scriptsize Expansion totale de \emph{`\underline{DefinedValue}'}. \\
+ \scriptsize Factorisation préfixe (\texttt{lower}). \\ 
+ \scriptsize Élimination de `NumberForm' car `NumberForm' = `ClassNumber' (Cf. section \ref{TYPES}).\\
+\hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{\underline{TagDefault}} & $\rightarrow$ & EXPLICIT \\
+                 & $\mid$        & IMPLICIT \\
+\\ \hline \\
+
+\emph{ModuleBody} & $\rightarrow$ & [Exports] [Imports] Assignment$^+$ \\
+Exports          & $\rightarrow$ & EXPORTS \{Symbol ``\textsf{,}'' \ldots \}$^*$ ``\textsf{;}'' \\
+Imports          & $\rightarrow$ & IMPORTS SymbolsFromModule$^*$ ``\textsf{;}'' \\
+SymbolsFromModule & $\rightarrow$ & \{Symbol ``\textsf{,}'' \ldots \}$^+$ FROM ModuleIdentifier \\
+Symbol     & $\rightarrow$ & \texttt{upper$_{typ}$} \\
+           & $\mid$        & \texttt{lower$_{val}$} \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+ \scriptsize Expansion globale de \emph{`AssignmentList'}. \\
+ \scriptsize Expansion globale de `SymbolList'. \\
+ \scriptsize Expansion globale de `SymbolsFromModuleList'. \\ \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{Assignment} & $\rightarrow$ & \texttt{upper$_{typ}$} ``\textsf{::=}'' Type \\
+                 & $\mid$        & \texttt{lower$_{val}$} Type ``\textsf{::=}'' Value \\
+
+\\ \hline \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+ \scriptsize `\underline{DefinedType}' est déplacée dans la section (\ref{TYPES}). \\ 
+ \scriptsize \emph{`\underline{DefinedValue}'} est déplacée dans les sections \ref{TYPES} et (\ref{VALUES}). \\ \hline
+\end{tabular}
+} \\
+
+\\ \hline
+\end{longtable}
+
+\subsection{Transformations de la grammaire des types}
+\label{TYPES}
+
+\subsubsection{Étape 0}
+
+Nous donnons d'abord ici la forme normalisée de la section consacrée à
+la spécification des types ASN.1, après restructuration.  Notons que
+nous récupérons les règles \emph{`DefinedType'} et {\em
+  `\underline{DefinedValue}'} en provenance de la
+section~\vref{MODULES}. Les règles \emph{`Subtype'} et
+\emph{`ParentType'} sont présentes dans cette section, et non pas dans
+la section~\vref{SUBTYPES}, pour faciliter la lecture.
+\emph{`SubtypeSpec'} est présente dans la section (\ref{SUBTYPES}) .
+Nous noterons aussi que \emph{`\underline{ClassNumber}'} est une règle
+d'entrée mixte (section~\vref{CLASS}).
+
+\begin{longtable}{lrl} \\ \hline \\
+
+\emph{\underline{Type}} & $\rightarrow$ & DefinedType \\
+                       & $\mid$        & BuiltInType \\
+                       & $\mid$        & Subtype \\
+\\ \hline \\
+
+\emph{DefinedType}  & $\rightarrow$ & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{typ}$}] \\
+\emph{\underline{DefinedValue}} & $\rightarrow$ & [\texttt{upper$_{mod}$} ``\textsf{.}''] \texttt{lower$_{val}$} \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+ \scriptsize Factorisation préfixe de \emph{`DefinedType'}. \\
+ \scriptsize Factorisation suffixe de \emph{`\underline{DefinedValue}'.}\\ \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{BuiltInType}      & $\rightarrow$ & BooleanType \\
+                       & $\mid$        & IntegerType \\
+                       & $\mid$        & BitStringType \\
+                       & $\mid$        & OctetStringType \\
+                       & $\mid$        & NullType \\
+                       & $\mid$        & SequenceType \\
+                       & $\mid$        & SequenceOfType \\
+                       & $\mid$        & SetType \\
+                       & $\mid$        & SetOfType \\
+                       & $\mid$        & ChoiceType \\
+                       & $\mid$        & SelectionType \\
+                       & $\mid$        & TaggedType \\
+                       & $\mid$        & AnyType \\
+                       & $\mid$        & ObjectIdentifierType \\
+                       & $\mid$        & CharacterStringType \\
+                       & $\mid$        & UsefulType \\
+                       & $\mid$        & EnumeratedType \\
+                       & $\mid$        & RealType \\
+\\ \hline \\
+
+\emph{NamedType}        & $\rightarrow$ & \texttt{identifier} Type \\
+                       & $\mid$        & Type \\
+                       & $\mid$        & SelectionType \\ 
+
+\\ \hline \\
+
+\emph{Subtype}          & $\rightarrow$ & ParentType SubtypeSpec \\
+                       & $\mid$        & SET SizeConstraint OF Type \\
+                       & $\mid$        & SEQUENCE SizeConstraint OF Type \\
+ParentType             & $\rightarrow$ & Type \\
+\underline{SizeConstraint} & $\rightarrow$ & SIZE SubtypeSpec \\
+
+\\ \hline \\
+
+\emph{IntegerType}      & $\rightarrow$ & INTEGER \\
+                       & $\mid$        & INTEGER ``\textsf{\{}'' NamedNumberList ``\textsf{\}}'' \\
+NamedNumberList        & $\rightarrow$ & NamedNumber \\
+                       & $\mid$        & NamedNumberList ``\textsf{,}'' NamedNumber \\
+NamedNumber            & $\rightarrow$ & \texttt{identifier} ``\textsf{(}'' SignedNumber ``\textsf{)}'' \\
+                       & $\mid$        & \texttt{identifier} ``\textsf{(}'' DefinedValue ``\textsf{)}'' \\
+\underline{SignedNumber} & $\rightarrow$ & [``\textsf{-}''] \texttt{number} \\
+
+\\ \hline \\
+
+\emph{BooleanType}      & $\rightarrow$ & BOOLEAN \\
+
+\\ \hline \\
+
+\emph{EnumeratedType}   & $\rightarrow$ & ENUMERATED ``\textsf{\{}'' Enumeration ``\textsf{\}}'' \\
+Enumeration            & $\rightarrow$ & NamedNumber \\
+                       & $\mid$        & Enumeration ``\textsf{,}'' NamedNumber \\
+
+\\ \hline \\
+
+\emph{RealType}         & $\rightarrow$ & REAL \\
+
+\\ \hline \\
+
+\emph{BitStringType}    & $\rightarrow$ & BIT STRING \\
+                       & $\mid$        & BIT STRING ``\textsf{\{}'' NamedBitList ``\textsf{\}}'' \\
+NamedBitList           & $\rightarrow$ & NamedBit \\
+                       & $\mid$        & NamedBitList ``\textsf{,}'' NamedBit \\
+NamedBit               & $\rightarrow$ & \texttt{identifier} ``\textsf{(}'' \texttt{number} ``\textsf{)}'' \\
+                       & $\mid$        & \texttt{identifier} ``\textsf{(}'' DefinedValue ``\textsf{)}'' \\
+
+\\ \hline \\
+
+\emph{OctetStringType}  & $\rightarrow$ & OCTET STRING \\
+
+\\ \hline \\
+
+\emph{SequenceOfType}   & $\rightarrow$ & SEQUENCE OF Type \\
+                       & $\mid$        & SEQUENCE \\
+\emph{SetOfType}        & $\rightarrow$ & SET OF Type \\
+                       & $\mid$        & SET \\
+
+\\ \hline \\
+
+\emph{NullType}         & $\rightarrow$ & NULL \\
+
+\\ \hline \\
+
+\emph{SequenceType}     & $\rightarrow$ & SEQUENCE ``\textsf{\{}'' ElementTypeList ``\textsf{\}}'' \\
+                       & $\mid$        & SEQUENCE ``\textsf{\{}'' ``\textsf{\}}'' \\
+\emph{SetType}          & $\rightarrow$ & SET ``\textsf{\{}'' ElementTypeList ``\textsf{\}}'' \\
+                       & $\mid$        & SET ``\textsf{\{}'' ``\textsf{\}}'' \\
+ElementTypeList        & $\rightarrow$ & ElementType \\
+                       & $\mid$        & ElementTypeList ``\textsf{,}'' ElementType \\
+ElementType            & $\rightarrow$ & NamedType \\
+                       & $\mid$        & NamedType OPTIONAL \\
+                       & $\mid$        & NamedType DEFAULT Value \\
+                       & $\mid$        & COMPONENTS OF Type \\
+
+\\ \hline \\
+
+\emph{ChoiceType}       & $\rightarrow$ & CHOICE ``\textsf{\{}'' AlternativeTypeList ``\textsf{\}}'' \\
+AlternativeTypeList    & $\rightarrow$ & NamedType \\
+                       & $\mid$        & AlternativeTypeList ``\textsf{,}'' NamedType \\
+
+\\ \hline \\
+
+\emph{SelectionType}    & $\rightarrow$ & \texttt{identifier} ``\textsf{$<$}'' Type \\
+
+\\ \hline \\
+
+\emph{TaggedType}       & $\rightarrow$ & Tag Type \\
+                       & $\mid$        & Tag IMPLICIT Type \\
+                       & $\mid$        & Tag EXPLICIT Type \\
+Tag                    & $\rightarrow$ & ``\textsf{[}'' Class ClassNumber ``\textsf{]}'' \\
+\emph{\underline{ClassNumber}} & $\rightarrow$ & \texttt{number} \\
+                       & $\mid$        & DefinedValue \\
+Class                  & $\rightarrow$ & UNIVERSAL \\   
+                       & $\mid$        & APPLICATION \\
+                       & $\mid$        & PRIVATE \\
+                       & $\mid$        & $\varepsilon$ \\
+
+\\ \hline \\
+
+\emph{AnyType}          & $\rightarrow$ & ANY \\
+                       & $\mid$        & ANY DEFINED BY \texttt{identifier} \\
+
+\\ \hline \\
+
+\emph{ObjectIdentifierType} & $\rightarrow$ & OBJECT IDENTIFIER \\
+
+\\ \hline \\
+
+\emph{UsefulType}       & $\rightarrow$ & EXTERNAL \\
+                       & $\mid$        & ``\textsf{UTCTime}'' \\
+                       & $\mid$        & ``\textsf{GeneralizedTime}'' \\
+                       & $\mid$        & ``\textsf{ObjectDescriptor}'' \\
+
+\\ \hline \\
+
+\emph{CharacterStringType} & $\rightarrow$ & ``\textsf{NumericString}'' \\
+                       & $\mid$        & ``\textsf{PrintableString}'' \\
+                       & $\mid$        & ``\textsf{TeletexString}'' \\
+                       & $\mid$        & ``\textsf{T61String}'' \\
+                       & $\mid$        & ``\textsf{VideotexString}'' \\
+                       & $\mid$        & ``\textsf{VisibleString}'' \\
+                       & $\mid$        & ``\textsf{ISO646String}'' \\
+                       & $\mid$        & ``\textsf{IA5String}'' \\
+                       & $\mid$        & ``\textsf{GraphicString}'' \\
+                       & $\mid$        & ``\textsf{GeneralString}'' \\
+
+\\ \hline 
+
+\end{longtable}
+
+\subsubsection{Étape 1}
+
+\begin{longtable}{lrl} \\ \hline \\
+\emph{NamedType}        & $\rightarrow$ & \texttt{lower$_{id}$} Type \\ 
+                       & $\mid$        & Type \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+ \scriptsize Élimination de la production `SelectionType' car: \\
+ \scriptsize \ \ \ Type $\Rightarrow$ BuiltInType $\Rightarrow$ SelectionType \\ \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{\underline{Type}} & $\rightarrow$ & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{typ}$}]\\
+                       & $\mid$        & BuiltInType \\
+                       & $\mid$        & SetType \\
+                       & $\mid$        & SequenceType \\
+                       & $\mid$        & SetOfType \\
+                       & $\mid$        & SequenceOfType \\
+                       & $\mid$        & SelectionType \\
+                       & $\mid$        & TaggedType \\
+                       & $\mid$        & NullType \\
+                       & $\mid$        & Type SubtypeSpec \\ 
+                       & $\mid$        & SET SIZE SubtypeSpec OF Type \\
+                       & $\mid$        & SEQUENCE SIZE SubtypeSpec OF Type \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+ \scriptsize Expansion totale de \emph{`DefinedType'}. \\
+ \scriptsize Expansion partielle des productions \emph{`SetType'}, \emph{`SequenceType'}, \emph{`SetOfType'}, \emph{`SequenceOfType'}, \emph{`NullType'},\\
+ \scriptsize \ \ \ \emph{`SelectionType'} et \emph{`TaggedType'} de la règle \emph{`BuiltInType'}. \\ 
+ \scriptsize Expansion globale de `\emph{Subtype}' après l'expansion globale de `ParentType': \\
+ \scriptsize \ \ \ Subtype $\Rightarrow$ ParentType SubtypeSpec $\Rightarrow$ Type SubtypeSpec \\ 
+ \scriptsize Le but est de factoriser à gauche la règle \emph{`\underline{Type}'} et de faire apparaître la double récurrence, cause d'ambiguïté. \\ 
+ \scriptsize Expansion globale de `SizeConstraint' qui est déplacée dans la section (\ref{SUBTYPES}).\\ \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{BuiltInType}      & $\rightarrow$ & BOOLEAN \\
+                       & $\mid$        & INTEGER [``\textsf{\{}'' \{NamedNumber ``\textsf{,}'' \ldots \}$^+$ ``\textsf{\}}''] \\
+                       & $\mid$        & BIT STRING [``\textsf{\{}'' \{NamedBit ``\textsf{,}'' \ldots \}$^+$ ``\textsf{\}}''] \\
+                       & $\mid$        & OCTET STRING \\
+                       & $\mid$        & CHOICE ``\textsf{\{}'' \{NamedType ``\textsf{,}'' \ldots\}$^+$ ``\textsf{\}}'' \\
+                       & $\mid$        & ANY [DEFINED BY \texttt{lower$_{id}$}] \\
+                       & $\mid$        & OBJECT IDENTIFIER \\
+                       & $\mid$        & ENUMERATED ``\textsf{\{}'' \{NamedNumber ``\textsf{,}'' \ldots\}$^+$ ``\textsf{\}}'' \\
+                       & $\mid$        & REAL \\
+                       & $\mid$        & ``\textsf{NumericString}'' \\
+                       & $\mid$        & ``\textsf{PrintableString}'' \\
+                       & $\mid$        & ``\textsf{TeletexString}'' \\
+                       & $\mid$        & ``\textsf{T61String}'' \\
+                       & $\mid$        & ``\textsf{VideotexString}'' \\
+                       & $\mid$        & ``\textsf{VisibleString}'' \\
+                       & $\mid$        & ``\textsf{ISO646String}'' \\
+                       & $\mid$        & ``\textsf{IA5String}'' \\
+                       & $\mid$        & ``\textsf{GraphicString}'' \\
+                       & $\mid$        & ``\textsf{GeneralString}'' \\
+                       & $\mid$        & EXTERNAL \\
+                       & $\mid$        & ``\textsf{UTCTime}'' \\
+                       & $\mid$        & ``\textsf{GeneralizedTime}'' \\
+                       & $\mid$        & ``\textsf{ObjectDescriptor}'' \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+ \scriptsize Expansion globale de \emph{`BooleanType'}, \emph{`IntegerType'}, \emph{`BitStringType'}, \emph{`OctetStringType'}, \\
+  \scriptsize \ \ \ \emph{`TaggedType'}, \emph{`AnyType'}, \emph{`ObjectIdentifierType'}, \emph{`UsefulType'}, \emph{`CharacterStringType'}, \emph{`RealType'}. \\ 
+  \scriptsize Arden de `Enumeration' et expansion globale, puis expansion globale de \emph{`EnumeratedType'}. \\
+  \scriptsize Arden de `AlternativeTypeList' et expansion globale, puis expansion globale de \emph{`ChoiceType'}. \\
+  \scriptsize Cf. \emph{`Type'}, \emph{`NamedNumber'}, \emph{`NamedBit'}. \\
+ \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+NamedNumber & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{(}'' AuxNamedNum ``\textsf{)}'' \\
+AuxNamedNum & $\rightarrow$ & SignedNumber \\
+            & $\mid$        & DefinedValue \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Arden de `NamedNumberList' et expansion globale.\\
+  \scriptsize Factorisation préfixe de \emph{`IntegerType'} puis expansion globale. \\
+  \scriptsize Factorisation bifixe de `NamedNumber' (`AuxNamedNum'). \\
+ \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+NamedBit & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{(}'' ClassNumber ``\textsf{)}'' \\ \\
+\multicolumn{3}{l}{ 
+\begin{tabular}{|l|} \hline
+  \scriptsize Factorisation bifixe: nous reconnaissons la règle
+`ClassNumber'. \\ \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{SequenceOfType}   & $\rightarrow$ & SEQUENCE [OF Type] \\
+\emph{SetOfType}        & $\rightarrow$ & SET      [OF Type] \\ \\
+\multicolumn{3}{l}{ 
+\begin{tabular}{|l|} \hline
+  \scriptsize Factorisations préfixes. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{SequenceType}     & $\rightarrow$ & SEQUENCE ``\textsf{\{}'' \{ElementType ``\textsf{,}'' \ldots\}$^*$ ``\textsf{\}}'' \\
+\emph{SetType}          & $\rightarrow$ & SET ``\textsf{\{}'' \{ElementType ``\textsf{,}'' \ldots\}$^*$ ``\textsf{\}}'' \\
+ElementType            & $\rightarrow$ & NamedType [ElementTypeSuf] \\
+                       & $\mid$        & COMPONENTS OF Type \\
+ElementTypeSuf         & $\rightarrow$ & OPTIONAL \\
+                       & $\mid$        & DEFAULT Value \\ \\
+\multicolumn{3}{l}{ 
+\begin{tabular}{|l|} \hline
+  \scriptsize Factorisation bifixe de \emph{`SequenceType'} et \emph{`SetType'}. \\
+  \scriptsize Arden de `ElementTypeList' et expansion globale. \\
+  \scriptsize Factorisation préfixe de `ElementType'. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{SelectionType}    & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{$<$}'' Type \\
+
+\\ \hline \\
+
+\emph{NullType}         & $\rightarrow$ & NULL \\
+
+\\ \hline \\
+
+\emph{TaggedType} & $\rightarrow$ & ``\textsf{[}'' [Class] ClassNumber ``\textsf{]}'' [TagDefault] Type \\ 
+Class                  & $\rightarrow$ & UNIVERSAL \\   
+                       & $\mid$        & APPLICATION \\
+                       & $\mid$        & PRIVATE \\ \\
+\multicolumn{3}{l}{ 
+\begin{tabular}{|l|} \hline
+  \scriptsize Factorisation bifixe de \emph{`TaggedType'} : nous reconnaissons l'option de la règle \emph{`\underline{TagDefault}'} (Cf. \ref{MODULES}). \\
+  \scriptsize Expansion globale de `Tag'. \\
+  \scriptsize Option de `Class'.\\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{\underline{ClassNumber}} & $\rightarrow$ & \texttt{number} \\
+  & $\mid$        & [\texttt{upper$_{mod}$} ``\textsf{.}''] \texttt{lower$_{val}$} \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion totale de \emph{`\underline{DefinedValue}'}. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline
+\end{longtable}
+
+\subsubsection{Étape 2}
+\label{NamedT}
+
+\begin{longtable}{lrl} \\ \hline \\
+\emph{NamedType}        & $\rightarrow$ & \texttt{lower$_{id}$} Type \\
+                       & $\mid$        & Type \\
+
+\\ \hline \\
+
+\emph{\underline{Type}} & $\rightarrow$ & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{typ}$}] \\
+                       & $\mid$        & BuiltInType  \\
+                       & $\mid$        & SET ``\textsf{\{}'' \{ElementType ``\textsf{,}'' \ldots\}$^*$ ``\textsf{\}}'' \\
+                       & $\mid$        & SEQUENCE ``\textsf{\{}'' \{ElementType ``\textsf{,}'' \ldots\}$^*$ ``\textsf{\}}'' \\
+                       & $\mid$        & SET      [OF Type] \\
+                       & $\mid$        & SEQUENCE [OF Type] \\
+                       & $\mid$        & \texttt{lower$_{id}$} ``\textsf{$<$}'' Type \\
+                       & $\mid$        & ``\textsf{[}'' [Class] ClassNumber ``\textsf{]}'' [TagDefault] Type \\
+                       & $\mid$        & NULL  \\
+                       & $\mid$        & Type SubtypeSpec \\ 
+                       & $\mid$        & SET SIZE SubtypeSpec OF Type \\
+                       & $\mid$        & SEQUENCE SIZE SubtypeSpec OF Type \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+ \scriptsize Expansion globale de \emph{`SetType'}, \emph{`SequenceType'}, \emph{`SetOfType'}, \emph{`SequenceOfType'}, \emph{`SelectionType'}, \\
+\scriptsize \ \ \ \emph{`TaggedType'} et \emph{`NullType'}.\\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{BuiltInType}      & $\rightarrow$ & BOOLEAN \\
+                       & $\mid$        & INTEGER [``\textsf{\{}'' \{NamedNumber ``\textsf{,}'' \ldots \}$^+$ ``\textsf{\}}''] \\
+                       & $\mid$        & BIT STRING [``\textsf{\{}'' \{NamedBit ``\textsf{,}'' \ldots \}$^+$ ``\textsf{\}}''] \\
+                       & $\mid$        & OCTET STRING \\
+                       & $\mid$        & CHOICE ``\textsf{\{}'' \{NamedType ``\textsf{,}'' \ldots\}$^+$ ``\textsf{\}}'' \\
+                       & $\mid$        & ANY [DEFINED BY \texttt{lower$_{id}$}] \\
+                       & $\mid$        & OBJECT IDENTIFIER \\
+                       & $\mid$        & ENUMERATED ``\textsf{\{}'' \{NamedNumber ``\textsf{,}'' \ldots\}$^+$ ``\textsf{\}}'' \\
+                       & $\mid$        & REAL \\
+                       & $\mid$        & ``\textsf{NumericString}'' \\
+                       & $\mid$        & ``\textsf{PrintableString}'' \\
+                       & $\mid$        & ``\textsf{TeletexString}'' \\
+                       & $\mid$        & ``\textsf{T61String}'' \\
+                       & $\mid$        & ``\textsf{VideotexString}'' \\
+                       & $\mid$        & ``\textsf{VisibleString}'' \\
+                       & $\mid$        & ``\textsf{ISO646String}'' \\
+                       & $\mid$        & ``\textsf{IA5String}'' \\
+                       & $\mid$        & ``\textsf{GraphicString}'' \\
+                       & $\mid$        & ``\textsf{GeneralString}'' \\
+                       & $\mid$        & EXTERNAL \\
+                       & $\mid$        & ``\textsf{UTCTime}'' \\
+                       & $\mid$        & ``\textsf{GeneralizedTime}'' \\
+                       & $\mid$        & ``\textsf{ObjectDescriptor}'' \\
+\\ \hline \\
+
+\emph{NamedNumber} & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{(}'' AuxNamedNum ``\textsf{)}'' \\
+AuxNamedNum & $\rightarrow$ & [``\textsf{-}''] \texttt{number} \\
+            & $\mid$        & [\texttt{upper$_{mod}$} ``\textsf{.}''] \texttt{lower$_{val}$} \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+ \scriptsize Expansion totale de `\underline{SignedNumber}' et \emph{`\underline{DefinedValue}'} dans `AuxNamedNum'. \\
+ \scriptsize Déplacement de `\underline{SignedNumber}' et \emph{`\underline{DefinedValue}'} dans la section (\ref{VALUES}). \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{NamedBit} & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{(}'' ClassNumber ``\textsf{)}'' \\
+
+\\ \hline \\
+
+\emph{ElementType}      & $\rightarrow$ & NamedType [ElementTypeSuf] \\
+                       & $\mid$        & COMPONENTS OF Type \\
+ElementTypeSuf         & $\rightarrow$ & OPTIONAL \\
+                       & $\mid$        & DEFAULT Value \\
+
+\\ \hline \\
+
+\emph{Class}            & $\rightarrow$ & UNIVERSAL \\   
+                       & $\mid$        & APPLICATION \\
+                       & $\mid$        & PRIVATE \\
+
+\emph{\underline{ClassNumber}} & $\rightarrow$ & \texttt{number} \\
+  & $\mid$        & [\texttt{upper$_{mod}$} ``\textsf{.}''] \texttt{lower$_{val}$} \\ 
+\\ \hline
+\end{longtable}
+
+\subsubsection{Étape 3}
+
+Nous supprimons ici l'ambiguïté de la règle \emph{`\underline{Type}'},
+en appliquant la transformation vue à la section~\vref{Ambiguïtés}.
+Nous rendrons ensuite LL(1) la règle \emph{`NamedType'}.
+
+\begin{longtable}{lrl} \\ \hline \\
+\emph{\underline{Type}} & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{$<$}'' Type \\
+                       & $\mid$        & ``\textsf{[}'' [Class] ClassNumber ``\textsf{]}'' [TagDefault] Type \\
+                       & $\mid$        & SetSeq [SIZE SubtypeSpec] OF Type  \\
+                       & $\mid$        & Type SubtypeSpec  \\ 
+                       & $\mid$        & NULL \\
+                       & $\mid$        & BuiltInType \\
+                       & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{typ}$}] \\
+                       & $\mid$        & SetSeq [``\textsf{\{}'' \{ElementType ``\textsf{,}'' \ldots\}$^*$ ``\textsf{\}}''] \\ \\
+SetSeq                 & $\rightarrow$ & SET \\
+                       & $\mid$        & SEQUENCE \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Factorisations suffixes (`SetSeq'). \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+\emph{\underline{Type}} & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{$<$}'' Type \\
+                       & $\mid$        & ``\textsf{[}'' [Class] ClassNumber ``\textsf{]}'' [TagDefault] Type \\
+                       & $\mid$        & SetSeq [SIZE SubtypeSpec] OF Type  \\
+                       & $\mid$        & NULL SubtypeSpec$^*$ \\
+                       & $\mid$        & BuiltInType SubtypeSpec$^*$ \\
+                       & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{typ}$}] SubtypeSpec$^*$ \\
+                       & $\mid$        & SetSeq [``\textsf{\{}'' \{ElementType ``\textsf{,}'' \ldots\}$^*$ ``\textsf{\}}''] SubtypeSpec$^*$ \\ \\
+SetSeq                 & $\rightarrow$ & SET \\
+                       & $\mid$        & SEQUENCE \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Application de la transformation vue à la section
+(\ref{Ambiguïtés}). \\ \hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+\emph{\underline{Type}} & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{$<$}'' Type \\
+                       & $\mid$        & ``\textsf{[}'' [Class] ClassNumber ``\textsf{]}'' [TagDefault] Type \\
+                       & $\mid$        & NULL SubtypeSpec$^*$ \\
+                       & $\mid$        & BuiltInType SubtypeSpec$^*$ \\
+                       & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{typ}$}] SubtypeSpec$^*$ \\
+                       & $\mid$        & SetSeq TypeSuf \\
+SetSeq                 & $\rightarrow$ & SET \\
+                       & $\mid$        & SEQUENCE \\
+TypeSuf                & $\rightarrow$ & [``\textsf{\{}'' \{ElementType ``\textsf{,}'' \ldots\}$^*$ ``\textsf{\}}''] SubtypeSpec$^*$ \\
+                       & $\mid$        & [SIZE SubtypeSpec] OF Type \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Factorisation préfixe (`TypeSuf'). \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+\emph{\underline{Type}} & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{$<$}'' Type \\
+                       & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{typ}$}] SubtypeSpec$^*$ \\
+                       & $\mid$        & NULL SubtypeSpec$^*$ \\
+                       & $\mid$        & AuxType \\
+AuxType                & $\rightarrow$ & ``\textsf{[}'' [Class] ClassNumber ``\textsf{]}'' [TagDefault] Type \\
+                       & $\mid$        & BuiltInType SubtypeSpec$^*$ \\
+                       & $\mid$        & SetSeq [TypeSuf] \\
+SetSeq                 & $\rightarrow$ & SET \\
+                       & $\mid$        & SEQUENCE \\
+TypeSuf                & $\rightarrow$ & SubtypeSpec$^+$ \\
+                       & $\mid$        & ``\textsf{\{}'' \{ElementType ``\textsf{,}'' \ldots\}$^*$ ``\textsf{\}}'' SubtypeSpec$^*$ \\
+                       & $\mid$        & [SIZE SubtypeSpec] OF Type \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Option de `TypeSuf'. \\ \scriptsize Réduction de {\em
+`\underline{Type}'} (`AuxType'). On comprendra pourquoi à l'étape 4 de
+la section (\ref{VALUES}).\\ \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{NamedType}        & $\rightarrow$ & \texttt{lower$_{id}$} Type \\
+                       & $\mid$        & Type \\
+
+\\ \hline \hline \\
+
+\emph{NamedType}        & $\rightarrow$ & \texttt{lower$_{id}$} Type  \\
+                       & $\mid$        & \texttt{lower$_{id}$} ``\textsf{$<$}'' Type \\
+                       & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{typ}$}] SubtypeSpec$^*$ \\
+                       & $\mid$        & NULL SubtypeSpec$^*$ \\
+                       & $\mid$        & AuxType \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion totale de \emph{`\underline{Type}'}. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+\emph{NamedType}        & $\rightarrow$ & \texttt{lower$_{id}$} [``\textsf{$<$}''] Type \\
+                       & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{typ}$}] SubtypeSpec$^*$ \\
+                       & $\mid$        & NULL SubtypeSpec$^*$ \\
+                       & $\mid$        & AuxType \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Factorisation bifixe. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline 
+\end{longtable}
+
+\subsubsection{Étape 4}
+Voici la grammaire finale de la section~\vref{TYPES}.
+
+\begin{longtable}{lrl} \\ \hline \\
+\emph{\underline{Type}} & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{$<$}'' Type \\
+                       & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{typ}$}] SubtypeSpec$^*$ \\
+                       & $\mid$        & NULL SubtypeSpec$^*$ \\
+                       & $\mid$        & AuxType \\
+AuxType                & $\rightarrow$ & ``\textsf{[}'' [Class] ClassNumber ``\textsf{]}'' [TagDefault] Type \\
+                       & $\mid$        & BuiltInType SubtypeSpec$^*$ \\
+                       & $\mid$        & SetSeq [TypeSuf] \\
+SetSeq                 & $\rightarrow$ & SET \\
+                       & $\mid$        & SEQUENCE \\
+TypeSuf                & $\rightarrow$ & SubtypeSpec$^+$ \\
+                       & $\mid$        & ``\textsf{\{}'' \{ElementType ``\textsf{,}'' \ldots\}$^*$ ``\textsf{\}}'' SubtypeSpec$^*$ \\
+                       & $\mid$        & [SIZE SubtypeSpec] OF Type \\ 
+
+\\ \hline \\
+
+\emph{BuiltInType}      & $\rightarrow$ & BOOLEAN \\
+                       & $\mid$        & INTEGER [``\textsf{\{}'' \{NamedNumber ``\textsf{,}'' \ldots \}$^+$ ``\textsf{\}}''] \\
+                       & $\mid$        & BIT STRING [``\textsf{\{}'' \{NamedBit ``\textsf{,}'' \ldots \}$^+$ ``\textsf{\}}''] \\
+                       & $\mid$        & OCTET STRING \\
+                       & $\mid$        & CHOICE ``\textsf{\{}'' \{NamedType ``\textsf{,}'' \ldots\}$^+$ ``\textsf{\}}'' \\
+                       & $\mid$        & ANY [DEFINED BY \texttt{lower$_{id}$}] \\
+                       & $\mid$        & OBJECT IDENTIFIER \\
+                       & $\mid$        & ENUMERATED ``\textsf{\{}'' \{NamedNumber ``\textsf{,}'' \ldots\}$^+$ ``\textsf{\}}'' \\
+                       & $\mid$        & REAL \\
+                       & $\mid$        & ``\textsf{NumericString}'' \\
+                       & $\mid$        & ``\textsf{PrintableString}'' \\
+                       & $\mid$        & ``\textsf{TeletexString}'' \\
+                       & $\mid$        & ``\textsf{T61String}'' \\
+                       & $\mid$        & ``\textsf{VideotexString}'' \\
+                       & $\mid$        & ``\textsf{VisibleString}'' \\
+                       & $\mid$        & ``\textsf{ISO646String}'' \\
+                       & $\mid$        & ``\textsf{IA5String}'' \\
+                       & $\mid$        & ``\textsf{GraphicString}'' \\
+                       & $\mid$        & ``\textsf{GeneralString}'' \\
+                       & $\mid$        & EXTERNAL \\
+                       & $\mid$        & ``\textsf{UTCTime}'' \\
+                       & $\mid$        & ``\textsf{GeneralizedTime}'' \\
+                       & $\mid$        & ``\textsf{ObjectDescriptor}'' \\
+
+\\ \hline \\
+
+\emph{NamedType}        & $\rightarrow$ & \texttt{lower$_{id}$} [``\textsf{$<$}''] Type \\
+                       & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{typ}$}] SubtypeSpec$^*$ \\
+                       & $\mid$        & NULL SubtypeSpec$^*$ \\
+                       & $\mid$        & AuxType \\
+
+\\ \hline \\
+
+\emph{NamedNumber} & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{(}'' AuxNamedNum ``\textsf{)}'' \\
+AuxNamedNum & $\rightarrow$ & [``\textsf{-}''] \texttt{number} \\
+            & $\mid$        & [\texttt{upper$_{mod}$} ``\textsf{.}''] \texttt{lower$_{val}$} \\
+
+\\ \hline \\
+
+\emph{NamedBit} & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{(}'' ClassNumber ``\textsf{)}'' \\
+
+\\ \hline \\
+
+\emph{ElementType}      & $\rightarrow$ & NamedType [ElementTypeSuf] \\
+                       & $\mid$        & COMPONENTS OF Type \\
+ElementTypeSuf         & $\rightarrow$ & OPTIONAL \\
+                       & $\mid$        & DEFAULT Value \\
+
+\\ \hline \\
+
+\emph{Class}            & $\rightarrow$ & UNIVERSAL \\   
+                       & $\mid$        & APPLICATION \\
+                       & $\mid$        & PRIVATE \\
+
+\emph{\underline{ClassNumber}} & $\rightarrow$ & \texttt{number} \\
+  & $\mid$        & [\texttt{upper$_{mod}$} ``\textsf{.}''] \texttt{lower$_{val}$} \\ 
+\\ \hline
+\end{longtable}
+
+
+\subsection{Transformations de la grammaire des valeurs}
+\label{VALUES}
+
+\subsubsection{Étape 0}
+\label{Valeurs0}
+
+Voici la forme normalisée de la grammaire des valeurs ASN.1 Notons que
+nous récupérons ici les règles \emph{`ObjectIdentifierValue'}, en
+provenance de la section~\vref{MODULES},
+\emph{`\underline{DefinedValue}'} et \emph{`SignedNumber'}, en
+provenance de la section~\vref{TYPES}.
+
+\begin{longtable}{lrl} \\ \hline \\
+\emph{\underline{Value}} & $\rightarrow$ & BuiltInValue \hspace*{4.5cm} \\
+                        & $\mid$        & DefinedValue \\
+
+\\ \hline \\
+
+\emph{DefinedValue} & $\rightarrow$ & [\texttt{upper$_{mod}$} ``\textsf{.}''] \texttt{lower$_{val}$} \\
+
+\\ \hline \\
+
+\emph{SignedNumber} & $\rightarrow$ & [``\textsf{-}''] \texttt{number} \\
+
+\\ \hline \\
+
+\emph{BuiltInValue}       & $\rightarrow$ & BooleanValue \\
+                          & $\mid$        & IntegerValue \\
+                          & $\mid$        & BitStringValue \\
+                          & $\mid$        & OctetStringValue \\
+                          & $\mid$        & NullValue \\
+                          & $\mid$        & SequenceValue \\
+                          & $\mid$        & SequenceOfValue \\
+                          & $\mid$        & SetValue \\
+                          & $\mid$        & SetOfValue \\
+                          & $\mid$        & ChoiceValue \\
+                          & $\mid$        & SelectionValue \\
+                          & $\mid$        & TaggedValue \\
+                          & $\mid$        & AnyValue \\
+                          & $\mid$        & ObjectIdentifierValue \\
+                          & $\mid$        & CharacterStringValue \\
+                          & $\mid$        & EnumeratedValue \\
+                          & $\mid$        & RealValue \\
+
+\emph{NamedValue}          & $\rightarrow$ & \texttt{identifier} Value \\
+                          & $\mid$        & Value \\
+
+\\ \hline \\
+
+\emph{BooleanValue}        & $\rightarrow$ & TRUE \\
+                          & $\mid$        & FALSE \\
+
+\\ \hline \\
+
+\emph{IntegerValue}        & $\rightarrow$ & SignedNumber \\
+                          & $\mid$        & \texttt{identifier} \\
+
+\\ \hline \\
+
+\emph{EnumeratedValue}     & $\rightarrow$ & \texttt{identifier} \\
+
+\\ \hline \\
+
+\emph{RealValue}           & $\rightarrow$ & NumericRealValue \\
+                          & $\mid$        & SpecialRealValue \\
+NumericRealValue          & $\rightarrow$ & ``\textsf{\{}'' Mantissa ``\textsf{,}'' Base ``\textsf{,}'' Exponent ``\textsf{\}}'' \\
+                          & $\mid$        & ``\textsf{0}'' \\
+Mantissa                  & $\rightarrow$ & SignedNumber \\
+Base                      & $\rightarrow$ & ``\textsf{2}'' \\
+                          & $\mid$        & ``\textsf{10}'' \\
+Exponent                  & $\rightarrow$ & SignedNumber \\
+SpecialRealValue          & $\rightarrow$ & PLUS-INFINITY \\
+                          & $\mid$        & MINUS-INFINITY \\
+
+\\ \hline \\
+
+\emph{OctetStringValue}    & $\rightarrow$ & \texttt{bstring} \\
+                          & $\mid$        & \texttt{hstring} \\
+
+\\ \hline \\
+
+\emph{BitStringValue}      & $\rightarrow$ & \texttt{bstring} \\
+                          & $\mid$        & \texttt{hstring} \\
+                          & $\mid$        & ``\textsf{\{}'' IdentifierList ``\textsf{\}}'' \\
+                          & $\mid$        & ``\textsf{\{}'' ``\textsf{\}}'' \\
+IdentifierList            & $\rightarrow$ & \texttt{identifier} \\
+                          & $\mid$        & IdentifierList ``\textsf{,}'' \texttt{identifier} \\
+
+\\ \hline \\
+
+\emph{NullValue}           & $\rightarrow$ & NULL \\
+
+\\ \hline \\
+
+\emph{SequenceValue}       & $\rightarrow$ & ``\textsf{\{}'' ElementValueList ``\textsf{\}}'' \\
+                          & $\mid$        & ``\textsf{\{}'' ``\textsf{\}}'' \\
+\emph{SetValue}            & $\rightarrow$ & ``\textsf{\{}'' ElementValueList ``\textsf{\}}'' \\
+                          & $\mid$        & ``\textsf{\{}'' ``\textsf{\}}'' \\
+ElementValueList          & $\rightarrow$ & NamedValue \\
+                          & $\mid$        & ElementValueList ``\textsf{,}'' NamedValue \\
+
+\\ \hline \\
+
+\emph{ChoiceValue}         & $\rightarrow$ & [\texttt{identifier} ``\textsf{:}''] Value \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Et non pas: \ \ \ \emph{ChoiceValue} $\rightarrow$ NamedValue \ \ \ (\textbf{Erratum}). \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{SelectionValue}      & $\rightarrow$ & Value \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Et non pas: \ \ \ \emph{SelectionValue} $\rightarrow$ NamedValue \ \ \ (\textbf{Erratum}). \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{SequenceOfValue} & $\rightarrow$ & ``\textsf{\{}'' ValueList ``\textsf{\}}'' \\
+                      & $\mid$        & ``\textsf{\{}'' ``\textsf{\}}'' \\
+\emph{SetOfValue}      & $\rightarrow$ & ``\textsf{\{}'' ValueList ``\textsf{\}}'' \\
+                      & $\mid$        & ``\textsf{\{}'' ``\textsf{\}}'' \\
+ValueList             & $\rightarrow$ & Value \\
+                      & $\mid$        & ValueList ``\textsf{,}'' Value \\
+
+\\ \hline \\
+
+\emph{TaggedValue}     & $\rightarrow$ & Value \\
+
+\\ \hline \\
+
+\emph{AnyValue}        & $\rightarrow$ & Type ``\textsf{:}'' Value \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Et non pas: \ \ \ \emph{AnyValue} $\rightarrow$ Type Value \ \ \ (\textbf{Erratum}). \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{ObjectIdentifierValue} & $\rightarrow$ & ``\textsf{\{}'' ObjIdComponent$^+$ ``\textsf{\}}'' \\
+
+\\ \hline \\
+
+\emph{CharacterStringValue}  & $\rightarrow$ & \texttt{cstring} \\
+
+\\ \hline
+\end{longtable}
+
+\subsubsection{Étape 1}
+\label{Valeurs1}
+
+On prendra garde à ce que les terminaux \texttt{bstring} et
+\texttt{hstring} sont fusionnés en \texttt{basednumber}. Voir
+section~\vref{AMBLEX}. D'autre part, les productions en doublon ne
+sont pas immédiatement fusionnées pour des raisons de clarté. On
+notera aussi que les terminaux ``\textsf{0}'', ``\textsf{2}'' et
+``\textsf{10}'' deviennent le terminal \texttt{number}. (C'est ce que
+fait normalement un analyseur lexical.)
+
+\begin{longtable}{lrl} \\ \hline \\
+\emph{\underline{Value}} & $\rightarrow$ & BuiltInValue \\
+                        & $\mid$        & IntegerValue\\
+                        & $\mid$        & NullValue \\
+                        & $\mid$        & ChoiceValue \\
+                        & $\mid$        & SelectionValue \\
+                        & $\mid$        & TaggedValue \\
+                        & $\mid$        & AnyValue \\
+                        & $\mid$        & EnumeratedValue  \\
+                        & $\mid$        & [\texttt{upper$_{mod}$} ``\textsf{.}''] \texttt{lower$_{val}$} \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion partielle de \emph{`IntegerValue'}, \emph{`NullValue'}, \emph{`ChoiceValue'}, \emph{`SelectionValue'}, \emph{`TaggedValue'}, \\
+  \scriptsize \ \ \ \emph{`AnyValue'} et \emph{`EnumeratedValue'} de la règle \emph{`BuiltInValue'}. \\
+  \scriptsize Expansion globale de \emph{`DefinedValue'}. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{BuiltInValue}        & $\rightarrow$ & TRUE \\
+                          & $\mid$        & FALSE  \\
+                          & $\mid$        & \texttt{basednum} \\
+                          & $\mid$        & ``\textsf{\{}'' \{\texttt{lower$_{id}$} ``\textsf{,}'' \ldots\}* ``\textsf{\}}''  \\
+                          & $\mid$        & \texttt{basednum} \\
+                          & $\mid$        & ``\textsf{\{}'' \{NamedValue ``\textsf{,}'' \ldots\}* ``\textsf{\}}'' \\
+                          & $\mid$        & ``\textsf{\{}'' \{Value ``\textsf{,}'' \ldots\}* ``\textsf{\}}'' \\
+                          & $\mid$        & ``\textsf{\{}'' \{NamedValue ``\textsf{,}'' \ldots\}* ``\textsf{\}}'' \\
+                          & $\mid$        & ``\textsf{\{}'' \{Value ``\textsf{,}'' \ldots\}* ``\textsf{\}}'' \\
+                          & $\mid$        & ``\textsf{\{}'' ObjIdComponent$^+$ ``\textsf{\}}'' \\
+                          & $\mid$        & \texttt{string}  \\
+                          & $\mid$        & ``\textsf{\{}'' [``\textsf{-}''] \texttt{number} ``\textsf{,}'' \texttt{number} ``\textsf{,}'' [``\textsf{-}''] \texttt{number} ``\textsf{\}}'' \\
+                          & $\mid$        & \texttt{number} \\
+                          & $\mid$        & PLUS-INFINITY \\
+                          & $\mid$        & MINUS-INFINITY \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion globale de \emph{`BooleanValue'}, \emph{`ObjectIdentifierValue'}, \emph{`CharacterStringValue'} \\
+  \scriptsize \ \ \ et \emph{`OctetStringValue'}. \\
+  \scriptsize Arden de `IdentifierList' et expansion globale, puis factorisation bifixe dans \emph{`BitStringValue'}.\\
+  \scriptsize \ \ \ Expansion globale de \emph{`BitStringValue'}.\\
+  \scriptsize Arden de `ElementValueList' et expansion globale, puis factorisation bifixe dans \emph{`SequenceValue'} \\
+  \scriptsize \ \ \ et \emph{`SetValue'}. \\
+  \scriptsize \ \ \ Expansion globale de \emph{`SequenceValue'} et \emph{`SetValue'}. \\
+  \scriptsize Arden de `ValueList' et expansion globale, puis factorisation bifixe dans \emph{`SequenceOfValue'} \\
+  \scriptsize \ \ \ et \emph{`SetOfValue'}. \\
+  \scriptsize \ \ \ Expansion globale de \emph{`SequenceOfValue'} et \emph{`SetOfValue'}. \\
+  \scriptsize Sous-section \emph{`RealValue'}: expansion totale de \emph{`SignedNumber'} dans `Mantissa' et `Exponent'. \\
+  \scriptsize \ \ \ Expansion globale de `Mantissa', `Base' (Base $\rightarrow$ \texttt{number}) et `Exponent'. \\
+  \scriptsize \ \ \ Expansion globale de `NumericRealValue', `SpecialRealValue' et \emph{`RealValue'}. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{NamedValue}          & $\rightarrow$ & \texttt{lower$_{id}$} Value \\
+                          & $\mid$        & Value \\
+
+\\ \hline \\
+
+\emph{IntegerValue}        & $\rightarrow$ & [``\textsf{-}''] \texttt{number} \\
+                          & $\mid$        & \texttt{lower$_{id}$} \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion globale de \emph{`SignedNumber'}. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{EnumeratedValue}     & $\rightarrow$ & \texttt{lower$_{id}$} \\
+
+\\ \hline \\
+
+\emph{NullValue}           & $\rightarrow$ & NULL \\
+
+\\ \hline \\
+
+\emph{ChoiceValue}         & $\rightarrow$ & [\texttt{lower$_{id}$} ``\textsf{:}''] Value \\
+
+\\ \hline \\
+
+\emph{SelectionValue}      & $\rightarrow$ & Value \\
+
+\\ \hline \\
+
+\emph{TaggedValue}     & $\rightarrow$ & Value \\
+
+\\ \hline \\
+
+\emph{AnyValue}        & $\rightarrow$ & Type ``\textsf{:}'' Value \\
+
+\\ \hline 
+\end{longtable}
+
+
+\subsubsection{Étape 2}
+\label{Valeurs2}
+
+\begin{longtable}{lrl} \\ \hline \\
+\emph{\underline{Value}} & $\rightarrow$ & BuiltInValue\\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} \\
+                        & $\mid$        & \texttt{lower$_{id}$}\\
+                        & $\mid$        & NULL \\
+                        & $\mid$        & [\texttt{lower$_{id}$} ``\textsf{:}''] Value \\
+                        & $\mid$        & Value \\
+                        & $\mid$        & Value \\
+                        & $\mid$        & Type ``\textsf{:}'' Value \\
+                        & $\mid$        & \texttt{lower$_{id}$} \\
+                        & $\mid$        & [\texttt{upper$_{mod}$} ``\textsf{.}''] \texttt{lower$_{val}$}  \\ 
+                          & $\mid$        & \texttt{number} \\
+\\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion globale de \emph{`IntegerValue'}, \emph{`NullValue'}, \emph{`ChoiceValue'}, \emph{`SelectionValue'}, \\
+  \scriptsize \ \ \  \emph{`TaggedValue'}, \emph{`AnyValue'}, et \emph{`EnumeratedValue'}. \\
+  \scriptsize Expansion partielle de \ \ \ \emph{BuiltInValue} $\rightarrow$ \texttt{number} \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{BuiltInValue}        & $\rightarrow$ & TRUE \\
+                          & $\mid$        & FALSE \\
+                          & $\mid$        & PLUS-INFINITY \\
+                          & $\mid$        & MINUS-INFINITY \\
+                          & $\mid$        & \texttt{basednum} \\
+                          & $\mid$        & \texttt{string} \\
+                          & $\mid$        & ``\textsf{\{}'' BetBraces ``\textsf{\}}'' \\
+BetBraces                 & $\rightarrow$ & \{NamedValue ``\textsf{,}'' \ldots\}* \\
+                          & $\mid$        & ObjIdComponent$^+$ \\
+                          & $\mid$        & [``\textsf{-}''] \texttt{number} ``\textsf{,}'' \texttt{number} ``\textsf{,}'' [``\textsf{-}''] \texttt{number} \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Lemme d'Arden (Élimination des redondances Value $\rightarrow$ Value $\mid$ \ldots).\\
+  \scriptsize Élimination de la production \ ``\textsf{\{}'' \{\texttt{lower$_{id}$} ``\textsf{,}'' \ldots\}* ``\textsf{\}}'' \\
+  \scriptsize \ \ \ car ``\textsf{\{}'' \{Value ``\textsf{,}'' \ldots\}* ``\textsf{\}}'' $\Rightarrow$ ``\textsf{\{}'' \{\texttt{lower$_{id}$} ``\textsf{,}'' \ldots\}* ``\textsf{\}}'' \\
+  \scriptsize Élimination de la production \ ``\textsf{\{}''\{Value ``\textsf{,}'' \ldots\}* ``\textsf{\}}'' \\
+  \scriptsize \ \ \ car ``\textsf{\{}'' \{NamedValue ``\textsf{,}'' \ldots\}* ``\textsf{\}}'' $\Rightarrow$ ``\textsf{\{}''\{Value ``\textsf{,}'' \ldots\}* ``\textsf{\}}'' \\
+  \scriptsize Factorisation bifixe (`BetBraces'). \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{NamedValue}          & $\rightarrow$ & \texttt{lower$_{id}$} Value \\
+                          & $\mid$        & Value \\
+
+\\ \hline
+\end{longtable}
+
+\subsubsection{Étape 3}
+\label{Valeurs3}
+
+\begin{longtable}{lrl} \\ \hline \\
+\emph{\underline{Value}} & $\rightarrow$ & BuiltInValue \\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} \\
+                        & $\mid$        & NULL \\
+                        & $\mid$        & \texttt{lower} [``\textsf{:}'' Value] \\
+                        & $\mid$        & Type ``\textsf{:}'' Value \\
+                        & $\mid$        & \texttt{upper$_{mod}$} ``\textsf{.}'' \texttt{lower$_{val}$} \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Élimination des redondances. \\
+  \scriptsize Arden de \emph{`\underline{Value}'}. \\
+  \scriptsize Factorisation préfixe de \texttt{lower}. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{BuiltInValue}        & $\rightarrow$ & TRUE \\
+                          & $\mid$        & FALSE \\
+                          & $\mid$        & PLUS-INFINITY \\
+                          & $\mid$        & MINUS-INFINITY \\
+                          & $\mid$        & \texttt{basednum} \\
+                          & $\mid$        & \texttt{string} \\
+                          & $\mid$        & ``\textsf{\{}'' [BetBraces] ``\textsf{\}}'' \\
+BetBraces                 & $\rightarrow$ & \{NamedValue ``\textsf{,}'' \ldots\}$^+$ \\
+                          & $\mid$        & ObjIdComponent$^+$ \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Option de `BetBraces'. \\
+  \scriptsize Élimination de la troisième production de `BetBraces' car:\\
+  \scriptsize \ \ \  \{NamedValue ``\textsf{,}'' \ldots\}$^+$ $\stackrel{+}{\Longrightarrow}$ [``\textsf{-}''] \texttt{number} ``\textsf{,}'' \texttt{number} ``\textsf{,}'' [``\textsf{-}''] \texttt{number} \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{NamedValue}          & $\rightarrow$ & \texttt{lower$_{id}$} Value \\
+                          & $\mid$        & Value \\
+
+\\ \hline
+
+\end{longtable}
+
+\subsubsection{Étape 4}
+
+Nous rendons LL(1) la règle \emph{`\underline{Value}'}, puis \emph{`NamedValue'}.\\
+
+\begin{longtable}{lrl} \\ \hline \\
+\emph{\underline{Value}} & $\rightarrow$ & BuiltInValue \\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} \\
+                        & $\mid$        & NULL \\
+                        & $\mid$        & \texttt{lower} [``\textsf{:}'' Value] \\
+                        & $\mid$        & \texttt{upper$_{mod}$} ``\textsf{.}'' \texttt{lower$_{val}$}  \\
+                        & $\mid$        & \texttt{lower$_{id}$} ``\textsf{$<$}'' Type ``\textsf{:}'' Value \\
+                       & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{typ}$}] SubtypeSpec$^*$ ``\textsf{:}'' Value\\
+                       & $\mid$        & NULL SubtypeSpec$^*$ ``\textsf{:}'' Value \\
+                       & $\mid$        & AuxType ``\textsf{:}'' Value \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion totale de \emph{`Type'}. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+\emph{\underline{Value}} & $\rightarrow$ & AuxVal0 \\
+                        & $\mid$        & \texttt{upper} AuxVal1 \\
+                        & $\mid$        & \texttt{lower} [AuxVal2] \\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} \\
+AuxVal0                 & $\rightarrow$ & BuiltInValue \\
+                        & $\mid$        & AuxType ``\textsf{:}'' Value \\
+                        & $\mid$        & NULL [SubtypeSpec$^*$ ``\textsf{:}'' Value] \\
+AuxVal1                 & $\rightarrow$ & [``\textsf{.}'' \texttt{upper$_{typ}$}] SubtypeSpec$^*$ ``\textsf{:}'' Value \\
+                        & $\mid$        & ``\textsf{.}'' \texttt{lower$_{val}$} \\
+AuxVal2                 & $\rightarrow$ & [``\textsf{$<$}'' Type] ``\textsf{:}'' Value \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Factorisations préfixes. \\
+  \scriptsize Réduction (`AuxVal0').\\
+  \scriptsize \ \ \ La raison est donnée en (\ref{Étape5}). \\ 
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+\emph{\underline{Value}} & $\rightarrow$ & AuxVal0 \\
+                        & $\mid$        & \texttt{upper} AuxVal1 \\
+                        & $\mid$        & \texttt{lower} [AuxVal2] \\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} \\
+AuxVal0                 & $\rightarrow$ & BuiltInValue \\
+                        & $\mid$        & AuxType ``\textsf{:}'' Value \\
+                        & $\mid$        & NULL [SpecVal] \\
+AuxVal1                 & $\rightarrow$ & SpecVal \\
+                        & $\mid$        & ``.'' AuxVal11 \\
+AuxVal2                 & $\rightarrow$ & [``\textsf{$<$}'' Type] ``\textsf{:}'' Value \\ 
+AuxVal11                & $\rightarrow$ & \texttt{upper$_{typ}$} SpecVal \\
+                        & $\mid$        & \texttt{lower$_{val}$} \\
+SpecVal                 & $\rightarrow$ & SubtypeSpec$^*$ ``\textsf{:}'' Value \\ \\ 
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion inverse (`SpecVal'). \\
+  \scriptsize Factorisation préfixe de `AuxVal1' (`AuxVal11'). \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+\\ \hline \\
+
+\emph{NamedValue}          & $\rightarrow$ & \texttt{lower$_{id}$} Value  \\
+                          & $\mid$        & AuxVal0 \\
+                          & $\mid$        & \texttt{upper} AuxVal1 \\
+                          & $\mid$        & \texttt{lower} [AuxVal2] \\
+                          & $\mid$        & [``\textsf{-}''] \texttt{number} \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion \emph{`\underline{Value}'}. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+\emph{NamedValue}          & $\rightarrow$ & \texttt{lower} [NamedValSuf] \\
+                          & $\mid$        & \texttt{upper} AuxVal1 \\
+                          & $\mid$        & [``\textsf{-}''] \texttt{number} \\
+                          & $\mid$        & AuxVal0 \\
+NamedValSuf               & $\rightarrow$ & Value \\
+                          & $\mid$        & AuxVal2 \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Factorisation préfixe. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline
+\end{longtable}
+
+\subsubsection{Étape 5}
+\label{Étape5}
+
+Nous rendons maintenant LL(1) la règle `BetBraces'.\\
+\begin{longtable}{lrl} \\ \hline \\
+BetBraces                 & $\rightarrow$ & NamedValue [``\textsf{,}'' \{NamedValue ``\textsf{,}'' \ldots\}$^+$] \\
+                          & $\mid$        & ObjIdComponent ObjIdComponent$^*$ \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Opérations rationnelles. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+BetBraces                 & $\rightarrow$ & \texttt{lower} [NamedValSuf] [AuxNamed]\\
+                          & $\mid$        & \texttt{upper} AuxVal1 [AuxNamed]\\
+                          & $\mid$        & [``\textsf{-}''] \texttt{number} [AuxNamed]\\
+                          & $\mid$        & AuxVal0 [AuxNamed]  \\
+ 
+                          & $\mid$        & \texttt{number} ObjIdComponent$^*$ \\
+                          & $\mid$        & \texttt{upper$_{mod}$} ``.'' \texttt{lower$_{val}$} ObjIdComponent$^*$ \\
+                          & $\mid$        & \texttt{lower} [``\textsf{(}'' ClassNumber ``\textsf{)}''] ObjIdComponent$^*$ \\ \\
+AuxNamed                  & $\rightarrow$ & ``\textsf{,}'' \{NamedValue ``\textsf{,}'' \ldots\}$^+$ \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion inverse (`AuxNamed'). \\
+  \scriptsize Expansion totale de \emph{`NamedValue'}. \\
+  \scriptsize Expansion totale de \emph{`ObjIdComponent'}. \\
+  \scriptsize \ \ \ Cf. (\ref{CLASS}). \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+BetBraces                 & $\rightarrow$ & AuxVal0 [AuxNamed] \\
+                          & $\mid$        & ``\textsf{-}'' \texttt{number} [AuxNamed] \\
+                          & $\mid$        & \texttt{lower} [AuxBet1] \\
+                          & $\mid$        & \texttt{upper} AuxBet2 \\
+                          & $\mid$        & \texttt{number} [AuxBet3] \\
+AuxBet1                   & $\rightarrow$ & ``\textsf{(}'' ClassNumber ``\textsf{)}'' ObjIdComponent$^*$ \\
+                          & $\mid$        & ObjIdComponent$^+$ \\
+                          & $\mid$        & NamedValSuf [AuxNamed] \\
+                          & $\mid$        & AuxNamed \\
+AuxBet2                   & $\rightarrow$ & AuxVal1 [AuxNamed] \\
+                          & $\mid$        & ``.'' \texttt{lower$_{val}$} ObjIdComponent$^*$ \\
+AuxBet3                   & $\rightarrow$ & ObjIdComponent$^+$ \\
+                          & $\mid$        & AuxNamed \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Factorisations préfixes et développement de `AuxBet1'. \hspace*{2.85cm} \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+AuxBet1                   & $\rightarrow$ & ``\textsf{(}'' ClassNumber ``\textsf{)}'' ObjIdComponent$^*$ \\
+                          & $\mid$        & AuxNamed  \\
+                          & $\mid$        & ObjIdComponent ObjIdComponent$^*$ \\
+                          & $\mid$        & ObjIdComponent ObjIdComponent$^*$ \\
+                          & $\mid$        & ObjIdComponent ObjIdComponent$^*$  \\ 
+                          & $\mid$        & Value   [AuxNamed] \\
+                          & $\mid$        & AuxVal2 [AuxNamed] \\ \\
+AuxBet2                   & $\rightarrow$ & SpecVal [AuxNamed] \\
+                          & $\mid$        & ``\textsf{.}'' \texttt{upper$_{typ}$} SpecVal [AuxNamed] \\
+                          & $\mid$        & ``\textsf{.}'' \texttt{lower$_{val}$} [AuxNamed]  \\ 
+                          & $\mid$        & ``.'' \texttt{lower$_{val}$} ObjIdComponent$^*$ \\
+\\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Opération rationnelle dans `AuxBet1'. \\
+  \scriptsize Expansion totale de `NamedValSuf'. \\
+  \scriptsize Expansion totale de `AuxVal1' dans `AuxBet2', puis de `AuxVal11'. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+AuxBet1                   & $\rightarrow$ & ``\textsf{(}'' ClassNumber ``\textsf{)}'' ObjIdComponent$^*$ \\
+                          & $\mid$        & AuxNamed \\
+                          & $\mid$        & AuxVal2 [AuxNamed]  \\
+                          & $\mid$        & \texttt{number} ObjIdComponent$^*$ \\
+                          & $\mid$        & \texttt{upper$_{mod}$} ``.'' \texttt{lower$_{val}$} ObjIdComponent$^*$ \\
+                          & $\mid$        & \texttt{lower} [``\textsf{(}'' ClassNumber ``\textsf{)}''] ObjIdComponent$^*$  \\ 
+                          & $\mid$        & AuxVal0 [AuxNamed] \\
+                          & $\mid$        & \texttt{upper} AuxVal1 [AuxNamed] \\
+                          & $\mid$        & \texttt{lower} [AuxVal2] [AuxNamed] \\
+                          & $\mid$        & [``\textsf{-}''] \texttt{number} [AuxNamed] \\ \\
+
+AuxBet2                   & $\rightarrow$ & SpecVal [AuxNamed] \\
+                          & $\mid$        & ``.'' AuxBet21 \\ \\
+AuxBet21                  & $\rightarrow$ & \texttt{upper$_{typ}$} SpecVal [AuxNamed] \\
+                          & $\mid$        & \texttt{lower$_{val}$} [AuxBet3] \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion totale de `ObjectIdComponent'. \\
+  \scriptsize Expansion totale de \emph{`\underline{Value}'}. \\
+  \scriptsize Factorisation préfixe de `AuxBet2'. \\
+  \scriptsize \ \ \ Nous reconnaissons `AuxBet3'. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+AuxBet1                   & $\rightarrow$ & ``\textsf{(}'' ClassNumber ``\textsf{)}'' ObjIdComponent$^*$ \\
+                          & $\mid$        & AuxNamed \\
+                          & $\mid$        & AuxVal2 [AuxNamed] \\
+                          & $\mid$        & ``\textsf{-}'' \texttt{number} [AuxNamed] \\
+                          & $\mid$        & AuxVal0 [AuxNamed]  \\
+                          & $\mid$        & \texttt{lower}  [AuxBet11] \\
+                          & $\mid$        & \texttt{number} [AuxBet3] \\
+                          & $\mid$        & \texttt{upper} AuxBet2 \\ \\
+AuxBet11                  & $\rightarrow$ & ``\textsf{(}'' ClassNumber ``\textsf{)}'' ObjIdComponent$^*$ \\
+                          & $\mid$        & ObjIdComponent$^+$ \\
+                          & $\mid$        & AuxVal2 [AuxNamed] \\
+                          & $\mid$        & AuxNamed \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Factorisations préfixes dans `AuxBet1' (`AuxBet11') où
+nous reconnaissons `AuxBet3' et `AuxBet2'.\\
+  \scriptsize Nous développons `AuxBet11'. \\
+  \scriptsize NOTA : Nous n'avons pas fait figurer ici les règles
+`AuxBet2' et `AuxBet21'. \\ \hline
+\end{tabular}
+} \\
+
+\\ \hline
+\end{longtable}
+
+\subsubsection{Étape 6}
+
+Nous rappelons le bilan des transformations.
+
+\begin{longtable}{lrl} \\ \hline \\
+\emph{\underline{Value}} & $\rightarrow$ & AuxVal0 \\
+                        & $\mid$        & \texttt{upper} AuxVal1 \\
+                        & $\mid$        & \texttt{lower} [AuxVal2] \\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} \\
+AuxVal0                 & $\rightarrow$ & BuiltInValue \\
+                        & $\mid$        & AuxType ``\textsf{:}'' Value \\
+                        & $\mid$        & NULL [SpecVal] \\
+AuxVal1                 & $\rightarrow$ & SpecVal \\
+                        & $\mid$        & ``.'' AuxVal11 \\
+AuxVal2                 & $\rightarrow$ & [``\textsf{$<$}'' Type] ``\textsf{:}'' Value \\ 
+AuxVal11                & $\rightarrow$ & \texttt{upper$_{typ}$} SpecVal \\
+                        & $\mid$        & \texttt{lower$_{val}$} \\
+SpecVal                 & $\rightarrow$ & SubtypeSpec$^*$ ``\textsf{:}'' Value \\
+
+\\ \hline \\
+
+\emph{BuiltInValue}        & $\rightarrow$ & TRUE \\
+                          & $\mid$        & FALSE \\
+                          & $\mid$        & PLUS-INFINITY \\
+                          & $\mid$        & MINUS-INFINITY \\
+                          & $\mid$        & \texttt{basednum} \\
+                          & $\mid$        & \texttt{string} \\
+                          & $\mid$        & ``\textsf{\{}'' [BetBraces] ``\textsf{\}}'' \\
+
+\\ \hline \\
+
+\emph{BetBraces}           & $\rightarrow$ & AuxVal0 [AuxNamed] \\
+                          & $\mid$        & ``\textsf{-}'' \texttt{number} [AuxNamed] \\
+                          & $\mid$        & \texttt{lower} [AuxBet1] \\
+                          & $\mid$        & \texttt{upper} AuxBet2 \\
+                          & $\mid$        & \texttt{number} [AuxBet3] \\
+AuxBet1                   & $\rightarrow$ & ``\textsf{(}'' ClassNumber ``\textsf{)}'' ObjIdComponent$^*$ \\
+                          & $\mid$        & AuxNamed \\
+                          & $\mid$        & AuxVal2 [AuxNamed] \\
+                          & $\mid$        & ``\textsf{-}'' \texttt{number} [AuxNamed] \\
+                          & $\mid$        & AuxVal0 [AuxNamed] \\
+                          & $\mid$        & \texttt{lower} [AuxBet11] \\
+                          & $\mid$        & \texttt{number} [AuxBet3] \\
+                          & $\mid$        & \texttt{upper} AuxBet2 \\ 
+AuxBet2                   & $\rightarrow$ & SpecVal [AuxNamed] \\
+                          & $\mid$        & ``.'' AuxBet21 \\ 
+AuxBet3                   & $\rightarrow$ & ObjIdComponent$^+$ \\
+                          & $\mid$        & AuxNamed \\ 
+AuxBet11                  & $\rightarrow$ & ``\textsf{(}'' ClassNumber ``\textsf{)}'' ObjIdComponent$^*$ \\
+                          & $\mid$        & ObjIdComponent$^+$ \\
+                          & $\mid$        & AuxVal2 [AuxNamed] \\
+                          & $\mid$        & AuxNamed \\ 
+AuxBet21                  & $\rightarrow$ & \texttt{upper$_{typ}$} SpecVal [AuxNamed] \\
+                          & $\mid$        & \texttt{lower$_{val}$} [AuxBet3] \\ 
+AuxNamed                  & $\rightarrow$ & ``\textsf{,}'' \{NamedValue ``\textsf{,}'' \ldots\}$^+$ \\
+NamedValue                & $\rightarrow$ & \texttt{lower} [NamedValSuf] \\
+                          & $\mid$        & \texttt{upper} AuxVal1 \\
+                          & $\mid$        & [``\textsf{-}''] \texttt{number} \\
+                          & $\mid$        & AuxVal0 \\
+NamedValSuf               & $\rightarrow$ & Value \\
+                          & $\mid$        & AuxVal2 \\
+
+\\ \hline
+\end{longtable}
+
+\subsection{Transformations de la grammaire des sous-types}
+\label{SUBTYPES}
+
+
+\subsubsection{Étape 0} 
+
+Nous présentons ici la forme normalisée de la grammaire des sous-types
+ASN.1, avec un découpage en sous-sections.  Notons que nous récupérons
+ici la règle `SizeConstraint' en provenance de la
+section~\vref{TYPES}.
+
+\begin{longtable}{lrl} \\ \hline \\
+\emph{\underline{SubtypeSpec}} & $\rightarrow$ & ``\textsf{(}'' SubtypeValueSet SubtypeValueSetList ``\textsf{)}'' \\
+SubtypeValueSetList       & $\rightarrow$ & ``\textsf{$\mid$}'' SubtypeValueSet SubtypeValueSetList \\
+                          & $\mid$        & $\varepsilon$ \\
+SubtypeValueSet           & $\rightarrow$ & SingleValue \\
+                          & $\mid$        & ContainedSubtype \\
+                          & $\mid$        & ValueRange \\
+                          & $\mid$        & PermittedAlphabet \\
+                          & $\mid$        & SizeConstraint \\
+                          & $\mid$        & InnerTypeConstraints \\
+\\ \hline \\
+
+\emph{SingleValue}         & $\rightarrow$ & Value \\
+
+\\ \hline \\
+
+\emph{ContainedSubtype}    & $\rightarrow$ & INCLUDES Type \\
+
+\\ \hline \\
+
+\emph{ValueRange}          & $\rightarrow$ & LowerEndPoint ``\textsf{..}'' UpperEndPoint \\
+LowerEndPoint             & $\rightarrow$ & LowerEndValue \\
+                          & $\mid$        & LowerEndValue ``\textsf{$<$}'' \\
+UpperEndPoint             & $\rightarrow$ & UpperEndValue \\
+                          & $\mid$        & ``\textsf{$<$}'' UpperEndValue \\
+LowerEndValue             & $\rightarrow$ & Value \\
+                          & $\mid$        & MIN \\
+UpperEndValue             & $\rightarrow$ & Value \\
+                          & $\mid$        & MAX \\
+
+\\ \hline \\
+
+\emph{SizeConstraint}      & $\rightarrow$ & SIZE SubtypeSpec \\
+
+\\ \hline \\
+
+\emph{PermittedAlphabet}   & $\rightarrow$ & FROM SubtypeSpec \\
+
+\\ \hline \\
+
+\emph{InnerTypeConstraints} & $\rightarrow$ & WITH COMPONENT SingleTypeConstraint \\
+                          & $\mid$        & WITH COMPONENTS MultipleTypeConstraints \\
+SingleTypeConstraint      & $\rightarrow$ & SubtypeSpec \\
+MultipleTypeConstraints   & $\rightarrow$ & FullSpecification \\
+                          & $\mid$        & PartialSpecification \\
+FullSpecification         & $\rightarrow$ & ``\textsf{\{}'' TypeConstraints ``\textsf{\}}'' \\
+PartialSpecification      & $\rightarrow$ & ``\textsf{\{}'' ``\textsf{\ldots}'' ``\textsf{,}'' TypeConstraints ``\textsf{\}}'' \\
+TypeConstraints           & $\rightarrow$ & NamedConstraint \\
+                          & $\mid$        & NamedConstraint ``\textsf{,}'' TypeConstraints \\
+NamedConstraint           & $\rightarrow$ & \texttt{identifier} Constraint \\
+                          & $\mid$        & Constraint \\
+Constraint                & $\rightarrow$ & ValueConstraint PresenceConstraint \\
+ValueConstraint           & $\rightarrow$ & SubtypeSpec \\
+                          & $\mid$        & $\varepsilon$ \\
+PresenceConstraint        & $\rightarrow$ & PRESENT \\
+                          & $\mid$        & ABSENT \\
+                          & $\mid$        & OPTIONAL \\
+                          & $\mid$        & $\varepsilon$ \\
+\\ \hline
+\end{longtable}
+
+\subsubsection{Étape 1}
+
+\begin{longtable}{lrl} \\ \hline \\
+\emph{\underline{SubtypeSpec}} & $\rightarrow$ & ``\textsf{(}'' \{SubtypeValueSet ``\textsf{$\mid$}'' \ldots\}$^+$ ``\textsf{)}'' \\
+SubtypeValueSet           & $\rightarrow$ & SingleValue \\
+                          & $\mid$        & ContainedSubtype \\
+                          & $\mid$        & ValueRange \\
+                          & $\mid$        & PermittedAlphabet \\
+                          & $\mid$        & SizeConstraint \\
+                          & $\mid$        & InnerTypeConstraints \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Arden de `SubtypeValueSetList', puis expansion globale. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{SingleValue}         & $\rightarrow$ & Value \\
+
+\\ \hline \\
+
+\emph{ContainedSubtype}    & $\rightarrow$ & INCLUDES Type \\
+
+\\ \hline \\
+
+\emph{ValueRange}          & $\rightarrow$ & LowerEndValue [``\textsf{$<$}''] ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\
+LowerEndValue             & $\rightarrow$ & Value \\
+                          & $\mid$        & MIN \\
+UpperEndValue             & $\rightarrow$ & Value \\
+                          & $\mid$        & MAX \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Factorisation préfixe de `LowerEndPoint'. \\
+  \scriptsize Factorisation suffixe de `UpperEndPoint'. \\
+  \scriptsize Expansion globale de `LowerEndPoint' et `UpperEndPoint'. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \\
+
+\emph{SizeConstraint}      & $\rightarrow$ & SIZE SubtypeSpec \\
+
+\\ \hline \\
+
+\emph{PermittedAlphabet}   & $\rightarrow$ & FROM SubtypeSpec \\
+
+\\ \hline \\
+
+\emph{InnerTypeConstraints} & $\rightarrow$ & WITH InnerTypeSuf \\
+InnerTypeSuf                 & $\rightarrow$ & COMPONENT SubtypeSpec \\ 
+                          & $\mid$        & COMPONENTS MultipleTypeConstraints \\
+MultipleTypeConstraints   & $\rightarrow$ & ``\textsf{\{}'' [``\textsf{\ldots}'' ``\textsf{,}''] TypeConstraints ``\textsf{\}}'' \\
+TypeConstraints           & $\rightarrow$ & \{NamedConstraint ``\textsf{,}'' \ldots\}$^+$ \\
+NamedConstraint           & $\rightarrow$ & [\texttt{lower$_{id}$}] Constraint \\
+Constraint                & $\rightarrow$ & [SubtypeSpec] [PresenceConstraint] \\
+PresenceConstraint        & $\rightarrow$ & PRESENT \\
+                          & $\mid$        & ABSENT \\
+                          & $\mid$        & OPTIONAL \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion globale de `SingleTypeConstraint'. \\
+  \scriptsize Factorisation préfixe de \emph{`InnerTypeConstraints'} (`InnerTypeSuf'). \\
+  \scriptsize Expansion globale de `FullSpecification' et `PartialSpecification'. \\
+  \scriptsize Factorisation bifixe de `MultipleTypeConstraints'. \\
+  \scriptsize Arden de `TypeConstraints'. \\
+  \scriptsize Factorisation suffixe de `NamedConstraint'. \\
+  \scriptsize Option de `ValueConstraint', puis expansion globale. \\
+  \scriptsize Option de `PresenceConstraint'. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline
+\end{longtable}
+
+\subsubsection{Étape 2}
+
+\begin{longtable}{lrl} \\ \hline \\
+\emph{\underline{SubtypeSpec}} & $\rightarrow$ & ``\textsf{(}'' \{SubtypeValueSet ``\textsf{$\mid$}'' \ldots\}$^+$ ``\textsf{)}'' \\
+SubtypeValueSet           & $\rightarrow$ & Value \\
+                          & $\mid$        & INCLUDES Type \\
+                          & $\mid$        & LowerEndValue [``\textsf{$<$}''] ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\
+                          & $\mid$        & FROM SubtypeSpec \\
+                          & $\mid$        & SIZE SubtypeSpec \\
+                          & $\mid$        & WITH InnerTypeSuf \\
+LowerEndValue             & $\rightarrow$ & Value \\
+                          & $\mid$        & MIN \\
+UpperEndValue             & $\rightarrow$ & Value \\
+                          & $\mid$        & MAX \\
+InnerTypeSuf                 & $\rightarrow$ & COMPONENT SubtypeSpec \\ 
+                          & $\mid$        & COMPONENTS MultipleTypeConstraints \\
+MultipleTypeConstraints   & $\rightarrow$ & ``\textsf{\{}'' [``\textsf{\ldots}'' ``\textsf{,}''] \{[NamedConstraint] ``\textsf{,}'' \ldots\} ``\textsf{\}}'' \\
+NamedConstraint           & $\rightarrow$ & \texttt{lower$_{id}$} [SubtypeSpec] [PresenceConstraint] \\
+                          & $\mid$        & SubtypeSpec [PresenceConstraint] \\
+                          & $\mid$        & PresenceConstraint \\
+PresenceConstraint        & $\rightarrow$ & PRESENT \\
+                          & $\mid$        & ABSENT \\
+                          & $\mid$        & OPTIONAL \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion globale de `SingleValue'. \\
+  \scriptsize Expansion globale de `ContainedSubtype'. \\
+  \scriptsize Expansion globale de `ValueRange'. \\
+  \scriptsize Expansion globale de `PermittedAlphabet'. \\
+  \scriptsize Expansion globale de `SizeConstraint'. \\
+  \scriptsize Expansion globale de `InnerTypeConstraints'. \\
+  \scriptsize Expansion globale de `TypeConstraints'. \\
+  \scriptsize Expansion globale de `Constraint' puis option de `NamedConstraint'. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline
+\end{longtable}
+
+\subsubsection{Étape 3}
+
+\begin{longtable}{lrl} \\ \hline \\
+\emph{\underline{SubtypeSpec}} & $\rightarrow$ & ``\textsf{(}'' \{SubtypeValueSet ``\textsf{$\mid$}'' \ldots\}$^+$ ``\textsf{)}'' \\
+SubtypeValueSet           & $\rightarrow$ & Value [SubValSetSuf]\\
+                          & $\mid$        & INCLUDES Type \\
+                          & $\mid$        & MIN SubValSetSuf \\ 
+                          & $\mid$        & FROM SubtypeSpec \\
+                          & $\mid$        & SIZE SubtypeSpec \\
+                          & $\mid$        & WITH InnerTypeSuf \\
+SubValSetSuf              & $\rightarrow$ & [``\textsf{$<$}''] ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\
+UpperEndValue             & $\rightarrow$ & Value \\
+                          & $\mid$        & MAX \\
+InnerTypeSuf                 & $\rightarrow$ & COMPONENT SubtypeSpec \\ 
+                          & $\mid$        & COMPONENTS MultipleTypeConstraints \\
+MultipleTypeConstraints   & $\rightarrow$ & ``\textsf{\{}'' [``\textsf{\ldots}'' ``\textsf{,}''] \{[NamedConstraint] ``\textsf{,}'' \ldots\} ``\textsf{\}}'' \\
+NamedConstraint           & $\rightarrow$ & \texttt{lower$_{id}$} [SubtypeSpec] [PresenceConstraint] \\
+                          & $\mid$        & SubtypeSpec [PresenceConstraint] \\
+                          & $\mid$        & PresenceConstraint \\
+PresenceConstraint        & $\rightarrow$ & PRESENT \\
+                          & $\mid$        & ABSENT \\
+                          & $\mid$        & OPTIONAL \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion globale de `LowerEndValue'. \\
+  \scriptsize Factorisation préfixe de `SubtypeValueSet' (`SubValSetSuf'). \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline
+\end{longtable}
+
+\subsubsection{Étape 4}
+
+Nous voyons apparaître un problème plus subtil qui empêche la
+grammaire d'être LL(1).  En effet, nous avions obtenu précédemment
+(section~\vref{VALUES}):\\
+\begin{tabular}{lrl} \\
+\emph{\underline{Value}} & $\rightarrow$ & AuxVal0 \\
+                        & $\mid$        & \texttt{upper} AuxVal1 \\
+                        & $\mid$        & \texttt{lower} [AuxVal2] \\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} \\
+AuxVal2                 & $\rightarrow$ & [``\textsf{$<$}'' Type] ``\textsf{:}'' Value \\ 
+\end{tabular}
+
+La troisième production de \emph{`\underline{Value}'} implique que le
+terminal ``\textsf{$<$}'' ne doit pas être un symbole possible après
+une occurrence de \emph{`\underline{Value}'}, sinon nous ne vérifions
+pas la troisième condition définissant une grammaire LL(1) ---~section
+\vref{LL1}. Or nous venons de former:\\
+\begin{tabular}{lrl} \\
+SubtypeValueSet           & $\rightarrow$ & Value [SubValSetSuf]\\
+                          & $\mid$        & INCLUDES Type \\
+                          & $\mid$        & MIN SubValSetSuf \\ 
+                          & $\mid$        & FROM SubtypeSpec \\
+                          & $\mid$        & SIZE SubtypeSpec \\
+                          & $\mid$        & WITH InnerTypeSuf \\
+SubValSetSuf              & $\rightarrow$ & [``\textsf{$<$}''] ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\
+\end{tabular}
+
+Ce qui implique que ``\textsf{$<$}'' \emph{est} un symbole possible
+après \emph{`\underline{Value}'}... Nous allons montrer que nous
+pouvons éliminer cet obstacle.  L'idée consiste à faire apparaître le
+sous-mot `Value [SubValSetSuf]' partout où c'est possible à l'aide
+d'expansions, et à en former une règle.  Nous tenterons ensuite de
+transformer cette règle pour en obtenir une définition ne produisant
+jamais un mot contenant `Value [SubValSetSuf]': à chaque occurrence
+(dans les règles dépendantes ou dans la règle elle-même) nous
+placerons un appel à cette règle.  Il faut noter qu'il n'était pas
+certain \emph{a priori} qu'une telle solution existait.\\
+\begin{longtable}{lrl} \\ \hline \\
+SubtypeValueSet           & $\rightarrow$ & SVSAux \\
+                          & $\mid$        & INCLUDES Type \\
+                          & $\mid$        & MIN SubValSetSuf \\ 
+                          & $\mid$        & FROM SubtypeSpec \\
+                          & $\mid$        & SIZE SubtypeSpec \\
+                          & $\mid$        & WITH InnerTypeSuf \\
+SubValSetSuf              & $\rightarrow$ & [``\textsf{$<$}''] ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\
+SVSAux                    & $\rightarrow$ & Value [SubValSetSuf] \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Factorisation inverse (`SVSAux'). \\
+  \hline
+\end{tabular}
+} \\ \\ \hline \\
+
+SVSAux                  & $\rightarrow$ & AuxVal0 [SubValSetSuf] \\
+                        & $\mid$        & \texttt{upper} AuxVal1 [SubValSetSuf] \\
+                        & $\mid$        & \texttt{lower} [AuxVal2] [SubValSetSuf] \\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} [SubValSetSuf] \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion totale de \emph{`\underline{Value}'}. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+SVSAux                  & $\rightarrow$ & BuiltInValue [SubValSetSuf] \\
+                        & $\mid$        & AuxType ``\textsf{:}'' Value [SubValSetSuf] \\
+                        & $\mid$        & NULL [SpecVal] [SubValSetSuf]  \\
+                        & $\mid$        & \texttt{upper} SVSAux1 \\
+                        & $\mid$        & \texttt{lower} [SVSAux2] \\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} [SubValSetSuf] \\ \\
+SVSAux1                 & $\rightarrow$ & AuxVal1 [SubValSetSuf] \\ \\
+SVSAux2                 & $\rightarrow$ & AuxVal2 [SubValSetSuf] \\ 
+                        & $\mid$        & SubValSetSuf \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion totale de `AuxVal0'. \\
+  \scriptsize Expansions inverses (`SVSAux1' et `SVSAux2'). \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+SVSAux                  & $\rightarrow$ & BuiltInValue [SubValSetSuf] \\
+                        & $\mid$        & AuxType ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & NULL [SVSAux3] \\
+                        & $\mid$        & \texttt{upper} SVSAux1 \\
+                        & $\mid$        & \texttt{lower} [SVSAux2] \\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} [SubValSetSuf] \\
+SVSAux1                 & $\rightarrow$ & SpecVal   [SubValSetSuf] \\
+                        & $\mid$        & ``.'' AuxVal11  [SubValSetSuf] \\
+SVSAux2                 & $\rightarrow$ & [``\textsf{$<$}'' Type] ``\textsf{:}'' Value [SubValSetSuf] \\
+                        & $\mid$        & [``\textsf{$<$}''] ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\
+SVSAux3                 & $\rightarrow$ & SpecVal [SubValSetSuf] \\
+                        & $\mid$        & SubValSetSuf \\ \\ 
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion inverse (`SVSAux3'). \\
+  \scriptsize Expansion totale de `AuxVal1'. \\
+  \scriptsize Expansion totale de `AuxVal2' et `SubValSetSuf'. \\
+  \scriptsize Expansions inverses (`SVSAux1' et `SVSAux2'). \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+SVSAux                  & $\rightarrow$ & BuiltInValue [SubValSetSuf] \\
+                        & $\mid$        & AuxType ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & NULL [SVSAux3] \\
+                        & $\mid$        & \texttt{upper} SVSAux1 \\
+                        & $\mid$        & \texttt{lower} [SVSAux2] \\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} [SubValSetSuf] \\
+SVSAux1                 & $\rightarrow$ & SubtypeSpec$^*$ ``\textsf{:}'' Value [SubValSetSuf] \\
+                        & $\mid$        & ``.'' SVSAux11 \\
+SVSAux2                 & $\rightarrow$ & ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\
+                        & $\mid$        & ``\textsf{$<$}'' SVSAux21 \\
+SVSAux3                 & $\rightarrow$ & SubtypeSpec$^*$ ``\textsf{:}'' Value [SubValSetSuf] \\
+                        & $\mid$        & SubValSetSuf \\ 
+SVSAux11                & $\rightarrow$ & \texttt{upper$_{typ}$} SpecVal [SubValSetSuf] \\
+                        & $\mid$        & \texttt{lower$_{val}$} [SubValSetSuf] \\
+SVSAux21                & $\rightarrow$ & Type ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Nous reconnaissons `SVSAux' dans `SVSAux2', puis factorisation préfixe (`SVSAux21'). \\
+  \scriptsize Expansion totale de `SpecVal' dans `SVSAux1' et `SVSAux3'. \\
+  \scriptsize Expansion totale inverse de `SVSAux11' (`SVSAux11'):\\
+  \scriptsize \ \ \ SVSAux11 $\rightarrow$ AuxVal11  [SubValSetSuf] \\
+  \scriptsize \ \ \ puis expansion totale de `AuxVal11' dans `SVSAux11'. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline \hline \\
+
+SVSAux                  & $\rightarrow$ & BuiltInValue [SubValSetSuf] \\
+                        & $\mid$        & AuxType ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & NULL [SVSAux3] \\
+                        & $\mid$        & \texttt{upper} SVSAux1 \\
+                        & $\mid$        & \texttt{lower} [SVSAux2] \\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} [SubValSetSuf] \\
+SVSAux1                 & $\rightarrow$ & SubtypeSpec$^*$ ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & ``.'' SVSAux11 \\
+SVSAux2                 & $\rightarrow$ & ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\
+                        & $\mid$        & ``\textsf{$<$}'' SVSAux21 \\
+SVSAux3                 & $\rightarrow$ & SubtypeSpec$^*$ ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & SubValSetSuf \\ 
+SVSAux11                & $\rightarrow$ & \texttt{upper$_{typ}$} SubtypeSpec$^*$ ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & \texttt{lower$_{val}$} [SubValSetSuf] \\
+SVSAux21                & $\rightarrow$ & Type ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\ \\
+\multicolumn{3}{l}{
+\begin{tabular}{|l|} \hline
+  \scriptsize Expansion totale de `SpecVal' dans `SVSAux11'. \\
+  \scriptsize Nous reconnaissons `SVSAux' dans `SVSAux1', `SVSAux3' et `SVSAux11'. \\
+  \hline
+\end{tabular}
+} \\
+
+\\ \hline
+\end{longtable}
+
+\subsubsection{Étape 5}
+
+Nous présentons ici le bilan des transformations.\\
+\begin{longtable}{lrl} \\ \hline \\
+\emph{\underline{SubtypeSpec}} & $\rightarrow$ & ``\textsf{(}'' \{SubtypeValueSet ``\textsf{$\mid$}'' \ldots\}$^+$ ``\textsf{)}'' \\
+SubtypeValueSet           & $\rightarrow$ & INCLUDES Type \\
+                          & $\mid$        & MIN SubValSetSuf \\ 
+                          & $\mid$        & FROM SubtypeSpec \\
+                          & $\mid$        & SIZE SubtypeSpec \\
+                          & $\mid$        & WITH InnerTypeSuf \\
+                          & $\mid$        & SVSAux \\
+
+\\ \hline \\
+
+\emph{InnerTypeSuf}        & $\rightarrow$ & COMPONENT SubtypeSpec \\ 
+                          & $\mid$        & COMPONENTS MultipleTypeConstraints \\
+MultipleTypeConstraints   & $\rightarrow$ & ``\textsf{\{}'' [``\textsf{\ldots}'' ``\textsf{,}''] \{[NamedConstraint] ``\textsf{,}'' \ldots\} ``\textsf{\}}'' \\
+NamedConstraint           & $\rightarrow$ & \texttt{lower$_{id}$} [SubtypeSpec] [PresenceConstraint] \\
+                          & $\mid$        & SubtypeSpec [PresenceConstraint] \\
+                          & $\mid$        & PresenceConstraint \\
+PresenceConstraint        & $\rightarrow$ & PRESENT \\
+                          & $\mid$        & ABSENT \\
+                          & $\mid$        & OPTIONAL \\
+\\ \hline \\
+
+\emph{SubValSetSuf}        & $\rightarrow$ & [``\textsf{$<$}''] ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\
+UpperEndValue             & $\rightarrow$ & Value \\
+                          & $\mid$        & MAX \\
+
+\\ \hline \\
+
+\emph{SVSAux}            & $\rightarrow$ & BuiltInValue [SubValSetSuf] \\
+                        & $\mid$        & AuxType ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & NULL [SVSAux3] \\
+                        & $\mid$        & \texttt{upper} SVSAux1 \\
+                        & $\mid$        & \texttt{lower} [SVSAux2] \\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} [SubValSetSuf] \\
+SVSAux1                 & $\rightarrow$ & SubtypeSpec$^*$ ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & ``.'' SVSAux11 \\
+SVSAux2                 & $\rightarrow$ & ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\
+                        & $\mid$        & ``\textsf{$<$}'' SVSAux21 \\
+SVSAux3                 & $\rightarrow$ & SubtypeSpec$^*$ ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & SubValSetSuf \\ 
+SVSAux11                & $\rightarrow$ & \texttt{upper$_{typ}$} SubtypeSpec$^*$ ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & \texttt{lower$_{val}$} [SubValSetSuf] \\
+SVSAux21                & $\rightarrow$ & Type ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\ \\ \hline
+\end{longtable}

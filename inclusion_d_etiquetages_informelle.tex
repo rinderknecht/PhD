@@ -1,0 +1,211 @@
+%%-*-latex-*-
+
+Jusqu'à présent, nous avons accepté les types \texttt{SET},
+\texttt{SEQUENCE} et \texttt{CHOICE} sans restreindre les étiquetages
+de leur champs. La norme X.680 prévoit en fait de telles
+contraintes. Ainsi, pour les types \texttt{SET} et \texttt{CHOICE},
+nous devrions nous assurer que tous les champs «~ont des étiquetages
+  distincts entre eux~» \cite[\S~24.3]{ASN94}
+\cite[\S~26.2]{ASN94}. Pour le type \texttt{SEQUENCE}, il faudrait que
+les champs consécutivement annotés \texttt{OPTIONAL} ou
+\texttt{DEFAULT}, ainsi que celui qui suit immédiatement la série,
+aient tous des étiquetages différents \cite[\S~22.5]{ASN94}. Pourquoi
+alors ne pas avoir tenu compte précédemment de ces clauses
+restrictives? La raison est que ces restrictions n'étaient pas
+nécessaires pour les définitions du contrôle des types, du codage et
+du contrôle sémantique des types (à venir). Comme pour la restriction
+qui veut que les champs de ces types aient des noms tous différents
+entre eux, les conditions sur les étiquetages serviront à établir des
+propriétés d'unicité d'exécution des algorithmes associés à nos
+définitions formelles.
+
+Ici nous allons commencer par examiner ce que signifie que deux champs
+d'un type ont des étiquetages distincts, car la norme n'est pas claire
+à ce sujet. Pour cela nous allons guider l'intuition à l'aide du
+modèle de graphe que nous avons présenté au
+chapitre~\vref{noyau_ASN.1} consacré au noyau d'ASN.1. Par exemple
+nous y avions écrit que
+\begin{sverb}
+A ::= SET OF A
+
+B ::= SET {
+        i REAL,
+        j A 
+       }
+\end{sverb}
+défini le graphe de la figure~\vref{graph0}.
+
+Nous étiquetons maintenant les arcs par les étiquetages éventuels en
+plus des labels éventuellement déjà présents, comme ici
+\texttt{i}~et~\texttt{j}. Ainsi,
+\begin{sverb}
+A ::= [0] SET OF [1] A
+
+B ::= [0] SET {
+        i [1][2] REAL,
+        j [3] A 
+      }
+\end{sverb}
+défini le graphe de la figure~\ref{graph5}.
+\begin{figure}
+\centering
+\includegraphics[scale=0.8]{graph5.eps}
+\caption{\label{graph5}Graphe avec étiquetages associé à une spécification ASN.1}
+\end{figure}
+
+Le lecteur attentif se souviendra que lors de la quinzième étape de
+réécriture du chapitre~\vref{noyau_ASN.1}, nous avions introduit
+explicitement les étiquettes \texttt{UNIVERSAL} implicites des types
+prédéfinis. Par exemple:
+\begin{sverb}
+T ::= INTEGER
+\end{sverb}
+était réécrit en
+\begin{sverb}
+T ::= [UNIVERSAL 2] IMPLICIT INTEGER
+\end{sverb}
+Cette réécriture laisse invariante la sémantique de la
+spécification. Elle était justifiée par le fait que la notion
+d'étiquette est floue dans la norme. D'un côté, les étiquettes sont
+des annotations de types (\emph{tagged types}), et d'un autre côté les
+types prédéfinis «~ont une étiquette~» (prédéfinie elle aussi). Nous
+avions décidé de séparer clairement le concept d'étiquette (et donc
+d'étiquetage) de celui de type: nous insérions ici les étiquettes de
+type et nous oubliions par la suite leur origine particulière. Ainsi,
+sur nos graphes, les annotations des arcs sont maintenant complètement
+indépendantes des sommets (voir notre exemple maintenant complété à la
+figure~\vref{graph6}).
+\begin{figure}
+\centering
+\includegraphics[scale=0.8]{graph6.eps}
+\caption{\label{graph6}Graphe avec étiquetages prédéfinis associé à une spécification ASN.1}
+\end{figure}
+où les étiquettes \texttt{UNIVERSAL} des types prédéfinis sont
+dénotées par le nom du type entre crochets, par exemple,
+\texttt{[INTEGER]} est mis pour \texttt{[UNIVERSAL 2]}.
+
+Munis à présent de graphes comme modèles détaillés des spécifications
+ASN.1, nous allons examiner ce que disent les normes X.680 et X.690 et
+ce que nous formaliserons.
+
+Intéressons-nous au type \texttt{CHOICE}, car il permet de mettre en
+évidence l'ensemble des difficultés. Tout d'abord rappelons
+l'exemple~3 de~\cite[\S~26.5]{ASN94}:
+\begin{sverb}
+A ::= CHOICE {
+        b B,
+        c C
+      }
+
+B ::= CHOICE {
+        d [0] NULL,
+        e [1] NULL
+      }
+
+C ::= CHOICE {
+        f [0] NULL,
+        g [1] NULL
+      }
+\end{sverb}
+Il est qualifié d'incorrect. Sa représentation graphique est
+donnée à la figure~\ref{graph7}.
+\begin{figure}
+\centering
+\includegraphics[scale=0.8]{graph7.eps}
+\caption{\label{graph7}Graphe associé à un exemple incorrect.}
+\end{figure}
+Il y a problème car, à partir du sommet \texttt{CHOICE} qui
+suit~\texttt{A}, si l'on suit les différents chemins possibles (quatre
+en tout) en concaténant les étiquetages des arcs, on obtient
+l'ensemble avec répétition \{\texttt{[0][NULL]}, \texttt{[1][NULL]},
+\texttt{[0][NULL]}, \texttt{[1][NULL]}\}. Cet ensemble présente au
+moins une répétition (deux exactement), donc nous concluons que la
+définition de~\texttt{A} est incorrecte du point de vue des
+étiquetages. En d'autres termes, nous dirons que \texttt{A}~est
+\emph{mal étiqueté}.
+
+Nous commençons à comprendre une première chose: ce ne sont pas les
+étiquetages des champs de~\texttt{A} qui sont les mêmes, \emph{c'est
+  l'ensemble des concaténations des étiquetages des chemins à partir
+  de~\texttt{A} qui possède des doublons} (l'égalité de deux
+étiquetages est purement syntaxique et ne pose aucune difficulté:
+\texttt{[0][NULL]} est différent de \texttt{[1][NULL]}). Cette
+interprétation ne fait pas partie de la norme, et nous pensons qu'elle
+est non seulement utile pour comprendre cette dernière, mais qu'elle
+permet de pousser nos raisonnements plus loin encore. Ainsi,
+ci-dessus, l'ensemble des concaténations d'étiquetages était fini,
+mais il est possible qu'il soit infini, en présence de types
+récursifs. Par exemple:
+\begin{sverb}
+T ::= CHOICE {
+        a [0] T,
+        b [1] NULL
+      }
+\end{sverb}
+est représenté à la figure~\vref{graph8}.
+\begin{figure}[b]
+\centering
+\includegraphics[scale=0.8]{graph8.eps}
+\caption{\label{graph8}Graphe associé à un type récursif.}
+\end{figure}
+Dans ce cas, l'ensemble des concaténations d'étiquetages à partir du
+sommet~\texttt{T} est \{\texttt{[1][NULL]}, \texttt{[0][1][NULL]},
+\texttt{[0][0][1][NULL]}, ...\}. Cette infinité n'est pas un problème
+grave car cet ensemble est un langage rationnel, c'est-à-dire que
+l'ensemble des étiquetage est reconnaissable par un automate fini
+---~l'alphabet est fini puisqu'il s'agit de l'ensemble des étiquetages
+\emph{de la définition du type}, qui est, par construction, de même
+cardinal que celui des arcs. Nous pouvons alors construire un
+algorithme qui peut distinguer ou identifier les différents
+étiquetages de notre ensemble infini. Pour une description formelle se
+référer à la section~\vref{inclusion_d_etiquetages}
+et~\vref{etiquetages_de_types_non_disjoints} (formellement nous
+donnons un sens différent à \emph{étiquetage}: c'est un couple formé
+d'une liste d'étiquettes (ce que nous nommons dans le corps de cette
+thèse étiquetage) et d'un type).
+
+Remarquons que la norme X.680, malgré son flou, semble être bien plus
+restrictive que nous ne le sommes dans cette thèse. En effet,
+l'interprétation usuelle \cite[\S~26.2]{ASN94} implique que:
+\begin{sverb}
+T ::= CHOICE {
+        a [0] INTEGER,
+        b [0] NULL
+      }
+\end{sverb}
+est incorrect, alors que nous l'acceptons. La raison est double.
+
+Tout d'abord, il n'y a aucun danger à laisser passer cette déclaration
+car le codage de référence que nous avons défini dans cette thèse,
+ainsi que les codages de X.690 \cite{X.690}, distinguera les codes des
+deux valeurs possibles du type~\texttt{T}. Ainsi $\semb{\texttt{a :
+    7}}{\texttt{INTEGER}}$ a pour étiquetage associé
+\texttt{[0][INTEGER]}, et $\semb{\texttt{b : NULL}}{\texttt{NULL}}$ a
+pour étiquetage associé \texttt{[0][NULL]}. Ces deux étiquetages sont
+bien distincts, et il n'y a donc aucun danger de confusion pour le
+décodeur entre $\semb{\texttt{a : 7}}{\texttt{INTEGER}}$ et
+$\semb{\texttt{b : NULL}}{\texttt{NULL}}$.
+
+La seconde raison est qu'en définissant comme nous l'avons fait la
+comparaison de champs du point de vue des étiquetages, nous pourrons
+réutiliser cette même comparaison lors de la définition de
+l'algorithme de contrôle sémantique des types, dont le succès est la
+condition nécessaire pour que le décodage réussisse. Du point de vue
+formel, nous pourrons alors réaliser plus facilement la preuve de
+correction du codage, car nous aurons les prémisses de comparaison de
+champs qui seront la même relation.
+
+Pour aider à la compréhension des parties qui suivent, il convient de
+fixer le vocabulaire introduit dans cette section. Nous dirons par
+définition que deux champs sont \emph{non disjoints} si leurs
+ensembles d'étiquetages, dont nous avons précédemment illustré le
+calcul, ont une intersection non vide. Par définition aussi nous
+dirons qu'un champ (ou variante) est \emph{inclus} dans tel autre si
+son ensemble d'étiquetages est inclus dans celui de l'autre. Les
+lecteurs férus de théorie des langages trouveront la définition
+formelle de l'inclusion à la section~\vref{inclusion_d_etiquetages},
+et les champs non disjoints à la
+section~\vref{etiquetages_de_types_non_disjoints}. Nous parlons
+formellement d'étiquetages de types non disjoints, car la définition
+formelle des étiquetages est différente de celle, plus intuitive, de
+cette partie informelle de notre thèse.

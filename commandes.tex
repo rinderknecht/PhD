@@ -1,0 +1,95 @@
+%%-*-latex-*-
+
+\newenvironment{sverb}{\small\verbatim}{\endverbatim}
+
+\newcommand{\emptyL}{\textrm{[\,]\,}}
+\newcommand{\emptyStr}{""}
+\newcommand{\wild}{\mbox{\large \raisebox{0.5mm}{\_}}}
+\renewcommand{\colon}{\textsf{\textbf{\,:\,}}}
+
+
+%\SList{T}{i}{n} => {T}$_{1 <= i <= n}$
+\newcommand{\SList}[3]{\mbox{\{#1\}$_{\scriptscriptstyle{1} \scriptscriptstyle{\leqslant} #2 \scriptscriptstyle{\leqslant} #3}$}}
+
+%\OList{T}{i}{n} => [T]$_{1 <= i <= n}$
+\newcommand{\OList}[3]{\mbox{[#1]$_{\scriptscriptstyle{1} \scriptscriptstyle{\leqslant} #2 \scriptscriptstyle{\leqslant} #3}$}}
+
+\newcommand{\REAL}{\textrm{"REAL"}}
+\newcommand{\INTEGER}{\textrm{"INTEGER"}}
+
+\newcommand{\semb}[2]{[\![\mbox{#1}]\!]_{_{\mbox{\footnotesize\rm #2}}}}
+
+\newcommand{\Field}[1]{\textsf{Field} ($l_#1$, $\tau_#1$, T$_#1$, $\sigma_#1$, $s_#1$)}
+
+\newcommand{\CHOICE}[2]{\textsf{CHOICE} \, \OList{($l_#1$, $\tau_#1$, T$_#1$, $\sigma_#1$, $s_#1$)}{#1}{#2}}
+
+\newcommand{\SET}[2]{\textsf{SET} \, \OList{\Field{#1}}{#1}{#2}}
+\newcommand{\SEQUENCE}[2]{\textsf{SEQUENCE} \, \OList{\Field{#1}}{#1}{#2}}
+
+\newcommand{\wildCHOICE}{\mbox{\textsf{CHOICE} \, $\!\wild$}}
+\newcommand{\wildSET}{\mbox{\textsf{SET} \, $\!\wild$}}
+\newcommand{\wildSEQUENCE}{\mbox{\textsf{SEQUENCE} \, $\!\wild$}}
+\newcommand{\wildINTEGER}{\mbox{\textsf{INTEGER} \, $\!\wild$}}
+\newcommand{\wildENUMERATED}{\mbox{\textsf{ENUMERATED} \, $\!\wild$}}
+\newcommand{\wildTRef}{\mbox{\textsf{TRef} \, $\!\wild$}}
+\newcommand{\wildVRef}{\mbox{\textsf{VRef} \, $\!\wild$}}
+\newcommand{\wildSelect}{\mbox{$\wild \!<\! \wild \wild$}}
+\newcommand{\wildBITSTRING}{\mbox{\textsf{BIT STRING} \, $\!\wild$}}
+\newcommand{\wildSETOF}{\mbox{\textsf{SET OF} \, \wild \wild \wild}}
+\newcommand{\wildSEQUENCEOF}{\mbox{\textsf{SEQUENCE OF} \, \wild \wild \wild}}
+\newcommand{\emptyINTEGER}{\mbox{\textsf{INTEGER} $\emptyL$}}
+\newcommand{\emptyENUMERATED}{\mbox{\textsf{ENUMERATED} $\emptyL$}}
+\newcommand{\emptyBITSTRING}{\mbox{\textsf{BIT STRING} $\emptyL$}}
+\newcommand{\emptySET}{\mbox{\textsf{SET} $\emptyL$}}
+\newcommand{\emptySEQUENCE}{\mbox{\textsf{SEQUENCE} $\emptyL$}}
+
+\newcommand{\AS}{\, \textbf{as} \,}
+
+\newcommand{\vdashL}{\vdash\hspace*{-2.5mm}_{\scriptscriptstyle \mathcal{L}} \,}
+\newcommand{\vdashT}{\vdash\hspace*{-2.5mm}_{\scriptscriptstyle \mathcal{T}} \,}
+\newcommand{\vdashC}{\vdash\hspace*{-2.5mm}_{\scriptscriptstyle \mathcal{C}} \,}
+\newcommand{\vdashD}{\vdash\hspace*{-2.5mm}_{\scriptscriptstyle \mathcal{D}} \,}
+\newcommand{\vdashCOMP}{\vdash\hspace*{-2.5mm}_{\scriptscriptstyle \textrm{comp}} \,}
+\newcommand{\vdashAUTO}{\vdash\hspace*{-2.5mm}_{\scriptscriptstyle \textrm{auto}} \,}
+\newcommand{\bouchon}[1]{\vdash\hspace*{-2.5mm}_{\scriptscriptstyle #1} \,\,}
+\newcommand{\Bouchon}[1]{\Vdash\hspace*{-2.5mm}_{\scriptscriptstyle #1} \,\,}
+
+\newcommand{\listminus}{-}
+\newcommand{\listin}{\in}
+\newcommand{\listinter}{\sqcap}
+\newcommand{\listunion}{\sqcup}
+
+\newcommand{\permutation}[2]{#1 \,\, \emph{est une permutation sur} \,\, #2}
+\newcommand{\perm}[1]{#1 \,\, \emph{est une permutation}}
+\newcommand{\noother}{\textbf{when} \,\, \emph{no other rule match}}
+
+\newcommand{\domain}[1]{\langle #1 \rangle}
+
+\newcommand{\poe}{\preccurlyeq}
+\newcommand{\bob}{\mbox{\boldmath $\{$}}
+\newcommand{\bcb}{\mbox{\boldmath $\}$}}
+
+\newcommand{\AND}{\mbox{\scriptsize \, $\wedge$ \,}}
+\newcommand{\OR}{\mbox{\scriptsize \, $\vee$ \,}}
+
+\newcommand{\Cons}{\!::\!}
+\newcommand{\Append}{\, \text\sf{\small @} \,}
+
+\newcommand{\Wide}{\, \sqsubseteq \,}
+\newcommand{\PAR}{\,\,\|\,\,}
+
+\newcommand{\nlhd}{\not{\hspace*{-1mm}\lhd}\hspace*{1mm}}
+
+\newcommand{\clearemptydoublepage}{\newpage{\pagestyle{empty}\cleardoublepage}}
+
+
+\font\toto=cmr5 scaled 700
+
+\newcommand{\disjlistunion}{%
+\setbox0=\hbox{$\sqcup$}%
+\setbox1=\hbox{\toto{\boldmath{+}}}%
+\dimen0=\the\wd0%
+\dimen1=\the\wd1%
+\advance\dimen0 by\the\dimen1%
+\divide\dimen0 by2%
+\mathbin{\vbox{\hphantom{$\sqcup$}\nointerlineskip\hbox{\box0\kern -\dimen0\raise 0.6mm\box1}}}}

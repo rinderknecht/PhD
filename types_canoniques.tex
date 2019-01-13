@@ -1,0 +1,240 @@
+2%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {c \nlhd \textsf{UNIVERSAL}\\
+   n \geqslant 0\\
+   \domain{\mathcal{A}} \Gamma, x \vdashC \tau' \, \textrm{T}}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdashC ((\textsf{Tag} \,\, (c,
+    \textsf{Imm} \, n) \,\, \textsf{EXPLICIT})\Cons\tau') \,\,
+    \textrm{T}}
+\;\TirName{[1]}
+\label{types_canoniques_1}
+
+\inferrule
+  {x'\in \mathcal{A}\\
+  \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+  \domain{\mathcal{A}} \Gamma, x' \vdashC \tau' \, \textrm{T}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \emptyL \, (\textsf{TRef} \, x')}
+\;\TirName{[2]}
+\label{types_canoniques_2}
+
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \, 1)
+    \,\, \textsf{IMPLICIT}]}
+%------
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, \textsf{BOOLEAN}}
+\;\TirName{[3]}
+\label{types_canoniques_3}
+
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \, 2)
+    \,\, \textsf{IMPLICIT}]}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, (\wildINTEGER\!)}
+\;\TirName{[4]}
+\label{types_canoniques_4}
+
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \, 3)
+    \,\, \textsf{IMPLICIT}]}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, (\wildBITSTRING\!)}
+\;\TirName{[5]}
+\label{types_canoniques_5}
+
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \, 4)
+    \,\, \textsf{IMPLICIT}]}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, \textsf{OCTET STRING}}
+\;\TirName{[6]}
+\label{types_canoniques_6}
+
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \, 5)
+    \,\, \textsf{IMPLICIT}]}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, \textsf{NULL}}
+\;\TirName{[7]}
+\label{types_canoniques_7}
+
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \, 9)
+    \,\, \textsf{IMPLICIT}]}
+%------
+  {\domain{\mathcal{A}} \Gamma, \REAL \vdashC \tau \,\, \textrm{T}}
+\;\TirName{[8]}
+\label{types_canoniques_8}
+
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \,
+    10) \,\, \textsf{IMPLICIT}]}
+%------
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, (\wildENUMERATED\!)}
+\;\TirName{[9]}
+\label{types_canoniques_9}
+
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \,
+    18) \,\, \textsf{IMPLICIT}]}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, (\textsf{CharString}
+    \, \textsf{Numeric})}
+\;\TirName{[10]}
+\label{types_canoniques_10}
+
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \,
+    19) \,\, \textsf{IMPLICIT}]}
+%------
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, (\textsf{CharString}
+    \, \textsf{Printable})}
+\;\TirName{[11]}
+\label{types_canoniques_11}
+
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \,
+    20) \,\, \textsf{IMPLICIT}]}
+%------
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, (\textsf{CharString}
+    \, (\textsf{Teletex} \mid \textsf{T}_61))}
+\;\TirName{[12]}
+\label{types_canoniques_12}
+
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \,
+    21) \,\, \textsf{IMPLICIT}]}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, (\textsf{CharString}
+    \, \textsf{Videotex})}
+\;\TirName{[13]}
+\label{types_canoniques_13}
+
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \,
+    22) \,\, \textsf{IMPLICIT}]}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, (\textsf{CharString}
+    \, \textsf{IA}_5)}
+\;\TirName{[14]}
+\label{types_canoniques_14}
+
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \,
+    25) \,\, \textsf{IMPLICIT}]}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, (\textsf{CharString}
+    \, \textsf{Graphic})}
+\;\TirName{[15]}
+\label{types_canoniques_15}
+
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \,
+    26) \,\, \textsf{IMPLICIT}]}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\,
+    (\textsf{CharString} \, (\textsf{Visible} \mid \textsf{ISO}_{646}))}
+\;\TirName{[16]}
+\label{types_canoniques_16}
+
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \,
+    27) \,\, \textsf{IMPLICIT}]}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\,
+    (\textsf{CharString} \, \textsf{General})}
+\;\TirName{[17]}
+\label{types_canoniques_17}
+
+% SEQUENCE OF
+%
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \,
+    16) \,\, \textsf{IMPLICIT}]\\
+  \domain{\mathcal{A}} \Gamma, \emptyStr \vdashC \tau' \,\,
+  \textrm{T}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, (\textsf{SEQUENCE
+      OF} \, \tau' \, \textrm{T}' \, \sigma')}
+\;\TirName{[18]}
+\label{types_canoniques_18}
+
+% SET OF
+%
+\inferrule
+  {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \,
+    17) \,\, \textsf{IMPLICIT}]\\
+  \domain{\mathcal{A}} \Gamma, x \vdashC \tau' \,\, \textrm{T}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, (\textsf{SET OF}
+    \, \tau' \, \textrm{T}' \, \sigma')}
+\;\TirName{[19]}
+\label{types_canoniques_19}
+
+% CHOICE
+%
+\inferrule
+  {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\\\
+  \domain{\mathcal{A}} \Gamma, \emptyStr \vdashC \tau' \,\, \textrm{T}'\\
+  \domain{\mathcal{A}} \Gamma, x \vdashC \emptyL \, (\textsf{CHOICE}
+  \, \mathcal{F}')}
+%------
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \emptyL \, (\textsf{CHOICE} \,
+    ([f'] \sqcup \mathcal{F}'))}
+\;\TirName{[20]}
+\label{types_canoniques_20}
+
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \emptyL \, (\textsf{CHOICE}
+    \, \emptyL\!)}
+\;\TirName{[21]}
+\label{types_canoniques_21}
+
+% SET
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\\\
+  \domain{\mathcal{A}} \Gamma, \emptyStr \vdashC \tau' \,\, \textrm{T}'\\
+  \domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, (\textsf{SET} \, \Phi')}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \, (\textsf{SET} \,
+    ([\varphi'] \sqcup \Phi'))}
+\;\TirName{[22]}
+\label{types_canoniques_22}
+
+\inferrule
+  {\tau' \lhd  [\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \,
+    17) \,\, \textsf{IMPLICIT}]}
+%------
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, (\textsf{SET} \,
+    \emptyL\!)}
+\;\TirName{[23]}
+\label{types_canoniques_23}
+
+% SEQUENCE
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+  \domain{\mathcal{A}} \Gamma, \emptyStr \vdashC \tau' \, \textrm{T}'\\
+  \domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, (\textsf{SEQUENCE}
+  \, \Phi')}
+%-----
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \, (\textsf{SEQUENCE}
+    \, ([\varphi'] \sqcup \Phi'))}
+\;\TirName{[24]}
+\label{types_canoniques_24}
+
+\inferrule
+  {\tau \lhd [\textsf{Tag} \,\, (\textsf{UNIVERSAL}, \textsf{Imm} \,
+    16) \,\, \textsf{IMPLICIT}]}
+%------
+  {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\, (\textsf{SEQUENCE}
+    \, \emptyL\!)}
+\;\TirName{[25]}
+\label{types_canoniques_25}
+
+\end{mathparpagebreakable}

@@ -1,0 +1,148 @@
+%%-*latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \{(\textrm{T}, \sigma)\})\\
+  \bouchon{32} \textrm{T} \rightarrow \overline\tau\\
+  \bouchon{67} \domain{\mathcal{A}} \Gamma \rightarrow
+  \domain{\overline{\mathcal{A}}} \overline\Gamma\\
+  \overline\gamma \triangleq x \mapsto (\alpha, \tau \Append
+  \overline\tau, \{(\textrm{T}, \sigma)\})}
+%-----
+  {\bouchon{67} \domain{\{x\} \uplus \mathcal{A}} \Gamma \rightarrow
+    \domain{\overline{\mathcal{A}}} \overline\Gamma \oplus
+    \overline\gamma}
+
+\inferrule
+  {}
+  {\bouchon{67} \domain{\varnothing} \Gamma \rightarrow \domain{\varnothing} \Gamma}
+
+\inferrule
+  {\overline\tau \triangleq   [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 1) \,\, \textsf{IMPLICIT}]}
+ %-----
+  {\bouchon{32} \textsf{BOOLEAN} \rightarrow \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 2) \,\, \textsf{IMPLICIT}]}
+%-----
+  {\bouchon{32} \wildINTEGER \rightarrow \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq   [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 3) \,\, \textsf{IMPLICIT}]}
+ %-----
+  {\bouchon{32} \wildBITSTRING \rightarrow \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 4) \,\, \textsf{IMPLICIT}]}
+ %-----
+  {\bouchon{32} \textsf{OCTET STRING} \rightarrow \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 5) \,\, \textsf{IMPLICIT}]}
+%-----
+  {\bouchon{32} \textsf{NULL} \rightarrow \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 6) \,\, \textsf{IMPLICIT}]}
+%-----
+  {\bouchon{32} \textsf{OBJECT IDENTIFIER} \rightarrow \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 10) \,\, \textsf{IMPLICIT}]}
+ %-----
+  {\bouchon{32} \wildENUMERATED \rightarrow \overline\tau}
+
+\inferrule
+  {}
+  {\bouchon{32} \wildCHOICE \rightarrow \emptyL}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 16) \,\, \textsf{IMPLICIT}]}
+ %-----
+  {\bouchon{32} \textsf{SEQUENCE OF} \, \wild \, \wild \, \wild
+    \rightarrow \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 16) \,\, \textsf{IMPLICIT}]}
+ %-----
+  {\bouchon{32} \wildSEQUENCE \rightarrow \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 17) \,\, \textsf{IMPLICIT}]}
+%-----
+  {\bouchon{32} \textsf{SET OF} \, \wild \, \wild \, \wild \rightarrow
+    \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 17) \,\, \textsf{IMPLICIT}]}
+%-----
+  {\bouchon{32} \wildSET \rightarrow \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 18) \,\, \textsf{IMPLICIT}]}
+%-----
+  {\bouchon{32} \textsf{CharString} \, (\textsf{Numeric}) \rightarrow
+    \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 19) \,\, \textsf{IMPLICIT}]}
+ %-----
+  {\bouchon{32} \textsf{CharString} \, (\textsf{Printable})
+    \rightarrow \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 20) \,\, \textsf{IMPLICIT}]}
+%-----
+  {\bouchon{32} \textsf{CharString} \, (\textsf{Teletex} \mid
+    \textsf{T}_{61}) \rightarrow \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 21) \,\, \textsf{IMPLICIT}]}
+%------
+  {\bouchon{32} \textsf{CharString} \, (\textsf{Videotex}) \rightarrow
+    \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 22) \,\, \textsf{IMPLICIT}]}
+%----
+  {\bouchon{32} \textsf{CharString} \, (\textsf{IA}_5) \rightarrow
+    \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 25) \,\, \textsf{IMPLICIT}]}
+%-----
+  {\bouchon{32} \textsf{CharString} \, (\textsf{Graphic}) \rightarrow
+    \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 26) \,\, \textsf{IMPLICIT}]}
+%-----
+  {\bouchon{32} \textsf{CharString} \, (\textsf{Visible} \mid
+    \textsf{ISO}_{646}) \rightarrow \overline\tau}
+
+\inferrule
+  {\overline\tau \triangleq [\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+      \textsf{Imm} \, 27) \,\, \textsf{IMPLICIT}]}
+%-----
+  {\bouchon{32} \textsf{CharString} \, (\textsf{General}) \rightarrow
+    \overline\tau}
+
+\end{mathparpagebreakable}

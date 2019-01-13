@@ -1,0 +1,131 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\domain{\mathcal{A}} \Gamma \bouchon{87} \domain{\mathcal{A}}
+    \Gamma \rightarrow \domain{\overline{\mathcal{A}}}
+    \overline\Gamma}
+  %-----
+  {\bouchon{89} \domain{\mathcal{A}} \Gamma \rightarrow
+    \domain{\overline{\mathcal{A}}} \overline\Gamma}
+
+\inferrule
+  {\Gamma'(x) \lhd (\alpha, \tau, \{(\textrm{T}, \sigma)\})\\
+   \domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{90} \sigma
+   \rightarrow \overline\sigma\\
+   \domain{\mathcal{A}} \Gamma \bouchon{87} \domain{\mathcal{A}'}
+   \Gamma' \rightarrow \domain{\overline{\mathcal{A}}'}
+   \overline\Gamma'\\
+   \overline\gamma' \triangleq x \mapsto (\alpha, \tau, \{(\textrm{T},
+   \overline\sigma)\})}
+  %------
+  {\domain{\mathcal{A}} \Gamma \bouchon{87} \domain{\{x\} \uplus
+      \mathcal{A}'} \Gamma' \rightarrow
+    \domain{\overline{\mathcal{A}}'} \overline\Gamma' \oplus
+    \overline\gamma'}
+
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma \bouchon{87} \domain{\varnothing}
+    \Gamma' \rightarrow \domain{\varnothing} \Gamma'}
+
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{88} \nu \rightarrow
+    \overline\sigma_0\\
+   \domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{90} \sigma
+   \rightarrow \overline\sigma}
+  %-----
+  {\domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{90} \{\nu\} \uplus
+    \sigma \rightarrow \overline\sigma_0 \cup \overline\sigma}
+
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{90} \{\}
+    \rightarrow \{\}}
+
+% Intersection
+
+% ..... non-empty
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{90} \sigma
+    \rightarrow \overline\sigma\\
+   \domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{88} \textsf{Inter}
+   \, \Sigma \rightarrow \{\textsf{Inter} \, \overline\Sigma\}}
+  %------
+  {\domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{88} \textsf{Inter}
+    \, (\sigma \Cons \Sigma) \rightarrow \{\textsf{Inter} \,
+    (\overline\sigma \Cons \overline\Sigma)\}}
+
+% ..... empty
+%
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{88} \textsf{Inter}
+    \, \emptyL \rightarrow \{\textsf{Inter} \, \emptyL\!\}}
+
+% INCLUDES
+%
+\inferrule
+  {x \neq x'\\
+   x' \in \mathcal{A}\\
+   \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+   \alpha \listinter \alpha' \neq \{\}\\
+   \domain{\mathcal{A}} \Gamma, x', \alpha' \bouchon{90} \sigma'
+   \rightarrow \overline\sigma'}
+  %-----
+  {\domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{88}
+    \textsf{INCLUDES} \, \emptyL \, (\textsf{TRef} \, x') \, \{\}
+    \rightarrow \overline\sigma'}
+
+% SIZE
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \INTEGER, \emptyL \bouchon{90} \sigma
+    \rightarrow \overline\sigma}
+  %------
+  {\domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{88} \textsf{SIZE}
+    \, \sigma \rightarrow \{\textsf{SIZE} \, \overline\sigma\}}
+
+% FROM
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{90} \sigma
+    \rightarrow \overline\sigma}
+  %------
+  {\domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{88} \textsf{FROM}
+    \, \sigma \rightarrow \{\textsf{FROM} \, \overline\sigma\}}
+
+% WITH COMPONENT
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{90} \sigma
+    \rightarrow \overline\sigma\\
+   \overline\nu \triangleq \textsf{WITH COMPONENT} \,
+   \overline\sigma}
+  %-----
+  {\domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{88} \textsf{WITH
+      COMPONENT} \, \sigma \rightarrow \{\overline\nu\}}
+
+% WITH COMPONENTS
+%
+\inferrule
+  {\forall j \in [1..p].\domain{\mathcal{A}} \Gamma, x, \alpha
+    \bouchon{90} \sigma_j \rightarrow \overline\sigma_j\\
+   \overline\nu \triangleq \textsf{WITH COMPONENTS} \,\, (m,
+   \OList{$(l_j, \overline\sigma_j, \hat\pi_j)$}{j}{p})}
+ %-----
+  {\domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{88} \textsf{WITH
+      COMPONENTS} \,\, (m, \OList{$(l_j, \sigma_j, \hat\pi_j)$}{j}{p})
+   \rightarrow \{\overline\nu\}}
+
+% Other constraints
+%
+\inferrule
+  {\nu \lhd \textsf{Value} \, \wild \mid \wild \wild \textbf{..} \wild
+    \wild}
+  %-----
+  {\domain{\mathcal{A}} \Gamma, x, \alpha \bouchon{88} \nu \rightarrow
+    \{\nu\}}
+
+\end{mathparpagebreakable}

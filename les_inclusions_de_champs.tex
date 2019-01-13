@@ -1,0 +1,71 @@
+%%-*-latex-*-
+
+Nous définissons une relation qui, étant donné un type, si c'est un
+\textsf{SEQUENCE} (liste finie ordonnée de types) ou un \textsf{SET}
+(liste finie non-ordonnée de types) qui spécifient des inclusions de
+champs, fournit la liste complète et expansée des champs, et sinon
+retourne la liste vide. Elle impose en plus que les \textsf{SET} ne
+peuvent inclure que des champs d'autres \textsf{SET} et idem pour les
+\textsf{SEQUENCE}.
+
+\begin{mathparpagebreakable}
+% SET
+% Field
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma \bouchon{26} \textsf{SET} \, \Phi'
+    \rightarrow \mathcal{F}'}
+%------
+  {\domain{\mathcal{A}} \Gamma \bouchon{26} \textsf{SET} \,
+    (\textsf{Field} \, (f') \Cons \Phi') \rightarrow f' \Cons \mathcal{F}' }
+
+% COMPONENTS OF
+%
+\inferrule
+  {\varphi' \lhd \textsf{COMPONENTS OF} \, \tau' \, (\textsf{TRef} \,
+    x) \, \{\}\\
+  x \in \mathcal{A}\\
+  \Gamma(x) \lhd (\alpha, \tau, \{(\textsf{SET} \, \Phi, \sigma)\})\\
+  \domain{\mathcal{A}} \Gamma \bouchon{26} \textsf{SET} \, \Phi
+  \rightarrow \mathcal{F}_0\\
+  \domain{\mathcal{A}}  \Gamma \bouchon{26} \textsf{SET} \, \Phi'
+  \rightarrow \mathcal{F}_1}
+%------
+  {\domain{\mathcal{A}} \Gamma \bouchon{26} \textsf{SET} \, (\varphi'
+    \Cons \Phi')  \rightarrow \mathcal{F}_0 \Append \mathcal{F}_1}
+
+% SEQUENCE
+% Field
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma \bouchon{26} \textsf{SEQUENCE} \, \Phi'
+    \rightarrow \mathcal{F}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{26} \textsf{SEQUENCE} \,
+    (\textsf{Field} \, (f') \Cons \Phi') \rightarrow f' \Cons \mathcal{F}'}
+
+% COMPONENTS OF
+%
+\inferrule
+  {\varphi' \lhd \textsf{COMPONENTS OF} \, \tau' \, (\textsf{TRef} \,
+  x) \, \{\}\\
+  x \in \mathcal{A}\\
+  \Gamma(x) \lhd (\alpha, \tau, \{(\textsf{SEQUENCE} \, \Phi, \sigma)\})\\
+  \domain{\mathcal{A}} \Gamma \bouchon{26} \textsf{SEQUENCE} \, \Phi
+  \rightarrow \mathcal{F}_0\\
+  \domain{\mathcal{A}} \Gamma \bouchon{26} \textsf{SEQUENCE} \, \Phi'
+  \rightarrow \mathcal{F}_1}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{26} \textsf{SEQUENCE} \,
+    (\varphi' \Cons \Phi') \rightarrow \mathcal{F}_0 \Append
+    \mathcal{F}_1}
+
+% Other
+%
+\inferrule
+  {\textrm{T} \nlhd \wildSET \mid \wildSEQUENCE}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{26} \textrm{T} \rightarrow
+    \emptyL}
+
+\end{mathparpagebreakable}

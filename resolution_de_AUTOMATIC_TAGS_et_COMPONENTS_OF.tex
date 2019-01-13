@@ -1,0 +1,131 @@
+%%-*-latex-*-
+
+\begin{framed}
+\begin{mathpar}
+\inferrule
+  {\textrm{default\_tagging} \lhd \textsf{Some} \, (\textsf{AUTOMATIC TAGS})\\
+  \Gamma(x) \lhd (\alpha, \tau, \{(\textrm{T}, \sigma)\})\\
+  \vdashAUTO \textrm{T}\\
+  \domain{\mathcal{A}} \Gamma \vdashCOMP \textrm{T} \rightarrow \textrm{T}_0\\
+  0 \vdashAUTO \textrm{T}_0 \rightarrow \overline{\textrm{T}}\\
+  \bouchon{9} \domain{\mathcal{A}} \Gamma \rightarrow
+  \domain{\overline{\mathcal{A}}} \overline\Gamma}
+%-----
+  {\bouchon{9} \domain{\{x\} \uplus \mathcal{A}} \Gamma \rightarrow
+    \domain{\overline{\mathcal{A}}} \overline\Gamma \oplus x \mapsto
+    (\alpha, \tau, \{(\overline{\textrm{T}}, \sigma)\})}
+
+\inferrule
+  {\textrm{default\_tagging} \nlhd \textsf{Some} \, (\textsf{AUTOMATIC TAGS})\\
+  \domain{\mathcal{A}} \Gamma \vdashCOMP \textrm{T} \rightarrow
+  \overline{\textrm{T}}\\
+  \bouchon{9} \domain{\mathcal{A}} \Gamma \rightarrow
+  \domain{\overline{\mathcal{A}}} \overline\Gamma}
+%-----
+  {\bouchon{9} \domain{\{x\} \uplus \mathcal{A}} \Gamma \rightarrow
+    \domain{\overline{\mathcal{A}}} \overline\Gamma \oplus x \mapsto
+    (\alpha, \tau, \{(\overline{\textrm{T}}, \sigma)\})}
+
+\inferrule
+  {}
+  {\bouchon{9} \domain{\varnothing} \Gamma \rightarrow \domain{\varnothing} \Gamma}
+
+\end{mathpar}
+\end{framed}
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\vdashAUTO \textsf{SET} \, \Phi'}
+%-----
+  {\vdashAUTO \textsf{SET} \, (\textsf{Field} \, (l', \emptyL\!,
+    \textrm{T}', \sigma', s')\Cons\Phi')}
+
+\inferrule
+  {\vdashAUTO \textsf{SET} \, \Phi'}
+%-----
+  {\vdashAUTO \textsf{SET} \, ((\textsf{COMPONENTS OF} \, \tau' \,
+    \textrm{T}' \, \sigma')\Cons\Phi')}
+
+\inferrule
+  {\vdashAUTO \textsf{SEQUENCE} \, \Phi'}
+%------
+  {\vdashAUTO \textsf{SEQUENCE} \, (\textsf{Field} \, (l', \emptyL\!,
+    \textrm{T}', \sigma', s')\Cons\Phi')}
+
+\inferrule
+  {\vdashAUTO \textsf{SEQUENCE} \, \Phi'}
+%-----
+  {\vdashAUTO \textsf{SEQUENCE} \, ((\textsf{COMPONENTS OF} \, \tau'
+    \, \textrm{T}' \, \sigma')\Cons\Phi')}
+
+\inferrule
+  {\vdashAUTO \textsf{CHOICE} \, \mathcal{F}'}
+%------
+  {\vdashAUTO \textsf{CHOICE} \, ((l', \emptyL\!, \textrm{T}',
+    \sigma', s')\Cons\mathcal{F}')}
+
+\inferrule
+  {\textrm{T} \nlhd \wildSET \mid \wildSEQUENCE \mid \wildCHOICE}
+%-----
+  {\vdashAUTO \textrm{T}}
+
+\inferrule
+  {n+1 \vdashAUTO \textsf{SET} \, \Phi' \rightarrow \textsf{SET} \, \overline\Phi'\\
+  \overline\tau' \triangleq (\textsf{Tag} \,\, (\textsf{Context}, n)
+  \,\, \textsf{Inferred})\Cons\tau'\\
+  \overline{\textrm{T}} \triangleq \textsf{SET} \, (\textsf{Field} \,
+  (l', \overline\tau', \textrm{T}', \sigma', s') \Cons \overline\Phi')}
+%------
+  {n \vdashAUTO \textsf{SET} \, (\textsf{Field} \, (l', \tau',
+    \textrm{T}', \sigma', s')\Cons\Phi') \rightarrow \overline{\textrm{T}}}
+
+\inferrule
+  {n+1 \vdashAUTO \textsf{SEQUENCE} \, \Phi' \rightarrow \textsf{SEQUENCE} \, \overline\Phi'\\
+  \overline\tau' \triangleq (\textsf{Tag} \,\, (\textsf{Context}, n)
+  \,\, \textsf{Inferred})\Cons\tau'\\
+  \overline{\textrm{T}} \triangleq \textsf{SEQUENCE} \,
+  (\textsf{Field} \, (l', \overline\tau', \textrm{T}', \sigma', s') \Cons
+  \overline\Phi')}
+%-----
+  {n \vdashAUTO \textsf{SEQUENCE} \, (\textsf{Field} \, (l', \tau',
+    \textrm{T}', \sigma', s')\Cons\Phi') \rightarrow \overline{\textrm{T}}}
+
+\inferrule
+  {n+1 \vdashAUTO \textsf{CHOICE} \, \mathcal{F}' \rightarrow
+    \textsf{CHOICE} \, \overline{\mathcal{F}}'\\
+  \overline\tau' \triangleq (\textsf{Tag} \,\, (\textsf{Context}, n)
+  \,\, \textsf{Inferred})\Cons\tau'\\
+  \overline{\textrm{T}} \triangleq \textsf{CHOICE} \, ((l',
+  \overline\tau', \textrm{T}', \sigma', s') \Cons \overline{\mathcal{F}}')}
+%-----
+  {n \vdashAUTO \textsf{CHOICE} \, ((l', \tau', \textrm{T}', \sigma',
+    s')\Cons\mathcal{F}') \rightarrow \overline{\textrm{T}}}
+
+\inferrule
+  {\textrm{T} \nlhd \wildSET \mid \wildSEQUENCE \mid \wildCHOICE}
+%-----
+  {n \vdashAUTO \textrm{T} \rightarrow \textrm{T}}
+
+\inferrule
+  {\textrm{T} \lhd \wildSET\\
+  \domain{\mathcal{A}} \Gamma \bouchon{26} \textrm{T} \rightarrow \mathcal{F}\\
+  \overline{\textrm{T}} \triangleq \textsf{SET} (\textrm{List.map}
+  \,\, \textsf{Field} \,\, \mathcal{F})}
+%-----
+  {\domain{\mathcal{A}} \Gamma \vdashCOMP \textrm{T} \rightarrow \overline{\textrm{T}}}
+
+\inferrule
+  {\textrm{T} \lhd \wildSEQUENCE\\
+  \domain{\mathcal{A}} \Gamma \bouchon{26} \textrm{T} \rightarrow \mathcal{F}\\
+  \overline{\textrm{T}} \triangleq \textsf{SEQUENCE} \,
+  (\textrm{List.map} \,\, \textsf{Field} \,\, \mathcal{F})}
+%-----
+  {\domain{\mathcal{A}} \Gamma \vdashCOMP \textrm{T} \rightarrow \overline{\textrm{T}}}
+
+\inferrule
+  {\textrm{T} \nlhd \wildSET \mid \wildSEQUENCE}
+%-----
+  {\domain{\mathcal{A}} \Gamma \vdashCOMP \textrm{T} \rightarrow \textrm{T}}
+\end{mathparpagebreakable}
+
+\input{les_inclusions_de_champs}

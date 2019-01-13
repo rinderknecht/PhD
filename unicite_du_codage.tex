@@ -1,0 +1,106 @@
+%%-*-latex-*-
+
+\newtheorem{unicite_codage}{Théorème}[section]
+
+\begin{unicite_codage}[Unicité du codage]
+\label{unicite_codage}
+\ \\
+
+\begin{tabular}{|l|}
+  \hline 
+  \\
+  S'il existe un codage d'une valeur d'un type bien labellisé, \\
+  alors ce codage est unique. \\
+  \\ 
+  \hline
+\end{tabular}
+\end{unicite_codage}
+
+\bigskip
+
+\noindent \textbf{Preuve du théorème~\ref{unicite_codage}} \\
+
+La preuve sera la même que celle concernant l'unicité du contrôle de
+type (\vref{unicite_typage}) sauf que l'on utilisera respectivement
+les lemmes~\vref{coding_CHOICE}, \vref{coding_SEQUENCE}, en lieu des
+lemmes \vref{labels_CHOICE} et \vref{labels_SEQUENCE}.\\\
+  
+\noindent \textbf{Remarque} \\
+
+Le cas du type \textsf{SET} est identique du type \textsf{SEQUENCE},
+la seule difference étant dans le réordonnancement éventuel des
+sous-parties du code:
+\begin{mathpar}
+  \inferrule
+    {\domain{\mathcal{A}} \Gamma \vdash v : \tau \, (\textsf{SEQUENCE} \,
+      \Phi) \Rightarrow (\psi, \textsf{Const} \, \tilde{V})\\
+     \permutation{\pi}{\tilde{V}}}
+    %-----
+    {\domain{\mathcal{A}} \Gamma \vdash v : \tau \, (\textsf{SET} \,
+      \Phi) \Rightarrow (\psi, \textsf{Const} \,  ( \pi \,\,
+      (\tilde{V})))}
+    \;\TirName{[21]}
+\end{mathpar}
+
+\newtheorem{coding_CHOICE}[unicite_codage]{Lemme}
+
+\begin{coding_CHOICE}
+\label{coding_CHOICE}
+\begin{equation*}
+\begin{array}{|ll|}
+  \hline 
+        & \\
+  Si    & \domain{\mathcal{A}} \Gamma, \{x'\} \uplus \textrm{L} \vdashL
+          \textsf{CHOICE} \, \mathcal{F} \\
+  alors & \neg(\domain{\mathcal{A}} \Gamma \vdash (x' \colon v') : \tau
+          \,\, (\textsf{CHOICE} \, \mathcal{F}) \Rightarrow
+          \tilde{v})\\
+        & \\
+  \hline
+ \end{array}
+\end{equation*}
+\end{coding_CHOICE}
+
+\bigskip
+
+\noindent \textbf{Preuve du lemme~\ref{coding_CHOICE}} \\
+
+La preuve est la même que celle du lemme \vref{labels_CHOICE}, mais
+avec l'algorithme de codage au lieu du contrôle des types. Cependant
+les règles~\RefTirName{[13]} \vpageref{controle_des_types_13})
+et~\RefTirName{[14]} \vpageref{controle_des_types_14} deviennent
+respectivement~\RefTirName{[16]} \vpageref{codage_16}
+et~\RefTirName{[17]}) (p.~\pageref{codage_17}).\hfill$\Box$
+
+
+\newtheorem{coding_SEQUENCE}[unicite_codage]{Lemme}
+
+\begin{coding_SEQUENCE}
+\label{coding_SEQUENCE}
+\begin{equation*}
+\begin{array}{|ll|}
+    \hline
+    & \\
+    Soit & v \lhd \bob [(\textsf{Some} \, x', v')] \sqcup V' \bcb \\
+    Si & \domain{\mathcal{A}} \Gamma, \{x'\} \uplus \textrm{L} \vdashL \textsf{SEQUENCE} \, \Phi \\
+    alors & \neg(\domain{\mathcal{A}} \Gamma \vdash  v : \textsf{SEQUENCE}
+    \, \Phi \Rightarrow \tilde{v}) \\
+    & \\
+    \hline
+\end{array}
+\end{equation*}
+\end{coding_SEQUENCE}
+
+\bigskip
+
+\noindent \textbf{Preuve du théorème~\ref{coding_SEQUENCE}} \\
+
+La preuve est la même que celle du théorème~\vref{labels_SEQUENCE},
+mais avec l'algorithme de codage au lieu du contrôle de
+type. Cependant les règles~\RefTirName{[15]}
+\vpageref{controle_des_types_15}, \RefTirName{[16]}
+\vpageref{controle_des_types_16} et~\RefTirName{[17]}
+\vpageref{controle_des_types_17} deviennent
+respectivement~\RefTirName{[18]} \vpageref{codage_18},
+\RefTirName{[19]} \vpageref{codage_19} et~\RefTirName{[20]}
+\vpageref{codage_20}.\hfill$\Box$

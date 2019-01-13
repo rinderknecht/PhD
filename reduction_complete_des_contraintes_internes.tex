@@ -1,0 +1,34 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\bouchon{19} \domain{\mathcal{A}} \Gamma \rightarrow
+    \domain{\mathcal{A}} \Gamma}
+  %-----
+  {\bouchon{20} \domain{\mathcal{A}} \Gamma \rightarrow
+    \domain{\mathcal{A}} \Gamma}
+
+\inferrule
+  {\bouchon{19} \domain{\mathcal{A}} \Gamma \rightarrow
+    \domain{\mathcal{A}_0} \Gamma_0\\
+   \domain{\mathcal{A}} \Gamma \neq \domain{\mathcal{A}_0} \Gamma_0\\
+   \bouchon{20} \domain{\mathcal{A}_0} \Gamma_0 \rightarrow
+   \domain{\mathcal{A}_1} \Gamma_1}
+  %-----
+  {\bouchon{20} \domain{\mathcal{A}} \Gamma \rightarrow
+    \domain{\mathcal{A}_1} \Gamma_1}
+
+\inferrule
+  {\bouchon{14} \domain{\mathcal{A}} \Gamma
+    \rightarrow\domain{\mathcal{A}_0}  \Gamma_0 \\
+   \bouchon{65} \domain{\mathcal{A}_0} \Gamma_0 \rightarrow
+   \domain{\mathcal{A}_1} \Gamma_1 \\
+   \bouchon{68} \domain{\mathcal{A}_1} \Gamma_1 \rightarrow
+   \domain{\mathcal{A}_2} \Gamma_2\\
+   \bouchon{62} \domain{\mathcal{A}_2} \Gamma_2 \rightarrow
+   \domain{\overline{\mathcal{A}}} \overline\Gamma}
+  %-----
+  {\bouchon{19} \domain{\mathcal{A}} \Gamma \rightarrow
+    \domain{\overline{\mathcal{A}}} \overline\Gamma}
+
+\end{mathparpagebreakable}

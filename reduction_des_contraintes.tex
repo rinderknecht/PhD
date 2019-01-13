@@ -1,0 +1,167 @@
+%%-*-latex-*-
+
+\subsection{Réduction des intersections de contraintes \textsf{SIZE}}
+\label{reduction_des_intersections_de_contraintes_SIZE}
+\input{reduction_des_intersections_de_contraintes_SIZE}
+
+\subsection{Normalisation des intersections de contraintes \textsf{SIZE}}
+\label{normalisation_des_intersections_de_contraintes_SIZE}
+\input{normalisation_des_intersections_de_contraintes_SIZE}
+
+\subsection{Élimination des contraintes \textsf{FROM} si \textsf{SIZE}(0)}
+\label{elimination_des_contraintes_FROM_si_SIZE_0}
+\input{elimination_des_contraintes_FROM_si_SIZE_0}
+
+\subsection{Réduction des contraintes}
+
+\begin{mathparpagebreakable}
+  \inferrule
+    {\Gamma(x) \lhd (\alpha, \tau, \SList{$(\textrm{T}_k,
+        \{\nu_k\})$}{k}{q})\\
+     \forall k \in [1..q].x, \textrm{ T}_k \bouchon{54} \nu_k \mid
+     \emptyL \rightarrow \overline\nu_k\\
+     \bouchon{94} \domain{\mathcal{ A}} \Gamma \rightarrow
+     \domain{\overline{\mathcal{A}}} \overline\Gamma\\
+     \overline\gamma \triangleq x \mapsto (\alpha, \tau,
+     \SList{$(\textrm{T}_k, \{\overline\nu_k\})$}{k}{q})}
+    %-----
+    {\bouchon{94} \domain{\{x\} \uplus \mathcal{A}} \Gamma
+      \rightarrow \domain{\overline{\mathcal{A}}} \overline\Gamma
+      \oplus \overline\gamma}
+
+  \inferrule
+     {}
+     {\bouchon{94} \domain{\varnothing} \Gamma \rightarrow
+       \domain{\varnothing} \Gamma}
+
+% Intersection
+
+% Non empty constraint list
+%
+  \inferrule
+    {x, \textrm{T} \bouchon{54} \nu \mid \emptyL \rightarrow
+      \overline\nu_0\\
+      x, \textrm{T} \bouchon{54} \textsf{Inter} \, (\Sigma) \mid
+      [\{\overline\nu_0\}] \rightarrow \overline\nu_1}
+    %-----
+    {x, \textrm{T} \bouchon{54} \textsf{Inter} \, (\{\nu\} \Cons
+      \Sigma) \mid \emptyL \rightarrow \overline\nu_1}
+
+  \inferrule
+    {\overline\Sigma_0 \nlhd \emptyL\\
+     x, \textrm{T} \bouchon{54} \nu \mid \overline\Sigma_0 \rightarrow
+     \textsf{Inter} \, (\overline\Sigma_1)\\
+     x, \textrm{T} \bouchon{54} \textsf{Inter} \, (\Sigma) \mid
+     \overline\Sigma_1 \rightarrow \overline\nu_1}
+    %----
+    {x, \textrm{T} \bouchon{54} \textsf{Inter} \, (\{\nu\} \Cons
+      \Sigma) \mid \overline\Sigma_0 \rightarrow \overline\nu_1}
+
+% Empty constraint list
+%
+  \inferrule
+    {}
+    {x, \textrm{T} \bouchon{54} \textsf{Inter} \, \emptyL \mid
+    \overline\Sigma \rightarrow \textsf{Inter} \, (\overline\Sigma)}
+
+% Value constraint for REAL
+%
+  \inferrule
+    {\textrm{"REAL"}, \textrm{T} \bouchon{73} \textsf{Value} \,
+      (\overline{v}) \mid \overline\Sigma \rightarrow \overline\nu\\
+     \overline{v} \triangleq \textrm{Real.normalize} \, (v)}
+    %-----
+    {\textrm{"REAL"}, \textrm{T} \bouchon{54} \textsf{Value} \, (v)
+      \mid \overline\Sigma \rightarrow \overline\nu}
+
+% Value constraint for other types
+%
+  \inferrule
+    {x \neq \REAL\\
+      x, \textrm{T} \bouchon{73} \textsf{Value} \, (v) \mid
+      \overline\Sigma \rightarrow \overline\nu}
+    %-----
+    {x, \textrm{T} \bouchon{54} \textsf{Value} \, (v) \mid
+      \overline\Sigma \rightarrow \overline\nu}
+
+% Value Range Constraint 
+
+% .....for INTEGER and CharString
+%
+  \inferrule
+    {\textrm{T} \lhd \wildINTEGER \mid \textsf{CharString} \, \wild\\
+     x, \textrm{T} \bouchon{44} \nu \mid \overline\Sigma \rightarrow
+     \overline\nu}
+    %-----
+    {x, \textrm{T} \bouchon{54} \wild \wild \textsf{\textbf{..}} \wild
+      \wild \AS \nu \mid \overline\Sigma \rightarrow \overline\nu}
+
+% .....for REAL
+%
+  \inferrule
+    {x = \textrm{"REAL"}\\
+     \bouchon{50} \nu \rightarrow \nu_0\\
+     x, \textrm{T} \bouchon{44} \nu_0 \mid \overline\Sigma \rightarrow
+     \overline\nu}
+    %-----
+    {x, \textrm{T} \bouchon{54} \wild \wild \textsf{\textbf{..}} \wild
+      \wild \AS \nu \mid \overline\Sigma \rightarrow \overline\nu}
+
+% Size Range Constraint
+%
+  \inferrule
+    {\textrm{T} \lhd \wildBITSTRING \mid \textsf{OCTET STRING} \\
+     \mid (\textsf{SET OF} \mid \textsf{SEQUENCE OF}) \wild \wild
+     \wild \, \mid \textsf{CharString} \, \wild\\
+     \sigma_0 \triangleq \{\textsf{Inter} \, [\textsf{Val} \,
+       (\textsf{Int} \, 0) \, \leqslant \textsf{\textbf{..}} \leqslant
+       \, \textsf{MAX}; \sigma']\}\\
+     \INTEGER, \emptyINTEGER \bouchon{55} \sigma_0 \mid \emptyL
+     \rightarrow \overline\sigma_0\\
+     x, \textrm{T} \bouchon{73} \textsf{SIZE} \, (\overline\sigma_0)
+     \mid \overline\Sigma \rightarrow \overline\nu}
+    %-----
+    {x, \textrm{T} \bouchon{54} \textsf{SIZE} \, (\sigma') \mid
+      \overline\Sigma \rightarrow \overline\nu}
+
+% Alphabet Limitation Constraint
+%
+  \inferrule
+    {\textrm{T} \lhd \textsf{CharString} \, \wild\\
+      x, \textrm{T} \bouchon{55} \sigma' \mid \emptyL \rightarrow
+      \overline\sigma'\\
+      x, \textrm{T} \bouchon{73} \textsf{FROM} \, (\overline\sigma')
+      \mid \overline\Sigma \rightarrow \overline\nu}
+    %-----
+    {x, \textrm{T} \bouchon{54} \textsf{FROM} \, (\sigma') \mid
+      \overline\Sigma \rightarrow \overline\nu}
+
+  \inferrule
+    {x, \textrm{T} \bouchon{54} \nu \mid \emptyL \rightarrow
+      \overline\nu\\
+     x, \textrm{T} \bouchon{55} \sigma \rightarrow \overline\sigma}
+    %-----
+    {x, \textrm{T} \bouchon{55} \{\nu\} \uplus \sigma \rightarrow
+      \{\overline\nu\} \cup \overline\sigma}
+
+  \inferrule
+    {}
+    {x, \textrm{T} \bouchon{55} \{\} \rightarrow \{\}}
+
+  \inferrule
+  % Normalisation MIN et MAX
+    {x, \textrm{T} \bouchon{45} \nu \mid \overline\Sigma \rightarrow
+      \nu_0\\
+  % Bonne formation de l'intervalle
+     \bouchon{42} \nu_0\\
+  % Intersection de l'intervalle et du reste
+     x, \textrm{T} \bouchon{73} \nu_0 \mid \overline\Sigma \rightarrow
+     \overline\nu}
+    %-----
+    {x, \textrm{T} \bouchon{44} \nu \mid \overline\Sigma \rightarrow
+      \overline\nu}
+\end{mathparpagebreakable}
+
+\subsection{Intersection de contraintes}
+\label{intersection_de_contraintes}
+\input{intersection_de_contraintes}

@@ -1,0 +1,1117 @@
+%%-*-latex-*-
+
+\lettrine{D}{ans ce chapitre,} nous définissons ici une syntaxe
+abstraite pour ASN.1. Pour ce faire nous employons les définitions de
+types de Caml, et des références seront constamment faites à la
+recommandation X.680. Les noms de types et de valeurs Caml seront en
+anglais, comme il est de bon usage en informatique.
+
+Il faut savoir que les constructeurs de valeurs Caml qui suivent ne
+sont pas tous produits par l'analyseur syntaxique: certains sont
+introduits par la phase de canonisation des types et des valeurs
+ASN.1, qui s'effectue sur l'arbre de syntaxe abstraite tel qu'il sort
+de l'analyseur syntaxique. Cette phase a pour but de désambigüer le
+plus possible ce qui peut l'être pour simplifier les traitements
+ultérieurs. Ainsi le fragment de syntaxe concrète~\texttt{0} donne
+toujours en sortie de l'analyseur syntaxique l'arbre de syntaxe
+abstraite \textsf{Zero}, et la phase de canonisation produira soit
+l'arbre \textsf{0.0}, soit $\textsf{Int} (0)$, selon le type de
+l'expression (cf.~\vref{desambiguation_du_zero}). À chaque étape de la
+présentation de la syntaxe abstraite, divisée en concepts comme les
+types, les valeurs, les étiquettes, etc., nous donnerons les
+conventions de notation des valeurs associées (par exemple, $e$~dénote
+toujours un étiquetage, et donc est du type $\mathcal{E}$).
+
+Puis les environnements, leurs opérations et notations propres seront
+présentés. Nous présenterons ensuite les conventions et le vocabulaire
+propre au formalisme (les propositions logiques et leurs
+preuves). Enfin, nous récapitulerons dans un glossaire le vocabulaire
+propre à cette thèse, qui aura été introduit dans ce chapitre.
+
+\section{Convention lexicales et typographiques}
+
+À la base, nous employons dans cette thèse les conventions lexicales
+du langage OCaml. Les principales déviances ou choix typographiques
+sont:
+\begin{itemize}
+
+   \item Les mots-clés apparaissent en \textbf{gras}.
+
+   \item Les noms de types ou de valeurs sont dans la police du texte
+     (par exemple, string, default\_tagging), ou en fonte
+     calligraphique (par exemple, $\mathcal{E}$).
+
+   \item Les constructeurs de types et de valeurs apparaissent en
+     police \textsf{Sans Serif}, par exemple \textsf{list},
+     \textsf{PRIVATE}.
+
+   \item Des symboles ou des nombres peuvent intervenir dans la
+     formation des noms de constructeurs de valeurs. ex. $\leqslant$,
+     \textbf{..}, \bob, \bcb, \textsf{0.0}.
+
+   \item Des espaces blanches sont autorisées dans les noms de
+     constructeurs, par exemple, \textsf{COMPONENTS OF}, toujours dans
+     le but de suggérer le plus possible le fragment de syntaxe
+     concrète associé.
+
+   \item Les constructeurs suivront la convention ASN.1 des mots-clés
+     (tout en majuscules) lorsqu'ils dénotent le concept associé, par
+     exemple, \textsf{EXPLICIT}.  Sinon seul leur premier caractère
+     sera en majuscule, par exemple, \textsf{Context} (pour les
+     étiquettes contextuelles, qu'aucun mot-clé ne dénote).
+
+   \item Les contructeurs de valeurs sont curryfiés et la position de
+     leurs paramètres est indiquée dans la déclaration par un
+     souligné, par exemple, $\textsf{Tag} \, \wild \wild$. Les valeurs
+     construites peuvent être ou non currifiées, comme $\textsf{Tag}
+     \,\, \psi \,\, \textsf{IMPLICIT}$, ou $\textsf{Tag} \, (\psi,
+     \textsf{IMPLICIT})$.
+
+    \item Quand une notation de valeur ou de partie de valeur sera
+      donnée, par exemple~$\Phi$, il faut entendre qu'elle peut aussi
+      apparaître sous la forme primée ($\Phi'$), surlignée
+      ($\overline\Phi$), ou indicée ($\Phi_i$). Généralement la
+      première forme s'utilise pour signifier que le terme en question
+      est un sous-élément d'une structure récursive (qui porte donc le
+      même nom, mais sans prime), par exemple on écrira
+      $\varphi'\Cons\Phi'$ pour une valeur qui s'appelle~$\Phi$. La
+      seconde forme s'emploiera généralement pour signifier que le
+      terme est inféré, c'est-à-dire qu'il est le résultat d'un calcul
+      ou d'une réécriture à partir d'un terme de même nom, sans
+      surlignage. La forme indicée quant à elle sous-entendra
+      généralement que la valeur désignée est un terme dans un
+      ensemble fini (ou une liste).
+
+   \item Nous supposons dans cette thèse que nous disposons d'un type
+     polymorphe prédéfini \textsf{set}, qui réalise un ensemble non
+     ordonné. Nous le supposons défini concrètement par deux
+     constructeurs (à l'instar de \textsf{list}): $\{ \wild \}$ et
+     $\{\}$ (ou $\varnothing$).
+
+   \item Les listes et ensembles seront parfois donnés en
+     extension. Dans ce cas nous indicerons les constructeurs
+     correspondants. Par exemple: $\OList{T}{i}{n}$ est une liste non
+     vide de $n$~types $\textrm{T}_i$. De même $\SList{T}{i}{n}$ est
+     un ensemble non vide de $n$~types $\textrm{T}_i$. Il est
+     important de noter que cette notation indicée sert uniquement
+     pour les ensembles ou listes \emph{non vides}. Nous utiliserons
+     cette notation aussi comme filtre (il faudra donc considérer
+     comme liée la variable~$n$, dans nos exemples).
+
+\end{itemize}
+
+\section{Étiquettes et étiquetage}
+
+Nous appelons \emph{classe d'étiquette} toute valeur du type: \\
+
+\noindent \textbf{type} class = \\
+\hspace*{1.2mm} \textsf{UNIVERSAL} \\
+$\mid$ \textsf{APPLICATION} \\
+$\mid$ \textsf{PRIVATE} \\
+$\mid$ \textsf{Context} \\
+
+Cette définition est isomorphe à la syntaxe concrète donnée en
+\cite[\S~28.1]{ASN94} (règle de grammaire \texttt{Class}). Pour
+l'usage de ces classes voir \cite[\S~28.4]{ASN94} et
+\cite[\S~F.2.12]{ASN94}. Les classes d'étiquettes seront notées~$c$
+(cf. relation $\bouchon{8}$ dans \ref{calcul_des_etiquetages}).
+
+Nous nommons \emph{numéro d'étiquette} toute valeur du type: \\
+
+\noindent \textbf{type} tag\_num = \\
+\hspace*{1.2mm} \textsf{Imm} \textbf{of} \, int \\
+$\mid$ \textsf{Ref} \textbf{of} \, string \\
+
+Cette définition est isomorphe à la syntaxe concrète donnée en
+\cite[\S~28.1]{ASN94} (règle de grammaire \texttt{ClassNumber}). Le
+constructeur \textsf{Imm} spécifie que le numéro est immédiat (par
+opposition à une référence, un lien, une indirection), et est un
+entier naturel. En réalité, la norme précise \cite[\S~28.2]{ASN94} que
+l'entier en question doit être positif, mais le système de types de
+OCaml ne permet pas de dire cela, aussi cette vérification est laissée
+pour la canonisation des étiquettes (cf. relation~$\bouchon{8}$ à la
+section~\vref{calcul_des_etiquetages}). Le constructeur \textsf{Ref}
+indique que le numéro d'étiquette est la valeur dont le nom suit
+(c'est donc une référence). Dans ce dernier cas, il faut consulter
+l'environnement des valeurs pour connaître le numéro.
+
+Nous nommons \emph{attribut d'étiquette} toute valeur du type: \\
+
+\noindent \textbf{type} attribute = \\
+\hspace*{1.2mm} \textsf{Inferred} \\
+$\mid$ \textsf{IMPLICIT} \\
+$\mid$ \textsf{EXPLICIT} \\
+
+Cette définition est isomorphe à la syntaxe concrète donnée en
+\cite[\S~28.1]{ASN94} (règle de grammaire \texttt{TaggedType}). Le
+constructeur \textsf{Inferred} correspond au cas où l'attribut doit
+être inféré selon le contexte (mode d'étiquetage par défaut du module
+par exemple). La connaissance de ce contexte permet alors de réécrire
+ce constructeur en l'un ou l'autre des constructeurs qui suivent dans
+la définition. Pour la sémantique informelle détaillée de ces concepts
+voir \cite[\S~28]{ASN94}. Les attributs d'étiquettes seront notés~$a$.
+
+Nous appelons \emph{mode d'étiquetage par défaut} la valeur: \\
+
+\noindent \textbf{type} default\_tags = \\
+\hspace*{1.2mm} \textsf{EXPLICIT TAGS} \\
+$\mid$ \textsf{IMPLICIT TAGS} \\
+$\mid$ \textsf{AUTOMATIC TAGS} \\
+\noindent \textbf{val} \textrm{default\_tagging : default\_tags} \textsf{option} \\
+
+La définition de default\_tag est isomorphe au trois premières
+productions de la règle de grammaire \texttt{TagDefault}, en
+\cite[\S~10.1]{ASN94}. Les modes d'étiquetage seront toujours utilisés
+en combinaison avec le type polymorphe \textsf{option}. Ainsi
+\textsf{None} correspondra à la production vide de la règle de
+grammaire associée.
+
+Nous nommons \emph{identifiant d'étiquette} toute valeur du type: \\
+
+\noindent \textbf{type} tag\_id = class $\times$ tag\_num \\
+
+Les identifiants d'étiquettes sont toujours notés~$\psi$ dans cette
+thèse.
+
+Nous nommons \emph{étiquette} toute valeur du type: \\
+
+\noindent \textbf{type} tag = \textsf{Tag} $\wild \wild$ \textbf{of}
+\, \textrm{tag\_id} $\times$ attribute \\
+
+Les étiquettes sont notées~$t$ dans cette thèse. \\
+
+Nous appelons \emph{étiquetage} toute valeur du type: \\
+
+\noindent \textbf{type} $\mathcal{E}$ = tag \textsf{list} \\
+
+Les étiquetages sont notés~$\tau$ dans cette thèse. \\
+
+Pour fixer les idées, soit l'extrait de syntaxe concrète:
+\begin{sverb}
+x INTEGER ::= 3
+T ::= [x] EXPLICIT [PRIVATE 4] IMPLICIT BOOLEAN
+\end{sverb}
+Nous avons deux étiquettes: \texttt{[x] EXPLICIT} et \texttt{[4
+    PRIVATE] IMPLICIT}. La suite des deux constitue un étiquetage. La
+première étiquette produit l'arbre de syntaxe abstraite:
+\(\textsf{Tag} \,\, (\textsf{Context}, \textsf{Ref} \, (\textrm{"x"}))
+\,\, \textsf{EXPLICIT}\), et la seconde: \(\textsf{Tag} \,\,
+(\textsf{PRIVATE}, \textsf{Imm} \, (4)) \,\, \textsf{IMPLICIT}.\) Nous
+avons l'étiquetage:
+\begin{equation*}
+[\textsf{Tag} \,\, (\textsf{Context}, \textsf{Ref} \, (\textrm{"x"}))
+\,\, \textsf{EXPLICIT}; \textsf{Tag} \,\, (\textsf{PRIVATE}, \textsf{Imm} \, (4)) \,\, \textsf{IMPLICIT}]
+\end{equation*}
+
+\section{Types\label{ast_types}}
+
+Nous définissons ici la syntaxe abstraite des types ASN.1. Le type
+\textsf{OBJECT IDENTIFIER} a été volontairement ignoré ici, son
+intérêt théorique étant nul. Les différents types de chaînes de
+caractères sont définis simplement par: \\
+
+\noindent \textbf{type} \textrm{strkind} = \\
+\hspace*{1.2mm} \textsf{Numeric} \\
+$\mid$ \textsf{Printable} \\
+$\mid$ \textsf{Teletex} \\
+$\mid$ \textsf{T$_{61}$} \\
+$\mid$ \textsf{Videotex} \\
+$\mid$ \textsf{IA$_5$} \\
+$\mid$ \textsf{Graphic} \\
+$\mid$ \textsf{Visible} \\
+$\mid$ \textsf{ISO$_{646}$} \\
+$\mid$ \textsf{General} \\
+
+Un \emph{type} ASN.1 est une valeur du type OCaml~$\mathcal{t}$: \\
+
+\noindent \textbf{type} $\mathcal{T}$ = \\
+
+Toutes ses valeurs seront notées~T. Voyons la liste de ses
+constructeurs, chacun correspondant à un type ASN.1. \\
+
+\noindent \hspace*{1.2mm} \textsf{CHOICE} $\wild$ \textbf{of} field
+\textsf{list} \\
+
+Ce constructeur représente le type somme \texttt{CHOICE}
+\cite[\S~26]{ASN94}. Il a pour paramètre une liste de variantes (voir
+plus bas). Cette liste de variantes sera notée~$\mathcal{F}$. Par
+exemple:
+\begin{sverb}
+T ::= CHOICE {
+        a [0] INTEGER,
+        b [1] BOOLEAN
+      }
+\end{sverb}
+définit une union de deux variantes de labels
+\texttt{a}~et~\texttt{b}. Une valeur de ce type sera obligatoirement
+une valeur pour le type d'une de ces variantes. Ce type correspond au
+\texttt{union} du langage~C.
+
+\noindent $\mid$ \textsf{SET} $\wild$ \textbf{of} element
+\textsf{list} \\
+
+Ce constructeur correspond au type \texttt{SET}
+\cite[\S~24]{ASN94}. C'est un produit appliqué à une liste de
+champs qui est notée~$\Phi$. Par exemple:
+\begin{sverb}
+T ::= SET {
+        a [0] INTEGER,
+        b [1] BOOLEAN
+      }
+\end{sverb}
+définit une structure composée de deux champs dont les labels sont
+\texttt{a}~et~\texttt{b}. Chacun de ces champs possède un type et un
+étiquetage. Une valeur de ce type doit obligatoirement (sauf attribut
+de champ \texttt{OPTIONAL} ou \texttt{DEFAULT}) fournir une valeur
+pour chacun des types des champs. L'ordre des champs n'est absolument
+pas significatif pour l'ordre des valeurs corespondant aux champs. Ce
+type \textsf{SET} correspond au \texttt{struct} du langage~C, ou
+encore au \texttt{record} de Pascal. \\
+
+\noindent $\mid$ \textsf{SEQUENCE} $\wild$ \textbf{of} element
+\textsf{list} \\
+
+Ce constructeur correspond au type \texttt{SEQUENCE}
+\citep[\S~22]{ASN94}. Comme \textsf{SET}, il dénote un type produit,
+avec la différence que le produit cartésien n'est pas commutatif ici:
+les valeurs pour chaque champ devront être écrites dans l'ordre des
+champs (de la déclaration de type). Il s'applique à une liste de
+champs. Cette liste de champs sera notée~$\Phi$. \\
+
+\noindent $\mid$ \textsf{SET OF} $\wild \wild \wild$ \textbf{of}
+$\mathcal{E} \times \mathcal{T} \times \mathcal{S}$ \\
+
+Ce constructeur correspond au type \texttt{SET OF} qui dénote un
+ensemble non ordonné avec répétition de valeurs ASN.1 de même type
+\citep[\S~25]{ASN94}. Le type des éléments est le second paramètre. Le
+premier paramètre est l'étiquetage associé à ce type, et le dernier
+paramètre est une contrainte de sous-typage s'appliquant au type des
+éléments (voir plus bas). Par exemple:
+\begin{sverb}
+T ::= SET OF [7] INTEGER (0|1)
+\end{sverb}
+définit un ensemble non ordonné avec répétition de nombres entiers
+égaux à \(0\)~ou~\(1\), et dont l'étiquetage du type
+(\textsf{INTEGER}) est \texttt{[7]}. \\
+
+\noindent $\mid$ \textsf{SEQUENCE OF} $\wild \wild \wild$ \textbf{of}
+$\mathcal{E} \times \mathcal{T} \times \mathcal{S}$ \\
+
+Ce constructeur correspond au type \texttt{SEQUENCE OF} qui dénote un
+ensemble ordonné avec répétition de valeurs ASN.1 de même type
+\citep[\S~23]{ASN94}. La signification des paramètres est la même que
+pour le constructeur \textsf{SET OF}. Par exemple:
+\begin{sverb}
+T ::= SEQUENCE OF INTEGER (0|1)
+\end{sverb}
+est une définition de l'ensemble des représentations binaires. \\
+
+\noindent $\mid \wild < \wild \wild$ \textbf{of} $\textrm{string}
+\times \mathcal{E} \times \mathcal{T}$ \\
+
+Ce constructeur a pour nom le symbole~\texttt{<} qui dénote dans la
+syntaxe concrète le \emph{type sélection} (on dira simplement une
+\emph{sélection}). Se référer à \citep[\S~27]{ASN94}. Il s'agit de la
+projection associée au type somme \textsf{CHOICE}. Le premier
+paramètre est le nom de la variante (nous dirons aussi «~\emph{label}
+  de variante~») à projeter. Le troisième est le type à projeter et le
+second l'étiquetage de ce dernier. Nous noterons le premier argument
+du constructeur:~$l$. Par exemple:
+\begin{sverb}
+T := a < CHOICE {a INTEGER, b BOOLEAN}
+\end{sverb}
+implique
+\begin{sverb}
+T ::= INTEGER
+\end{sverb}
+Le constructeur suivant est: \\
+
+\noindent $\mid$ \textsf{INTEGER} $\wild$ \textbf{of}
+$(\textrm{string} \times \mathcal{V})$ \textsf{list} \\
+
+Il s'agit du type \texttt{INTEGER} \citep[\S~16]{ASN94}. Il prend
+comme argument une liste de couples de la forme (nom, valeur). Chacun
+de ces couples définit une liaison locale au type, il s'agit donc d'un
+sous-environnement de valeurs. Nous verrons dans le chapitre consacré
+à la canonisation des environnements comment traiter ces constantes
+entières (en particulier, la
+section~\vref{les_constantes_des_types}). Nous noterons la liste de
+ces liaisons~$\mathcal{C}$, et leur nom~$c$. Prenons un exemple:
+\begin{sverb}
+T ::= INTEGER {zero(0), mystic(7)}
+\end{sverb}
+alors nous pouvons définir la valeur~\texttt{v} telle que:
+\begin{sverb}
+v T ::= zero
+\end{sverb}
+Cette définition implique
+\begin{sverb}
+v T ::= 0
+\end{sverb}
+Le constructeur suivant est: \\
+
+\noindent $\mid$ \textsf{BIT STRING} $\wild$ \textbf{of}
+$(\textrm{string} \times \mathcal{V})$ \textsf{list} \\
+
+Il s'agit du type \texttt{BIT STRING} \citep[\S~19]{ASN94}. Par
+rapport au constructeur précédent (\textsf{INTEGER}), les liaisons ici
+s'interprètent comme des positions nommées de bits dans une
+chaîne. Nous noterons la liste de ces liaisons~$\mathcal{C}$, et leur
+nom~$c$. Par exemple:
+\begin{sverb}
+T ::= BIT STRING {lsb(0), msb(7)}
+\end{sverb}
+alors nous pouvons définir la chaîne de bits 10000000 de la façon
+suivante:
+\begin{sverb}
+v T ::= {msb}
+\end{sverb}
+La présence des noms de position de bits s'interprète comme
+signifiant~1. Le constructeur suivant est: \\
+
+\noindent $\mid$ \textsf{ENUMERATED} $\wild$ \textbf{of}
+$(\textrm{string} \times \mathcal{V})$ \textsf{list} \\
+
+Il s'agit du type \texttt{ENUMERATED} \citep[\S~17]{ASN94}. Par
+rapport au constructeur \textsf{INTEGER}, les noms des liaisons ici
+dénotent l'ensemble des valeurs du type, les valeurs liées donnent au
+spécifieur le contrôle du codage des constantes énumérées. Nous
+noterons la liste de ces liaisons~$\mathcal{C}$, et leur nom~$c$. Par
+exemple:
+\begin{sverb}
+Tao ::= ENUMERATED {yin(0), yang(1)}
+\end{sverb}
+alors le type~\texttt{Tao} ne possède que deux valeurs:
+\texttt{yin} et \texttt{yang}:
+\begin{sverb}
+moon Tao ::= yin
+\end{sverb}
+Les entiers associés à ces valeurs symboliques doivent êtres
+différents deux à deux, mais ne sont significatifs que pour le codage
+de la spécification. Ainsi:
+\begin{sverb}
+moon Tao ::= 0   
+\end{sverb}
+est \emph{incorrect}. Le constructeur suivant est: \\
+
+\noindent $\mid$ \textsf{TRef} $\wild$ \textbf{of} string \\
+
+Ce constructeur correspond aux \texttt{typereference} de la syntaxe
+concrète \citep[\S~9.2]{ASN94}, c'est-à-dire à ce que nous appellerons
+dans cette thèse \emph{abréviation de type}. Le paramètre du
+constructeur est donc le nom d'un type présent dans un environnement
+qui doit être fourni en contexte. L'opération consistant à réécrire
+les abréviations de type en non abréviations s'appelera \emph{dépliage
+  de type}. Nous noterons l'argument de \textsf{TRef}:~$x$. Par
+exemple, soit:
+\begin{sverb}
+A ::= INTEGER
+\end{sverb}
+alors nous pouvons définir~\texttt{B} de la façon suivante: 
+\begin{sverb}
+B ::= A
+\end{sverb}
+L'arbre de syntaxe abstraite définissant~\texttt{B} est:
+$\textsf{TRef} \, (\textrm{"A"})$. Les constructeurs suivants sont: \\
+
+\noindent $\mid$ \textsf{BOOLEAN} \\
+\noindent $\mid$ \textsf{NULL} \\
+\noindent $\mid$ \textsf{OCTET STRING} \\
+\noindent $\mid$ \textsf{CharString} $\wild$ \textbf{of} strkind \\
+
+Le constructeur \textsf{CharString} introduit tous les types de
+chaînes de caractères. Dans cette thèse nous ne nous intéresserons pas
+aux alphabets qui distinguent ces types, car l'intérêt théorique est
+nul. \\
+
+\noindent \textbf{and} element = \\
+\hspace*{1.2mm} \textsf{Field} $\wild \wild \wild \wild \wild$
+\textbf{of} field \\
+
+Nous nommons \emph{champ} toute valeur du type «~element~» construite
+grâce à \textsf{Field}. Nous noterons ces valeurs~$\varphi$. \\
+
+\noindent $\mid$ \textsf{COMPONENTS OF} $\wild \wild \wild$
+\textbf{of} $\mathcal{E} \times \mathcal{T} \times \mathcal{S}$ \\
+
+Nous nommons \emph{inclusion de champs} toute valeur du type
+«~element~» construite grâce à \textsf{COMPONENTS OF}. Pour le sens
+informel de cette construction se référer à \cite[\S~22.4]{ASN94}. \\
+
+\noindent \textbf{and} field = $\textrm{string} \times \mathcal{E}
+\times \mathcal{T} \times \mathcal{S} \times \textrm{status} \,
+\textsf{option}$ \\
+
+Ce type sert à définir les variantes (cf. \textsf{CHOICE}) et les
+champs (cf. \textsf{SET}, \textsf{SEQUENCE} et le type
+«~element~»). Une variante n'est pas autre chose qu'un champ de
+\textsf{CHOICE}. Un champ est donc une abréviation OCaml mise pour un
+quintuplet:
+\begin{itemize}
+
+  \item le premier paramètre est le nom du champ, dit \emph{label} et
+    noté~$l$,
+
+  \item le troisième paramètre est le type du champ,
+
+  \item le second paramètre est l'étiquetage du type du champ,
+
+  \item le quatrième paramètre est la contrainte de sous-typage du
+    type du champ,
+
+  \item le cinquième paramètre est le \emph{statut du champ} (voir
+    ci-après), noté~$s$.
+
+\end{itemize}
+Nous noterons les valeurs du type «~field~»:~$f$. Prenons un exemple:
+\begin{sverb}
+T ::= CHOICE {
+        a INTEGER,
+        b BOOLEAN
+      }
+\end{sverb}
+Nous avons l'arbre de syntaxe abstraite:
+\begin{tabbing}
+$\textsf{CHOICE} \,\, [$\=$(\textrm{"a"}, \emptyL\!, \textsf{INTEGER}
+    \, \emptyL\!, \{\}, \textsf{Some} \, \textsf{OPTIONAL});$ \\
+\> $(\textrm{"b"}, \emptyL\!, \textsf{BOOLEAN}, \{\}, \textsf{Some}
+    \, \textsf{OPTIONAL})]$
+\end{tabbing}
+On remarquera que les variantes des \textsf{CHOICE} ont un statut
+toujours égal à \(\textsf{Some} \, \textsf{OPTIONAL}\) pour des
+raisons d'uniformité dans le traitement avec les types \textsf{SET} et
+\textsf{SEQUENCE}. \\
+
+\noindent \textbf{and} status = \\
+\hspace*{1.2mm} \textsf{OPTIONAL} \\
+\noindent $\mid$ \textsf{DEFAULT} $\wild$ \textbf{of} $\mathcal{V}$ \\
+
+Le type «~status~» sert à définir le \emph{statut de champ}, en tant
+qu'argument du type OCaml \textsf{option}. Le premier constructeur
+(\textsf{OPTIONAL}) indique que le champ est optionnel, le second
+indique une valeur par défaut pour le champ
+\citep[\S~22.8,\S~22.9]{ASN94}. \\
+
+\noindent \textbf{and} $\ldots$ 
+
+
+\section{Contraintes de sous-typage}
+
+Dans cette thèse nous n'aborderons pas les constructions \textsf{ALL}
+et \textsf{EXCEPT} \citep[\S~44.1, \S~44.2]{ASN94}.
+
+La particularité du sous-typage d'ASN.1 est qu'il est explicitement
+fondé sur le paradigme: «~type = ensemble de valeurs~». Cela est dû au
+contexte télécom qui est son berceau et où l'aspect transmission de
+données guide l'intuition. \\
+
+\noindent \textbf{and} \ldots \\
+
+Nous appellerons \emph{contrainte de sous-typage} toute valeur du
+type: \\
+
+\noindent \textbf{and} $\mathcal{S}$ = base\_and\_intersection \textsf{set} \hfill \textsf{(* Union *)} \\
+
+Une contrainte de sous-typage est une union (un ensemble non ordonné)
+de contraintes de base et/ou d'une intersection de contraintes. Nous
+avons choisi de représenter les contraintes comme des unions
+d'intersections, plutôt que comme des intersections d'unions --- ce
+qui correspond directement à la syntaxe concrète. La raison de ce
+choix apparaîtra au chapitre~\vref{controle_des_sous-types} consacré
+au contrôle des sous-types. Nous noterons les contraintes~$\sigma$.
+
+Nous présentons maintenant les contraintes de bases et les
+intersections de contraintes. Ce sont les valeurs du type: \\
+
+\noindent \textbf{and} base\_and\_intersection = \\
+
+Toutes ses valeurs seront notées~$\nu$. Le premier constructeur est: \\
+
+\hspace*{1.2mm} \textsf{Inter} $\wild$ \textbf{of} $\mathcal{S}$ \textsf{list}
+\hfill \textsf{(* Intersection *)} \\
+
+Le constructeur \textsf{Inter} introduit l'intersection de
+contraintes et consiste en une liste de contraintes. Ces
+intersections sont non commutatives en général. Nous noterons les
+valeurs du type «~$\mathcal{S}$ \textsf{list}~»:~$\Sigma$. \\
+
+\textsf{(* Basic constraints *)} \\
+$\mid$ \textsf{Value} $\wild$ \textbf{of} $\mathcal{V}$ \\
+
+Le constructeur \textsf{Value} correspond à
+\citep[\S~45.2]{ASN94}. Nous nommerons \emph{contrainte de valeur}
+toute valeur du type «~base\_\-and\_\-intersection~» construite à
+l'aide de \textsf{Value}. Il s'agit de la contrainte qui spécifie en
+un point la valeur du type auquel elle s'applique et le restreint à
+cette unique valeur. Par exemple la contrainte du type
+\textsf{INTEGER} dans
+\begin{sverb}
+T ::= INTEGER (7)
+\end{sverb}
+est $\{\textsf{Value} \, (\textsf{Int} \, (7))\}$, et
+\begin{sverb}
+v T ::= 3
+\end{sverb}
+est \emph{incorrect}. \\
+
+\noindent $\mid$ \textsf{INCLUDES} $\wild \wild \wild$ \textbf{of}
+$\mathcal{E} \times \mathcal{T} \times \mathcal{S}$ \\
+
+Le constructeur \textsf{INCLUDES} correspond à
+\citep[\S~45.3]{ASN94}. Une \emph{inclusion de contraintes} est une
+valeur du type «~base\_\-and\_\-intersection~» construite à l'aide de
+\textsf{INCLUDES}. Il s'agit de la contrainte qui spécifie qu'elle
+doit être remplacée par la contrainte de sous-typage du type en second
+argument, auquel s'applique déjà la contrainte en troisième
+argument. Le premier paramètre est l'étiquetage du type en second
+paramètre (voir example juste après). Le type dont les contraintes
+sont incluses et celui auquel s'applique la contrainte
+\textsf{INCLUDES} doivent être obtenus par sous-typage à partir du
+même type (qu'on nommera \emph{sur-type}):
+\begin{sverb}
+Day ::= ENUMERATED {monday (0), tuesday (1), wednesday (2),
+                    thursday (3), friday (4), saturday (5), 
+                    sunday (6)}
+Week-End ::= Day (saturday | sunday)
+Long-Week-End ::= Day (INCLUDES Week-End | monday)
+\end{sverb}
+La sémantique de \textsf{INCLUDES} implique que \texttt{Long-Week-End}
+doit être réécrit en
+\begin{sverb}
+Long-Week-End ::= Day (saturday | sunday | monday)
+\end{sverb}
+Ici, \texttt{Week-End} et \texttt{Day} ont le même sur-type
+\texttt{Day}. Nous appellerons \emph{dérivation} l'opération qui
+consiste à obtenir un type par sous-typage. Pour \texttt{Day} la
+longueur de dérivation est nulle (le sous-typage n'est pas strict en
+ASN.1, c'est-à-dire qu'un sous-type n'est pas de cardinal strictement
+inférieur à celui de son sur-type.) Le constructeur suivant est: \\
+
+\noindent $\mid$ $\wild \wild$ \textbf{..} $\wild \wild$
+\textbf{of} bound $\times$ inout $\times$ inout $\times$ bound \\
+
+Le constructeur \textbf{..} correspond à \citep[\S~45.4]{ASN94}. Une
+\emph{contrainte d'intervalle} est une valeur du type
+     «~base\_and\_intersection~» construite à l'aide de
+     «~\textbf{..}~». Cette contrainte spécifie un intervalle de
+     valeurs pour le type auquel elle s'applique et qui se prête à une
+     telle topologie: \textsf{INTEGER}, \textsf{REAL} et
+     \textsf{CharString}. Les quatres paramètres sont deux paires
+     mises à plat et constituées chacune d'une borne (cf. plus bas) et
+     d'une indication pour savoir si la borne est incluse ou non. Par
+     exemple la contrainte du type \textsf{INTEGER} dans
+\begin{sverb}
+T ::= INTEGER (2 < .. 5)
+\end{sverb}
+correspond à la syntaxe abstraite: $(\textsf{Val} \, (\textsf{Int} \,
+(2))) \, < \, \textbf{..} \, \leqslant \, (\textsf{Val} \,
+(\textsf{Int} \, (5)))$, soit, en notation mathématique: $]2;5]$. Le
+    constructeur suivant est: \\
+
+\noindent $\mid$ \textsf{SIZE} $\wild$ \textbf{of} $\mathcal{S}$ \\
+
+Le constructeur \textsf{SIZE} est défini par la norme à la cote
+\citep[\S~45.5]{ASN94}. Une \emph{contrainte de taille} est une valeur
+du type «~base\_\-and\_\-intersection~» construite à l'aide de
+\textsf{SIZE}. Cette contrainte spécifie le cardinal du type auquel
+elle s'applique: uniquement \textsf{BIT STRING}, \textsf{OCTET
+  STRING}, \textsf{CharString}, \textsf{SEQUENCE OF} et \textsf{SET
+  OF}. Le paramètre est une contrainte au sens général et nous devrons
+vérifier que cette contrainte est bien un cardinal. Par exemple,
+\begin{sverb}
+T ::= SET SIZE (3) OF INTEGER
+\end{sverb}
+définit un ensemble de trois entiers. L'arbre de syntaxe abstraite
+associé au type~T est \(\textsf{SET OF} \, \emptyL \,
+(\emptyINTEGER\!)\, \emptyL\), et celui associé à la contrainte est
+\(\{\textsf{SIZE} \, (\{\textsf{Value} \, (\textsf{Int} \,
+(3))\})\}\). Le constructeur suivant est: \\
+
+\noindent $\mid$ \textsf{FROM} $\wild$ \textbf{of} $\mathcal{S}$ \\
+
+Le constructeur \textsf{FROM} correspond à la cote
+\citep[\S~45.7]{ASN94}. Une \emph{contrainte d'alphabet} est une
+valeur du type «~base\_and\_intersection~» construite à l'aide de
+\textsf{FROM}. Cette contrainte s'applique aux types de chaînes de
+caractères et spécifie leur alphabet. Le paramètre est une contrainte
+au sens le plus général et nous devrons vérifier qu'elle est bien un
+alphabet. Par exemple,
+\begin{sverb}
+T ::= VisibleString (FROM ("A".."C"))
+\end{sverb}
+définit un sous-ensemble (un sous-type) de chaînes dont l'alphabet est
+composé des lettres~A, B~et~C. L'arbre de syntaxe abstraite associé à
+la contrainte précédente est:
+\begin{equation*}
+\{\textsf{FROM} \, (\{(\textsf{Val} \, (\textsf{Str} \,
+(\textrm{"A"}))) \, \leqslant \, \textbf{..} \, \leqslant \,
+(\textsf{Val} \, (\textsf{Str} \, (\textrm{"C"})))\})\}
+\end{equation*}
+Le constructeur suivant est: \\
+
+\noindent $\mid$ \textsf{WITH COMPONENT} $\wild$ \textbf{of}
+$\mathcal{S}$ \\
+
+Le constructeur \textsf{WITH COMPONENT} est défini par la norme à la
+cote \citep[\S~45.8.3]{ASN94}. Nous nommerons \emph{contrainte interne
+  simple} toute valeur du type «~base\_and\_intersection~» construite
+à l'aide de \textsf{WITH COMPONENT}. Une contrainte interne simple est
+par définition une \emph{contrainte interne}
+\citep[\S~45.8.1]{ASN94}. Elle s'applique au type des éléments d'un
+\textsf{SET OF} ou d'un \textsf{SEQUENCE OF} (et non à ces types). Son
+paramètre est donc une contrainte générale. Par exemple,
+\begin{sverb}
+T ::= SET (WITH COMPONENT (0|1)) OF INTEGER
+\end{sverb}
+définit l'ensemble des entiers valant 0 ou 1. L'arbre de syntaxe
+abstraite associé au type est \(\textsf{SET} \,\, \emptyL \,
+(\emptyINTEGER\!) \, \emptyL\) et celui associé à la contrainte est
+\(\{\textsf{WITH COMPONENT} \, \{\textsf{Value} \, (\textsf{Int} \,
+(0)); \textsf{Value} \, (\textsf{Int} \, (1))\}\}\). Cette définition du type~\texttt{T} équivaut à
+\begin{sverb}
+T ::= SET OF INTEGER (0|1)
+\end{sverb}
+Ici, l'arbre de syntaxe abstraite associé au type est:
+\begin{equation*}
+\textsf{SET} \,\, \emptyL \, (\emptyINTEGER\!) \, \{\textsf{Value} \,
+(\textsf{Int} \, (0)); \textsf{Value} \, (\textsf{Int} \, (1))\}
+\end{equation*}
+et celui associé à la contrainte est simplement~$\{\}$. Le
+constructeur suivant est: \\
+
+\noindent $\mid$ \textsf{WITH COMPONENTS} \bob\wild \wild\bcb
+\textbf{of} kind $\times$ field\_constraint \textsf{list} \\
+
+Le constructeur \textsf{WITH COMPONENTS} correspond à
+\citep[\S~45.8.4]{ASN94}. Nous nommerons \emph{contrainte interne
+  multiple} toute valeur du type «~base\_and\_intersection~»
+construite à l'aide de \textsf{WITH COMPONENTS}. Une contrainte
+interne multiple est par définition une \emph{contrainte interne}
+\citep[\S~45.8.1]{ASN94}. Elle s'applique aux types \textsf{CHOICE},
+\textsf{SET} et \textsf{SEQUENCE}. Le premier paramètre indique de
+quelle sorte est cette contrainte (cf. ci-après) et le second est une
+liste de contraintes qui s'appliquent aux variantes ou champs des
+\textsf{CHOICE}, \textsf{SET} et \textsf{SEQUENCE} (cf. plus bas). Il
+est important de noter que, rigoureusement, le nom du constructeur
+\textsf{WITH COMPONENTS} contient les accolades ouvrantes et fermantes
+en gras (pour les distinguer des accolades du constructeur
+d'ensembles). Nous noterons les valeurs du type
+«~field\_constraint \textsf{list}~»:~$\mathcal{K}$. \\
+
+\noindent \textbf{and} kind = \\
+\hspace*{1.2mm} \textsf{Partial} \\
+\noindent $\mid$ \textsf{Full} \\
+
+Les contraintes internes multiples peuvent être de deux sortes:
+\emph{partielles} ou \emph{complètes}. Nous noterons les valeurs du
+type «~kind~»~$m$. Nous nommerons \emph{borne} toute valeur du type:
+\\
+
+\noindent \textbf{and} bound = \\
+\hspace*{1.2mm} \textsf{MIN} \\
+\noindent $\mid$ \textsf{MAX} \\
+\noindent $\mid$ \textsf{Val} $\wild$ \textbf{of} $\mathcal{V}$ \\
+
+Les deux premiers constructeurs indiquent que la borne est l'élément
+minimum ou maximum du type (qui doit posséder de tels éléments). Le
+troisième constructeur introduit une valeur comme borne. Nous noterons
+les bornes~$e$. \\
+
+\noindent \textbf{and} inout = $\textbf{<} \mid \leqslant$\\
+
+Le type «~inout~» spécifie si la borne est exclue ou non de
+l'intervalle. Nous noterons les valeurs de ce type~$b$. Nous nommerons
+\emph{contrainte de champ} toute valeur du type: \\
+
+\noindent \textbf{and} field\_constraint = $\textrm{string}$ $\times$
+$\mathcal{S}$ $\times$ presence \textsf{option} \\
+
+Les contraintes de champs structurent les contraintes internes
+multiples (cf. \textsf{WITH COMPONENTS} plus haut) et s'appliquent aux
+champs du type auxquel les contraintes multiples englobantes
+s'appliquent. Le premier paramètre est le label (i.e. le nom du
+champ). Le second est la contrainte du champ dont le label précède. Le
+troisième est une contrainte de présence qui s'applique au champ dont
+le premier paramètre donne le nom. Nous noterons respectivmeent les
+trois paramètres: $l$, $\sigma$, $\hat{\pi}$. Les contraintes de
+champs seront notées~$k$. Par exemple
+\begin{sverb}
+T ::= SET {a INTEGER} (WITH COMPONENTS {a (0|1)})
+\end{sverb}
+Ici, l'arbre de syntaxe abstraite du type est \(\textsf{SET} \,\,
+\emptyL \, (\emptyINTEGER\!) \, \{\}\). L'arbre de syntaxe abstraite
+de la contrainte est:
+\begin{tabbing}
+$\{\textsf{WITH COMPONENTS} \, \bob (\textsf{Full}, [($\=$\textrm{"a"},$ \\
+\> $\{\textsf{Value} \, (\textsf{Int} \, (0)); \textsf{Value} \,
+  (\textsf{Int} \, (1))\},$ \\
+\> $\textsf{Some} \, \textsf{PRESENT})]) \bcb\}$
+\end{tabbing}
+La définition précédente équivaut à:
+\begin{sverb}
+T ::= SET {a INTEGER (0|1)}
+\end{sverb}
+Ici, l'arbre de synatxe abstraite associé au type est:
+\begin{equation*}
+\textsf{SET} \,\, \emptyL \, (\emptyINTEGER\!) \, \{\textsf{Value} \,
+(\textsf{Int} \, (0)); \textsf{Value} \, (\textsf{Int} \, (1))\}
+\end{equation*}
+et celui associé à la contrainte est simplement $\{\}$. \\
+
+\noindent \textbf{and} presence = \\
+\hspace*{1.2mm} \textsf{PRESENT} \\
+\noindent $\mid$ \textsf{ABSENT} \\
+\noindent $\mid$ \textsf{OPTIONAL} \\
+
+Les trois constructeurs du type «~presence~» correspondent aux trois
+constructions homonymes dans \citep[\S~45.8.9]{ASN94}. Ils
+contraignent le statut d'un champ.\\
+
+\noindent \textbf{and} \ldots
+
+
+\section{Valeurs\label{ast_valeurs}}
+
+Nous définissons ici la syntaxe abstraite des valeurs ASN.1. Certains
+des constructeurs qui suivent ne sont pas produits par l'analyseur
+syntaxique, mais par la phase de canonisation des environnements (voir
+la section~\vref{environnements_canoniques}). D'aucuns disparaîtront
+au cours de cette même phase. Nous le signalerons au fur et à
+mesure. Les valeurs seront génériquement notées:~$v$. La valeur qui
+correspondait au type \textsf{ANY} \citep{ASN90} a été ignorée. \\
+
+\noindent \textbf{and} \ldots \\
+
+\noindent \textbf{and} $\mathcal{V}$ = \\
+
+\noindent \hspace*{1.2mm} \textsf{NULL} \\
+
+Le constructeur \textsf{NULL} est employé à la fois pour dénoter le
+type \texttt{NULL} et son unique valeur \texttt{NULL}. \\
+
+\noindent $\mid$ \textsf{Int} $\wild$ \textbf{of} \textsf{int} \\
+
+Il s'agit des valeurs du type \textsf{INTEGER}. \\
+
+\noindent $\mid$ \textsf{Zero} \\
+$\mid$ \textsf{0.0} \\
+
+Le premier constructeur, \textsf{Zero}, est produit par l'analyseur
+syntaxique en présence du fragment de syntaxe concrète:~\texttt{0},
+qui peut être interprété comme l'entier (\textsf{INTEGER}) nul ou le
+réel (\textsf{REAL}) nul. La phase de canonisation des valeurs
+tranchera cette ambigüité, et supprimera ce constructeur de l'arbre de
+syntaxe abstraite. Dans le cas entier, il produira en lieu et place:
+$\textsf{Int} \, (0)$, et dans le cas réel:~\textsf{0.0}. Par exemple
+la sortie de l'analyseur syntaxique pour les valeurs suivantes
+\begin{sverb}
+x INTEGER ::= 0
+y REAL ::= 0
+\end{sverb}
+est \textsf{Zero} dans les deux cas. Après canonisation, \texttt{x}~se
+verra attribuer $\textsf{Int} \, (0)$ et \texttt{y}~\textsf{0.0}. \\
+
+\noindent $\mid$ \textsf{TRUE} \\
+$\mid$ \textsf{FALSE} \\
+
+Il s'agit des deux valeurs du type \textsf{BOOLEAN}. \\
+
+\noindent $\mid$ \textsf{PLUS-INFINITY} \\
+$\mid$ \textsf{MINUS-INFINITY} \\
+
+Ce sont deux des trois valeurs spéciales du type \textsf{REAL}
+\citep[\S~18.6]{ASN94}. \\
+
+\noindent $\mid$ \textsf{Str} $\wild$ \textbf{of} \textsf{string} \\
+
+Ce constructeur \textsf{Str} représente toutes les valeurs des
+différents types de chaînes de caractères. \\
+
+\noindent $\mid$ \textsf{HexStr} $\wild$ \textbf{of} \textsf{string} \\
+$\mid$ \textsf{BinStr} $\wild$ \textbf{of} \textsf{string} \\
+
+Le premier constructeur, \textsf{HexStr}, est produit par l'analyseur
+syntaxique en présence d'une chaîne numérique hexadécimale. La phase
+de normalisation des valeurs convertira les valeurs de ce genre en
+représentation binaire et les remplacera par la construction
+\textsf{BinStr}. \\
+
+\noindent $\mid$ \textsf{Id} $\wild$ \textbf{of} string \\
+$\mid$ \textsf{Enum} $\wild$ \textbf{of} string \\
+$\mid$ \textsf{VRef} $\wild$ \textbf{of} string \\
+
+Les constructeurs \textsf{Id}, \textsf{Enum} et \textsf{VRef} sont
+étroitement liés. Le premier est produit par l'analyseur syntaxique en
+présence d'une \texttt{valuereference} ou d'un \texttt{identifier},
+car ils sont lexicalement indistinguables et le contexte syntaxique ne
+permet généralement pas de trancher. La phase de canonisation des
+valeurs désambigüera ces cas et produira tantôt \textsf{Enum} s'il se
+révèle que \textsf{Id}~désignait une constante énumérée, et tantôt
+\textsf{VRef} s'il s'agissait d'une abréviation de valeur
+(\texttt{valuereference}). Donc \textsf{Id}~disparaît après cette
+phase. Par exemple, les arbres de syntaxe abstraite pour les deux
+valeurs \texttt{x}~et~\texttt{y} suivantes:
+\begin{sverb}
+T ::= ENUMERATED {a (0)} 
+x T ::= a
+y T ::= x
+\end{sverb}
+sont respectivement: $\textsf{Id} \, (\textrm{"a"})$ et $\textsf{Id}
+\, (\textrm{"x"})$. Après la phase de canonisation ils deviennent:
+$\textsf{Enum} \, (\textrm{"a"})$ et $\textsf{VRef} \,
+(\textrm{"x"})$. Le lecteur attentif se demandera ce qu'il advient de
+\begin{sverb}
+x INTEGER {a (1)} ::= a
+\end{sverb}
+L'analyseur syntaxique produit $\textsf{Id} \, (\textrm{"a"})$ et la
+phase de canonisation lui substitue: $\textsf{Int} \, (1)$ \\
+
+\noindent $\mid$ $\wild$ \textbf{:} $\wild$ \textbf{of} $\textrm{string}
+\times \mathcal{V}$ \\
+
+Il s'agit des valeurs du type \textsf{CHOICE}. Le premier paramètre
+représente le label de la variante dans le type (qu'on notera~$l$) et
+le second la valeur pour le type de la variante. \\
+
+\noindent $\mid$ $\bob\wild\bcb$ \textbf{of} $(\textrm{string} \,
+\textsf{option} \times \mathcal{V})$ \textsf{list} \\
+
+Le constructeur $\bob\wild\bcb$ dénote toutes les valeurs qui n'ont
+pas été désambigüées (comme certaines chaînes numériques) et dont la
+syntaxe concrète est comprise entre deux accolades. Elles sont
+constituées d'une liste de couples (parfois l'ordre que la liste
+implique ne sera pas pertinent, mais le cas général l'exige, comme
+pour les valeurs du type \textsf{SEQUENCE OF}). La seconde composante
+des couples est une valeur. La première peut désigner une absence
+(\textsf{None} correspondant à \texttt{empty} dans la syntaxe
+concrète) ou un label (noté~$l$). Par exemple l'arbre de syntaxe
+abstraite de la valeur~\texttt{v} suivante
+\begin{sverb}
+v SEQUENCE OF INTEGER ::= {0,1,2}
+\end{sverb}
+est \(\bob [(\textsf{None}, \textsf{Int} \, (0)); (\textsf{None},
+  \textsf{Int} \, (1)); (\textsf{None}, \textsf{Int} \,
+  (2))]\bcb\). Celui dans:
+\begin{sverb}
+x SET {a INTEGER, b BOOLEAN} ::= {a 3, b TRUE}
+\end{sverb}
+est \(\bob[(\textsf{Some} \, \textrm{"a"}, \textsf{Int} \, (3));
+  (\textsf{Some} \, \textrm{"b"}, \textsf{TRUE})]\bcb\).
+
+\section{Environnements}
+
+Nous définissons ici les environnements de types et de valeurs, ainsi
+que les notations afférentes. Nous appellerons \emph{domaine} toute
+valeur du type \\
+
+\noindent \textbf{type} domain = string \textsf{set} \\
+
+Un domaine est un ensemble de noms (on les notera~$x$). Lorsqu'il
+s'agira d'un environnement de types, nous noterons le
+domaine:~$\mathcal{A}$. S'il s'agit d'un environnement de
+valeurs:~$\mathcal{B}$. Nous noterons~$x$ les noms de types, et~$y$
+les noms de valeur. \\
+
+\noindent \textbf{type} constrained\_type = $(\mathcal{T} \times \mathcal{S})$
+\textsf{set} \\
+
+Le type «~constrained\_type~» nous sert à capturer la forme normale
+disjonctive d'un sous-type: les unions de contraintes seront
+développées par rapport au type comme autant de termes
+algébriques. Nous noterons les valeurs de ce type: «~ct~». Nous
+nommerons \emph{les alias} toute valeur du type: \\
+
+\noindent \textbf{type} alias = string \textsf{list} \\
+
+Les alias nous servent à garder trace des abréviations de types modulo
+sous-typage, après les dépliages en cascade. Ils nous serviront pour
+répondre à la question: quand deux types ont-ils un sur-type en
+commun? Nous noterons~$\alpha$ les alias. Nous nommons \emph{un alias}
+un élément de la liste. Prenons l'exemple:
+\begin{sverb}
+A ::= B (0|1)
+B ::= C
+C ::= INTEGER
+\end{sverb}
+La phase de canonisation des environnements de types dépliera les
+abréviations de type ci-dessus:
+\begin{sverb}
+A ::= INTEGER (0|1)
+B ::= INTEGER
+C ::= INTEGER
+\end{sverb}
+Pour le contrôle des sous-types il nous faut conserver trace de ces
+dépliages, et cela grâce aux alias. Ainsi, les alias de~\texttt{A}
+sont $[\textrm{"B"}; \textrm{"C"}]$, ceux de~\texttt{B} sont
+$[\textrm{"C"}]$, et ceux de~\texttt{C} sont~$\emptyL\!$.
+
+Nous nommerons \emph{environnement de types} toute valeur de type: \\
+
+\noindent \textbf{type} type\_env = domain $\times$ $(\textrm{string}
+\rightarrow (\textrm{alias} \times \mathcal{E} \times
+\textrm{constrained\_type}))$ \\
+
+Un environnement de types est une paire dont le premier composant est
+un domaine et le second une fonction des noms vers le triplet: (alias,
+étiquetage, sous-type en forme développée). Nous les noterons:
+$\domain{\mathcal{A}} \Gamma$. Cette définition provient en partie de la syntaxe
+concrète. Par exemple:
+\begin{sverb}
+T ::= INTEGER (0|1)
+\end{sverb}
+correspond initialement à l'environnement de types
+\begin{tabbing}
+$(\{\textrm{"T"}\}, \textbf{function} \, \textrm{"T"} \rightarrow
+  (\emptyL\!, \emptyL\!, \{$\=$(\textsf{INTEGER} \, \emptyL\!,
+  \{\textsf{Value} \, (\textsf{Int} \, (0));$ \\
+\> $\textsf{Value} \, (\textsf{Int} \, (1))\})\}))$
+\end{tabbing}
+Lorsque le sous-type sera développé, nous aurons:
+\begin{tabbing}
+$(\{\textrm{"T"}\}, \textbf{function} \, \textrm{"T"} \rightarrow
+  (\emptyL\!, \emptyL\!, \{$\=$(\textsf{INTEGER} \, \emptyL\!,
+  \{\textsf{Value} \, (\textsf{Int} \, (0))\});$ \\
+\> $(\textsf{INTEGER} \, \emptyL\!, \{\textsf{Value} \, (\textsf{Int}
+\, (1))\})\}))$
+\end{tabbing}
+
+Nous nommerons \emph{liaison de type} une valeur du type: \\
+
+\noindent \textbf{type} type\_binding = string $\times$ $(\textrm{alias} \times \mathcal{E} \times \textrm{constrained\_type})$ \\
+
+Nous les noterons~$\gamma$. Les noms de types seront notés~$x$. Nous
+utiliserons aussi une notation spéciale, destinée à rappeler que la
+paire en question est une liaison: $x \mapsto (\alpha, \tau,
+\{(\textrm{T}, \sigma)\})$ est défini par: $(x, \alpha, \tau,
+\{(\textrm{T}, \sigma)\})$.
+
+Nous nommerons \emph{environnement de valeurs} toute valeur du type: \\
+
+\noindent \textbf{type} value\_env = domain $\times$ $(\textrm{string}
+\rightarrow (\mathcal{E} \times \mathcal{T} \times \mathcal{S} \times
+\mathcal{V}))$ \\
+
+Un environnement de valeurs est une paire dont le premier composant
+est un domaine et le second une fonction des noms vers un quadruplet:
+(étiquetage, type, contrainte de sous-typage, valeur). Nous les
+noterons: $\domain{\mathcal{B}} \Delta$. Cette définition est inspirée de
+la syntaxe concrète. Par exemple:
+\begin{sverb}
+x BOOLEAN ::= TRUE
+\end{sverb}
+produit l'environnement de valeurs: 
+\begin{equation*}
+(\{\textrm{"x"}\}, \textbf{function} \, \textrm{"x"} \rightarrow
+(\emptyL\!, \textsf{BOOLEAN}, \{\}, \textsf{TRUE})).
+\end{equation*}
+
+Nous nommerons \emph{liaison de valeur} une valeur du type: \\
+
+\noindent \textbf{type} value\_binding = string $\times$ $(\mathcal{E}
+\times \mathcal{T} \times \mathcal{S} \times \mathcal{V})$ \\
+
+\noindent Nous les noterons~$\delta$. Les noms de valeurs seront
+notés~$y$. Nous utiliserons aussi une notation spéciale, destinée à
+rappeler que la paire en question est une liaison: $y \mapsto (\tau,
+\textrm{T}, \sigma, v)$ est défini par: $(y, \tau, \textrm{T}, \sigma,
+v)$.
+
+Nous définissons une fonction qui étend les environnements: \\
+
+\noindent \textbf{let} $\oplus$ (dom,env) $(u,v)$ =\\
+\hspace*{1.2mm} $(\textrm{dom} \cup \{u\}, \textbf{fun} \, u'
+\rightarrow \textbf{if} \, u = u' \, \textbf{then} \, v \,
+\textbf{else} \,\, \textrm{env} \, (u'))$ \\
+
+\noindent Nous l'emploierons en notation infixe: $\domain{\mathcal{B}}
+\Delta \oplus y \mapsto (\tau, \textrm{T}, \sigma, v)$.
+
+
+\section{Règles d'inférence et preuves}
+
+Nous définissons ici les notations relatives aux règles d'inférence et
+les preuves. Les relations logiques sont reconnaissables à l'emploi du
+\emph{symbole de thèse}~$\vdash$, ou avec des variantes
+comme~$\Vdash$. Un \emph{jugement} est la mise en relation de
+\emph{termes}: à droite du symbole de thèse se trouve un terme:
+\emph{la thèse}, et à sa gauche se trouve un autre terme: le
+\emph{contexte}, dans lequel la thèse doit être interprétée. Pour
+désigner ces positions par rapport au symbole de thèse, nous parlerons
+de \emph{champ}: champ de contexte, champ de thèse. Par exemple,
+\begin{equation*}
+\domain{\mathcal{A}}\Gamma \vdash \textrm{T}
+\end{equation*}
+désigne une relation qui prend deux termes: la thèse~T, et le contexte
+$\domain{\mathcal{A}}\Gamma$. Implicitement un jugement est vrai ou
+faux, c'est-à-dire qu'il est interprété comme vrai si et seulement si
+les termes sont en relation, et faux dans le cas contraire. Ce sont
+alors des \emph{prédicats}. En termes fonctionnels on dirait que les
+relations sont des fonctions qui prennent deux arguments: la thèse et
+le contexte, et retournent \texttt{true} ou \texttt{false} (les
+fonctions sont pour nous les fonctions de OCaml). Lorsque nous
+voudrons spécifier des fonctions retournant des valeurs de type
+quelconque, nous complèterons les jugements par une partie droite,
+introduite par le symbole~$\rightarrow$, ou sa
+variante~$\Rightarrow$. À droite de ce symbole nous aurons un champ
+\emph{résultat}. Par exemple:
+\begin{equation*}
+\domain{\mathcal{A}}\Gamma \vdash \textrm{T} \rightarrow
+\overline{\textrm{T}}
+\end{equation*}
+dénote un jugement dont l'interprétation fonctionnelle est une
+application de fonction aux deux arguments
+$\domain{\mathcal{A}}\Gamma$ et T, et de résultat
+$\overline{\textrm{T}}$. Les champs de contexte et de thèse sont dits
+d'\emph{analyse}, et celui de résultat d'\emph{inférence}. En effet,
+les deux premiers sont des champs qui sont des \emph{projections},
+c'est-à-dire un terme est décomposé en sous-termes, alors que le
+dernier est une \emph{injection}, c'est-à-dire qu'un terme est
+construit, à l'aide de constructeurs et de fonctions. En particulier
+cela signifie que le procédé de \emph{filtrage} (projection) ne
+s'applique qu'aux contextes et thèses, autrement dit on ne pourra pas
+distinguer les deux conclusions de deux règles en usant du champ
+résultat.
+
+Nous n'entrerons pas ici dans les détails de la sémantique
+opérationnelle structurelle (ou sémantique naturelle). Nous indiquons
+les particularités de notation propre à cette thèse.
+\begin{itemize}
+
+  \item Le symbole~$\triangleq$ introduit une liaison dans
+    l'environnement de la règle (i.e. l'ensemble des liaisons formées
+    par projections ou injections). Il correspond à la construction
+    \textbf{let ... in ...} de OCaml. Par exemple:
+    \begin{equation*}
+      \varphi \triangleq \textsf{Field} \, (f)
+    \end{equation*}
+    introduit une nouvelle liaison de nom~$\varphi$ et de contenu
+    $\textsf{Field} \, (f)$. Cette construction ne possède pas
+    d'interprétation au sens propre (i.e. une valeur booléenne) nous
+    la considérerons comme une prémisse et sera placée en tant que
+    telle dans la règle (une autre solution aurait été une
+    construction \textbf{where} placée sous la conclusion.)
+
+  \item Le symbole~$\lhd$ dénote la projection explicite, c'est-à-dire
+    la construction \textbf{match ... with ...} de OCaml. À gauche du
+    symbole se trouve un terme et à droite un motif (donc contenant
+    des noms qui sont ainsi liés dans l'environnement de la
+    règle). Par exemple:
+    \begin{equation*}
+      s'\lhd \textsf{DEFAULT} \, v'
+    \end{equation*}
+    dénote la projection (ou filtrage) du terme~$s'$ en un terme
+    \textsf{DEFAULT} dont la valeur est $v'$ (ce nom est alors
+    introduit dans la règle et peut être référencé par les autres
+    prémisses et un éventuel champ résultat.) En OCaml, ce jugement
+    est équivalent à l'expression:
+    \begin{equation*}
+      \textbf{match} \, s' \, \textbf{with} \, \textsf{DEFAULT} \,
+      (v').
+    \end{equation*}
+
+\end{itemize}
+Rappelons pour conclure que les prémisses et les règles ne sont pas
+ordonnées. Les motifs ne sont pas linéaires, et deux occurrences de
+même nom dans l'environnement de la règle sont possibles. Dans les
+deux cas cela signifie qu'il faut s'assurer que les deux termes de
+même nom sont identiques (i.e. syntaxiquement égaux).

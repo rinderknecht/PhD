@@ -1,0 +1,131 @@
+%%%-*-latex-*-
+
+Le succès du contrôle sémantique des types implique celui du
+décodage. Il ne s'agit pas d'un véritable décodage car il est
+suffisant de s'assurer qu'un éventuel décodage ne poserait aucun
+problème. Quels pourraient être ces problèmes? Pour cerner cette
+question, il faut rappeler le contexte dans lequel s'effectue la
+communication entre environnements \emph{a priori} hétérogènes. Parmi
+les types d'un module ASN.1, ou ensemble de modules, l'émetteur en
+choisit un sous-ensemble que l'on dénomme en anglais \emph{Protocol
+  Data Unit} (PDU). Tout se passe comme si l'on définissait, à un
+niveau englobant la spécification ASN.1 proprement dite, un type
+\texttt{CHOICE} dont les variantes contiendraient ces types
+sélectionnés pour représenter tous les formats de données possibles au
+cours de la communication. Le récepteur partage avec l'émetteur. le
+même PDU, c'est-à-dire ce même méta-type \texttt{CHOICE}. (Nous
+opposons ici émetteur et récepteur, mais, bien sûr, dans la pratique
+l'émetteur peut devenir le récepteur et vice-versa, selon le flot de
+contrôle des applications communicantes.) Il sait donc \emph{a priori}
+qu'il va recevoir une valeur de ce méta-type, à n'importe quel moment
+en général ---~le protocole peut être complété par une spécification
+temporelle des échanges, avec des synchronisations, des
+ordonnancements etc. Pour gagner en clarté, restreignons notre
+discours et imaginons que l'émetteur et le récepteur savent d'un
+commun accord qu'ils vont s'échanger une valeur d'un type donné à
+l'avance. Le récepteur ignore donc de quelle valeur il s'agit, mais
+connaît son type. L'émetteur vérifie d'abord que la valeur qu'il veut
+émettre est bien du type en question: c'est l'utilité de l'algorithme
+de contrôle des types que nous avons présenté informellement à la
+section~\ref{controle_des_types_informel}. Puis il va coder cette
+valeur de ce type: c'est le codage de référence que nous avons
+esquissé informellement à la section~\vref{codage_informel}. Ce codage
+possède la particularité d'inclure toutes les informations de contrôle
+dont nous disposons statiquement: les étiquetages, qui sont ce qui
+reste des types après codage et qui accompagnent les valeurs. Les
+valeurs sont ainsi marquées. Le récepteur doit décoder dynamiquement
+la valeur ainsi codée. Pour ce faire il se livre à un certain nombre
+de décisions en fonction des étiquetages qu'il trouve mêlés au code
+proprement dit, par opposition à l'information dite de contrôle pour
+cette raison, et que représentent les étiquetages. Ce sont ces
+décisions, ou vérifications, que capture notre notion de
+\emph{contrôle sémantique des types}, car nous ne sommes pas
+intéressés par une reconstruction de la valeur initiale à partir de
+son code puisque ce travail est effectué dans la pratique par des
+fonctions automatiquement produites par le compilateur ASN.1, et elles
+retournent des valeurs dont le format est conforme à l'environnement
+d'exécution de l'application receveuse, et jamais ne renvoient des
+valeurs ASN.1, qui n'existent que statiquement. Ce contrôle sémantique
+des types est le pendant du contrôle des types, que nous aurions pu
+qualifier précédemment de \emph{syntaxique} car ce dernier s'applique
+aux valeurs ASN.1, alors que le premier s'appelle \emph{sémantique}
+car il s'applique aux code, qui représentent la sémantique, comme nous
+l'avons défini au début de ce chapitre.
+
+Présentons le principe de fonctionnement de l'algorithme de contrôle
+sémantique des types. Nous utiliserons pour cela les notions de champs
+non disjoints et de champs inclus, que nous avons définies à la
+section~\vref{inclusion_d_etiquetages_informelle}.
+
+Tout d'abord nous définissons une petite fonction qui prend un code en
+argument et retourne un étiquetage. Ensuite examinons cas par cas, en
+fonction des types.
+\begin{itemize}
+
+  \item Le contrôle sémantique des types \texttt{SET OF} et
+    \texttt{SEQUENCE OF} comporte deux cas:
+    \begin{enumerate}
+
+      \item \emph{La liste des sous-codes est vide.} On s'assure
+        alors que l'étiquette du code est bien celle du type
+        \texttt{SET OF} ou \texttt{SEQUENCE OF}.
+
+      \item \emph{La liste des sous-codes est non vide.} On choisit
+        n'importe quel sous-code et on le contrôle en le supposant du
+        type des éléments. On recommence le traitement.
+
+    \end{enumerate}
+
+  \item Le contrôle sémantique du type \texttt{CHOICE} présente deux
+    cas:
+    \begin{enumerate}
+
+      \item \emph{La liste des variantes est non vide.} Il est
+        possible \emph{a priori} d'écarter n'importe quelle variante.
+
+      \item \emph{La liste des variantes est non vide et l'étiquetage
+        extrait du code correspond à une variante (reconstruite)
+        incluse dans l'une de celles du type.} Dans ce cas on a
+        reconnu le code d'une variante et on contrôle donc le code en
+        le supposant du type de la variante.
+
+    \end{enumerate}
+    Il est très important de noter ici que le premier cas du
+    \texttt{CHOICE} est plus général que le second, donc que
+    l'algorithme de contrôle sémantique des types est non
+    déterministe, comme l'était celui de contrôle (syntaxique) des
+    types (chapitre~\vref{controle_des_types_informel}).
+
+  \item Le contrôle sémantique du type \texttt{SEQUENCE} se ramène à
+    trois cas:
+    \begin{enumerate}
+
+    \item \emph{Le type est \texttt{SEQUENCE~\{\}} et la liste des
+      sous-codes est vide.} Alors on extrait l'étiquette du code et on
+      s'assure qu'elle est bien celle du type \texttt{SEQUENCE}.
+
+    \item \emph{La liste des champs est non vide et contient un champ
+      \texttt{OPTIONAL}.} Il est possible d'écarter ce champ et
+      d'examiner les autres cas.
+
+    \item \emph{La liste des champs et la liste des sous-codes sont
+      non vides.} On extrait du premier sous-code l'étiquetage et on
+      vérifie que son champ reconstruit associé est inclus dans le
+      premier des champs du type. On contrôle alors ce sous-code en
+      supposant donc qu'il est du type de ce champ. On contrôle le
+      reste du type par rapport au reste du code (les premiers
+      éléments de leurs listes respectives ont été ôtés car ils
+      viennent d'être traités.).
+
+   \end{enumerate}
+   Il est très important de noter ici que si le champ en tête est
+   \texttt{OPTIONAL} alors le second cas et le troisième sont
+   également envisageables, ce qui prouve encore que l'algorithme de
+   contrôle sémantique des types est non déterministe.
+
+  \item Le cas du type \texttt{SET} est identique à celui du type
+    \texttt{SEQUENCE}, sauf que le troisième cas correspondant ne
+    tient pas compte de l'ordre des champs, ni de celui des
+    sous-codes.
+
+\end{itemize}

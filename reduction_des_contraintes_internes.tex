@@ -1,0 +1,82 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+% Intersection
+%
+\inferrule
+  {\bouchon{13} (\textrm{T}, \nu') \rightarrow
+    (\overline{\textrm{T}}_0, \overline\sigma_0)\\
+   \bouchon{13} (\overline{\textrm{T}}_0, \textsf{Inter} \, \Sigma')
+   \rightarrow (\overline{\textrm{T}}, \overline\sigma_1)\\
+   \overline\Sigma \triangleq \textrm{list\_of\_set} \,
+   (\overline\sigma_0 \cup \overline\sigma_1)\\
+   \bouchon{16} \overline\Sigma \rightarrow \overline\nu}
+  %-----
+  {\bouchon{13} (\textrm{T}, \textsf{Inter} \, (\{\nu'\} \Cons
+    \Sigma')) \rightarrow (\overline{\textrm{T}}, \{\overline\nu\})}
+
+\inferrule
+  {}
+  {\bouchon{13} (\textrm{T}, \textsf{Inter} \, \emptyL\!) \rightarrow
+    (\textrm{T}, \{\})}
+
+% WITH COMPONENT
+
+% SET OF
+%
+% .........Non empty contraint list
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{SET OF} \,\, \emptyL \, (\textsf{TRef} \,
+    x) \, \sigma'\\
+   \overline{\textrm{T}} \triangleq \textsf{SET OF} \,\, \emptyL \,
+   (\textsf{TRef} \, x) \, (\textsf{Inter} \, [\sigma'; \sigma])}
+  %-----
+  {\bouchon{13} (\textrm{T}, \textsf{WITH COMPONENT} \,\, \sigma)
+    \rightarrow (\overline{\textrm{T}}, \{\})}
+
+% SEQUENCE OF
+%
+% .........Non empty contraint list
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{SEQUENCE OF} \,\, \emptyL \, (\textsf{TRef}
+    \, x) \, \sigma'\\
+    \overline{\textrm{T}} \triangleq \textsf{SEQUENCE OF} \,\, \emptyL
+    \, (\textsf{TRef} \, x) \, (\textsf{Inter} \, [\sigma'; \sigma])}
+  %-------
+  {\bouchon{13} (\textrm{T}, \textsf{WITH COMPONENT} \,\, \sigma)
+    \rightarrow (\overline{\textrm{T}}, \{\})}
+
+% WITH COMPONENTS
+%
+\inferrule
+  {\emptyL, m \bouchon{12} (\textrm{T}, \mathcal{K}) \rightarrow
+    \overline{\textrm{T}}}
+  %------
+  {\bouchon{13} (\textrm{T}, \textsf{WITH COMPONENTS} \, \bob m \,\,
+    \mathcal{K}\bcb \! ) \rightarrow (\overline{\textrm{T}}, \{\})}
+
+% Others
+%
+\inferrule
+  {\nu \nlhd \textsf{Inter} \, \wild \mid \textsf{WITH COMPONENT} \,
+    \wild \mid \textsf{WITH COMPONENTS} \, \wild}
+  %-----
+  {\bouchon{13} (\textrm{T}, \nu) \rightarrow (\textrm{T}, \nu)}
+
+\inferrule
+  {}
+  {\bouchon{16} \emptyL \rightarrow \{\}}
+
+\inferrule
+  {}
+  {\bouchon{16} [\overline\sigma] \rightarrow \overline\sigma}
+
+\inferrule
+  {\overline\Sigma \lhd \wild\!\Cons\wild\!\Cons\wild}
+  %------
+  {\bouchon{16} \overline\Sigma \rightarrow \{\textsf{Inter} \,
+    \overline\Sigma\}}
+
+\end{mathparpagebreakable}

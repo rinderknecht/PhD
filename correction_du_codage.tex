@@ -1,0 +1,2965 @@
+%%-*-latex-*-
+
+Dans les preuves qui suivent, si une hypothèse est une conjonction de
+propositions, celles-ci seront étiquetées de la forme
+\textbf{H.\(x\)}. Sinon l'hypothèse sera \textbf{Hyp} et ses prémisses
+\textbf{H.\(x\)}. Il en sera de même avec les conclusions, à partir du
+patron~\textbf{C}. Les prémisses des diverses propositions seront
+étiquetées à l'avenant: \textbf{H.\(x\).\(y\)},
+\textbf{C.\(x\).\(y\)}, etc.
+
+De même que les relations introduites dans cette thèse sont toutes
+définies par des algorithmes, ce qui implique que les règles sont
+ordonnées, les preuves seront elles aussi présentées par cas
+ordonnés.
+
+Dans la partition en cas de la preuve, certaines caractéristiques des
+cas seront parfois introduites comme hypothèses, dite \emph{hypothèses
+  de filtre} et notées \textbf{HF.\(x\)}, pour être plus facilement
+référencées. Elles sont nécessaires pour la définition complète du cas
+courant. Cette présentation est notamment commode quand le cas est
+défini par une clause \textbf{when} dans un filtre de règle, et que la
+proposition ainsi introduite n'est pas seulement syntaxique (la clause
+\textbf{when} effectue des calculs).
+
+Parmi les prémisses, certaines sont des extensions de l' environnement
+de la règle (en OCaml l'équivalent serait un \textbf{let \ldots in
+  \ldots}). Elles seront distinguées par l'emploi du
+signe~$\triangleq$.
+
+\newtheorem{Theoreme_correction}{Théorème}[section]
+\begin{Theoreme_correction}[Correction du codage]
+\label{Theoreme_correction}
+\begin{equation*}
+\begin{array}{ll}
+  Soit & \Gamma \, \textrm{un environnement de types canonique de
+         domaine} \, \mathcal{A} \\
+  et & x \in \mathcal{A} \AND \Gamma(x) \lhd (\alpha, \tau,
+       \{(\textrm{T}, \sigma)\}) \\
+  Si & \domain{\mathcal{A}} \Gamma, x \vdash v : \textrm{T} \\
+  et & \domain{\mathcal{A}} \Gamma \vdash v : \tau \, \textrm{T}
+       \Rightarrow \tilde{v} \\
+  alors & \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,
+  \textrm{T}
+\end{array}
+\end{equation*}
+\end{Theoreme_correction}
+
+\noindent \textbf{Preuve du théorème~\ref{Theoreme_correction}} \\
+
+On applique d'abord le lemme~\ref{Lemme_1_correction} puis le
+lemme~\ref{Lemme_2_correction}. \hfill $\Box$
+
+\bigskip
+
+\newtheorem{Lemme_1_correction}[Theoreme_correction]{Lemme}
+\begin{Lemme_1_correction}
+\label{Lemme_1_correction}
+\begin{equation*}
+\begin{array}{ll}
+  Si & \bouchon{47} (\domain{\mathcal{A}_0} \Gamma_0,
+        \domain{\mathcal{B}_0} \Delta_0) \rightarrow
+        (\domain{\mathcal{A}}\Gamma, \domain{\mathcal{B}} \Delta) \\
+  et & x \in \mathcal{A} \AND \Gamma(x) \lhd (\alpha, \tau,
+  \{(\textrm{T}, \sigma)\}) \\
+  alors & \domain{\mathcal{A}} \Gamma, x \vdashC \tau \, \textrm{T}
+ \end{array}
+\end{equation*}
+\end{Lemme_1_correction}
+
+\noindent \textbf{Schéma de preuve du lemme~\ref{Lemme_1_correction}}
+
+Étiquetons les propositions du lemme:
+\begin{itemize}
+
+  \item \textbf{H.0}: $\bouchon{47} (\domain{\mathcal{A}_0} \Gamma_0,
+    \domain{\mathcal{B}_0} \Delta_0) \rightarrow (\domain{\mathcal{A}}
+    \Gamma, \domain{\mathcal{B}} \Delta)$
+
+  \item \textbf{H.1}: $x \in \mathcal{A} \AND \Gamma(x) \lhd (\alpha,
+    \tau, \{(\textrm{T}, \sigma)\})$
+
+  \item \textbf{C}: $\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,
+    \textrm{T}$
+
+ \end{itemize}
+ \textbf{H.0} implique que l'un des environnements de type servant à
+ construire $\domain{\mathcal{A}} \Gamma$ est produit par
+ l'algorithme~$\bouchon{67}$
+ (section~\vref{ajout_des_etiquettes_UNIVERSAL_implicites}). Nommons-le
+ $\domain{\mathcal{A}'} \Gamma'$. Les calculs de~$\bouchon{47}$ ne
+ retranchant jamais de liaisons, on a: $x \in \mathcal{A}' \AND
+ \Gamma'(x) \lhd (\alpha, \tau, \{(\textrm{T}, \sigma)\})$. On montre
+ alors dans un premier temps que $\domain{\mathcal{A}'} \Gamma'
+ \vdashC \tau \, \textrm{T}$, puis on généralise
+ à~\textbf{C.1}. \hfill $\Box$
+
+\bigskip
+
+\newtheorem{Lemme_2_correction}[Theoreme_correction]{Lemme}
+\begin{Lemme_2_correction} 
+\label{Lemme_2_correction}
+\begin{equation*}
+\begin{array}{ll}
+   Soit  & \domain{\mathcal{A}} \Gamma, x \vdashC \tau \, \textrm{T} \\
+   Si    & \domain{\mathcal{A}} \Gamma, x \vdash v : \textrm{T} \\
+   et    & \domain{\mathcal{A}} \Gamma \vdash v : \tau \, \textrm{T}
+           \Rightarrow \tilde{v} \\
+   alors & \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,
+           \textrm{T} \\
+ \end{array}
+\end{equation*}
+\end{Lemme_2_correction}
+
+\noindent \textbf{Preuve du lemme \ref{Lemme_2_correction}} \\
+
+Étiquetons les propositions de ce lemme:
+\begin{itemize}
+
+  \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,
+    \textrm{T}$
+
+  \item \textbf{H.2}: $\domain{\mathcal{A}} \Gamma, x \vdash v :
+    \textrm{T}$
+
+  \item \textbf{H.3}: $\domain{\mathcal{A}} \Gamma \vdash v : \tau \,
+    \textrm{T} \Rightarrow \tilde{v}$
+
+  \item \textbf{C}: $\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau
+    \, \textrm{T}$
+
+\end{itemize}
+Posons:
+\begin{itemize}
+
+  \item $\textbf{Hyp} \triangleq \textbf{H.1} \AND \textbf{H.2} \AND
+    \textbf{H.3}$
+
+  \item $\textbf{PA}: \domain{\mathcal{A}} \Gamma \vdash \mathcal{D}
+    (\tilde{v}) \Wide (\tau, \textrm{T})$
+
+\end{itemize}
+La preuve de $\textbf{Hyp} \Rightarrow \textbf{C}$ (notre lemme)
+nécessite dans certains cas le théorème $\textbf{Hyp} \Rightarrow
+\textbf{PA}$ (qui s'applique dans toute sa généralité, c'est-à-dire
+pour tout \textbf{H}). Nous pourrions donc prouver au préalable
+$\textbf{Hyp} \Rightarrow \textbf{PA}$, et ensuite nous servir de ce
+résultat liminaire dans les cas de la preuve de notre lemme qui le
+nécessitent. Cette façon de procéder est techniquement la plus simple,
+mais elle implique la duplication des nombreuses hypothèses
+constituant \textbf{Hyp} et de leurs nombreuses prémisses. Pour ne pas
+remplir trop de pages redondantes, nous allons procéder d'une façon
+indirecte qui mène au même résultat tout en permettant le partage des
+hypothèses de \textbf{Hyp}.
+
+Nous allons donc, pour prouver notre lemme, démontrer un résultat plus
+général qui sera notre \emph{unique} hypothèse d'induction:
+\begin{itemize}
+
+  \item $\textbf{Hyp} \Rightarrow (\textbf{PA} \AND \textbf{C})$
+
+\end{itemize}
+Dans tous les cas, on commencera par prouver dans un premier temps
+\begin{itemize}
+
+  \item $\textbf{Hyp} \Rightarrow \textbf{PA}$
+
+\end{itemize}
+Puis on prouvera
+\begin{equation*}
+\left\{
+\begin{array}{c}
+  \textbf{Hyp} \Rightarrow \textbf{C} \\
+  ou \\
+  \textbf{Hyp} \Rightarrow (\textbf{PA} \Rightarrow \textbf{C})
+\end{array} 
+\right.
+\end{equation*}
+Le premier sous-cas correspond aux cas où~\textbf{PA} n'est pas
+nécessaire (en tout cas explicitement) pour prouver~\textbf{C}. Donc
+dans tous les cas on démontre bien
+\begin{itemize}
+
+  \item $\textbf{Hyp} \Rightarrow (\textbf{PA} \AND \textbf{C})$
+
+\end{itemize}
+Nous allons raffiner \textbf{PA} (\emph{\underline{P}roposition
+  \underline{A}uxiliaire}), pour y faire apparaître la définition par
+cas de $\mathcal{D}$. Par définition
+(section~\vref{controle_semantique_des_types}):
+\begin{equation*}
+  \domain{\mathcal{A}} \Gamma \vdash \mathcal{D}
+  (\tilde{v}) \Wide (\tau, \textrm{T}) \; \emph{est équivalent à} \;
+  \vdashD \tilde{v} \rightarrow e \Rightarrow \domain{\mathcal{A}}
+  \Gamma \vdash e \Wide (\tau, \textrm{T}).
+\end{equation*}
+Étiquetons:
+\begin{itemize}
+
+  \item \textbf{PA.H}: $\vdashD \tilde{v} \rightarrow e$
+
+  \item \textbf{PA.C}: $\domain{\mathcal{A}} \Gamma \vdash
+     e \Wide (\tau, \textrm{T})$
+
+\end{itemize} 
+Pour résumer, voici la forme de la preuve. Supposons
+\begin{itemize}
+
+  \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,
+    \textrm{T}$
+
+  \item \textbf{H.2}: $\domain{\mathcal{A}} \Gamma, x \vdash v :
+    \textrm{T}$
+
+  \item \textbf{H.3}: $\domain{\mathcal{A}} \Gamma \vdash v : \tau \,
+    \textrm{T} \Rightarrow \tilde{v}$
+
+\end{itemize}
+Alors, successivement
+\begin{enumerate}
+
+  \item En supposant \textbf{Hyp} et \textbf{PA.H}, démontrons \textbf{PA.C}.
+
+  \item $\left\{
+         \begin{array}{c}
+            \textrm{Démontrons \textbf{C}.} \\
+            \textit{ou} \\
+            \textrm{En supposant \textbf{PA.H} et \textbf{PA.C}
+                    démontrons \textbf{C}.} 
+         \end{array}
+        \right.$
+
+\end{enumerate}
+La conjonction de ces deux démonstrations successives implique
+trivialement
+\begin{itemize}
+
+  \item $\textbf{Hyp} \Rightarrow (\textbf{PA} \AND \textbf{C})$
+
+\end{itemize}
+qui est l'hypothèse d'induction et notre théorème dont on déduit alors
+trivialement notre lemme~\vref{Lemme_2_correction} (par simple
+élimination de \textbf{PA} à droite de l'implication). On terminera
+les deux sous-preuves par le symbole~$\Diamond$, chaque cas par
+$\triangle$, et la preuve entière par~$\Box$. Nous ne présenterons en
+détail que les cas les plus difficiles de cette longue preuve.
+%%====================================================
+%% HYPOTHESE D'INDUCTION
+%%
+%%\begin{center}
+%%$\begin{array}{ll}
+%%   Soit  & \domain{\mathcal{A}} \Gamma, x \vdashC \tau \, \textrm{T} \\
+%%   Si    & \domain{\mathcal{A}} \Gamma, x \vdash v : \textrm{T} \\
+%%   et    & \domain{\mathcal{A}} \Gamma \vdash v : \tau \, \textrm{T} \Rightarrow \tilde{v} \\
+%%   alors & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \, (\tilde{v})
+%%   \Wide (\tau, \textrm{T}) \\
+%%   et & \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \, \textrm{T} \\
+%%\end{array}$
+%%\end{center}
+\begin{itemize}
+
+  \item $\tau \lhd (\textsf{Tag} \,\, ((c, \textsf{Imm} \, n) \AS \psi)
+    \,\,\textsf{EXPLICIT})\Cons\tau'$. Étiquetons cette hypothèse de filtre:
+    \begin{itemize}
+
+      \item \textbf{HF.0}: $\tau \lhd (\textsf{Tag} \,\, ((c,
+        \textsf{Imm} \, n) \AS \psi) \,\, \textsf{EXPLICIT})\Cons\tau'$
+
+    \end{itemize}
+    Les autres hypothèses sont:
+    \begin{itemize}
+
+      \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma, x \vdashC \tau
+        \, \textrm{T}$ \\ La règle~\TirName{[1]}
+        \vpageref{types_canoniques_1} peut s'appliquer:
+        \begin{mathpar}
+          \inferrule
+            {c \nlhd \textsf{UNIVERSAL}\\
+             n \geqslant 0 \\
+             \domain{\mathcal{A}} \Gamma, x \vdashC \tau' \,
+             \textrm{T}}
+          %------
+           {\domain{\mathcal{A}} \Gamma, x \vdashC ((\textsf{Tag} \,\,
+             (c, \textsf{Imm} \, n) \,\, \textsf{EXPLICIT})\Cons\tau')
+             \,\, \textrm{T}}
+          \;\TirName{[1]}
+        \end{mathpar}
+        Appliquons directement la règle (i.e. toutes les variables de
+        la règle sont liées aux variables de même nom dans
+        l'environnement du cas courant de la preuve). Étiquetons ses
+        prémisses:
+        \begin{itemize}
+
+          \item \textbf{H.1.0}: $c \nlhd \textsf{UNIVERSAL}$
+
+          \item \textbf{H.1.1}: $n \geqslant 0$
+
+          \item \textbf{H.1.2}: $\domain{\mathcal{A}} \Gamma, x'
+            \vdashC \tau' \, \textrm{T}$
+
+        \end{itemize}
+ 
+      \item \textbf{H.2}: $\domain{\mathcal{A}} \Gamma, x \vdash v :
+        \textrm{T}$
+
+      \item \textbf{H.3}: $\domain{\mathcal{A}} \Gamma \vdash v : \tau
+        \, \textrm{T} \Rightarrow \tilde{v}$. C'est la
+        règle~\RefTirName{[1]} \vpageref{codage_1} qui s'applique:
+        \begin{mathpar}
+          \inferrule
+            {\domain{\mathcal{A}} \Gamma \vdash v : \tau' \,
+              \textrm{T} \Rightarrow \tilde{v}'}
+            %-----
+            {\domain{\mathcal{A}} \Gamma \vdash v : ((\textsf{Tag}
+              \,\, \psi \,\, \textsf{EXPLICIT})\Cons\tau') \,
+              \textrm{T} \Rightarrow (\psi, \textsf{Const} \,
+              [\tilde{v}'])}
+            \;\TirName{[1]}
+        \end{mathpar}
+        Appliquons directement la règle. Étiquetons alors sa prémisse:
+        \begin{itemize}
+
+          \item \textbf{H.3.0}: $\domain{\mathcal{A}} \Gamma \vdash v :
+            \tau' \, \textrm{T} \Rightarrow \tilde{v}'$
+
+        \end{itemize}
+        et le jugement résultant de la projection du champ inféré:
+        \begin{itemize}
+
+          \item \textbf{H.3.1}: $(\psi, \textsf{Const} \,
+            [\tilde{v}']) \lhd \tilde{v}$
+
+        \end{itemize}
+    \end{itemize}
+    Reprenons l'énoncé du théorème et effectuons-y les renommages
+    suivants:
+    \begin{itemize}
+
+      \item $\tau \stackrel{\alpha}{\longleftarrow} \tau'$
+      
+      \item $\tilde{v} \stackrel{\alpha}{\longleftarrow} \tilde{v}'$
+
+    \end{itemize}
+    Nous obtenons alors:
+    \begin{equation*}
+    \begin{array}{ll}
+      Soit  & \domain{\mathcal{A}} \Gamma, x \vdashC \tau' \,
+              \textrm{T} \\
+      Si    & \domain{\mathcal{A}} \Gamma, x \vdash v : \textrm{T} \\
+      et    & \domain{\mathcal{A}} \Gamma \vdash v : \tau' \,
+              \textrm{T} \Rightarrow \tilde{v}' \\
+      alors & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \, (\tilde{v}')
+              \Wide (\tau', \textrm{T}) \\
+      et    & \domain{\mathcal{A}} \Gamma \models \tilde{v}' : \tau'
+      \, \textrm{T}
+    \end{array}
+    \end{equation*}
+    Nous reconnaissons en cet énoncé une instance de l'hypothèse
+    d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+    \textbf{H.1.2}, \textbf{H.2} et \textbf{H.3.0}. En l'appliquant il
+    vient donc:
+    \begin{itemize} 
+
+      \item \textbf{H.4}: $\domain{\mathcal{A}} \Gamma \vdash \mathcal{D}
+        \, (\tilde{v}') \Wide (\tau', \textrm{T})$
+
+      \item \textbf{H.5}: $\domain{\mathcal{A}} \Gamma \models
+        \tilde{v}' : \tau' \, \textrm{T}$
+
+    \end{itemize}
+    Maintenant
+    \begin{enumerate}
+
+      \item Prouvons $\textbf{Hyp} \Rightarrow \textbf{PA}$. On se donne:
+        \begin{itemize}
+
+          \item \textbf{PA.H}: $\vdashD \tilde{v} \rightarrow e$. \\
+            \textbf{H.1.0} implique 
+            \begin{itemize}
+
+               \item is\_built\_in\_tag $(\psi)$ = \textbf{false}
+
+            \end{itemize}
+            Par conséquent, en accord avec \textbf{H.3.1}, la
+            règle~\RefTirName{[3]} \vpageref{decodage_3} s'applique:
+            \begin{mathpar}
+              \inferrule
+                {\vdashD \overline{v}' \rightarrow (\tau', \textrm{T})}
+                %-----
+                {\vdashD (\psi, \textsf{Const} \,
+                  [\overline{v}']) \rightarrow ((\textsf{Tag} \,\,
+                  \psi \,\, \textsf{EXPLICIT})\Cons\tau', \textrm{T})}
+                \;\TirName{[3]}
+            \end{mathpar}
+            Appliquons directement cette règle, après le renommage
+            \begin{itemize}
+
+              \item $\textrm{T} \stackrel{\alpha}{\longleftarrow}
+                \textrm{T}_0$
+
+            \end{itemize}
+            et étiquetons ensuite sa prémisse:
+            \begin{itemize}
+
+              \item \textbf{PA.H.0}: $\vdashD \tilde{v}' \rightarrow
+                (\tau'_0, \textrm{T}_0)$
+
+            \end{itemize}
+            et le jugement résultant de la projection du champ inféré:
+            \begin{itemize}
+
+              \item \textbf{PA.H.1}: $((\textsf{Tag} \,\, \psi \,\,
+              \textsf{EXPLICIT}) \Cons \tau'_0, \textrm{T}_0) \lhd e$
+
+            \end{itemize}
+
+        \end{itemize}
+        Prouvons alors:
+        \begin{itemize}
+
+          \item \textbf{PA.C}: $\domain{\mathcal{A}} \Gamma \vdash e
+            \Wide (\tau, \textrm{T})$. Les propositions \textbf{HF.0}
+            et \textbf{PA.H.1} font que la règle~\RefTirName{[4]}
+            \vpageref{inclusion_d_etiquetages_4} est applicable:
+            \begin{mathpar}
+              \inferrule
+                {\domain{\mathcal{A}} \Gamma \vdash (\tau'_0,
+                  \textrm{T}_0) \Wide (\tau'_1, \textrm{T}_1)}
+                %-----
+                {\domain{\mathcal{A}} \Gamma \vdash (t \Cons \tau'_0,
+                  \textrm{T}_0) \Wide (t \Cons \tau'_1, \textrm{T}_1)}
+                \;\TirName{[4]}
+            \end{mathpar}
+            Appliquons-là. Ce faisant nous effectuons les
+            substitutions suivantes sur la règle (les autres
+            consistant à substituer les termes liés dans
+            l'environnement courant du cas de la preuve aux termes
+            \emph{de même nom} dans la règle):
+            \begin{itemize}
+ 
+              \item $t \stackrel{\beta}{\longleftarrow} \textsf{Tag}
+                \,\, \psi \,\, \textsf{EXPLICIT}$
+                     
+              \item $\tau'_1 \stackrel{\beta}{\longleftarrow} \tau'$
+
+              \item $\textrm{T}_1 \stackrel{\beta}{\longleftarrow} \textrm{T}$
+              
+            \end{itemize}
+            Étiquetons ensuite sa prémisse:
+            \begin{itemize} 
+
+              \item \textbf{PA.C.1}: $\domain{\mathcal{A}} \Gamma \vdash
+                (\tau'_0, \textrm{T}_0) \Wide (\tau', \textrm{T})$
+
+            \end{itemize}
+            D'autre part \textbf{PA.H.0} est équivalent à:
+            \begin{itemize}
+
+              \item \textbf{H.6}: $\mathcal{D} \, (\tilde{v}') \triangleq
+                (\tau'_0, \textrm{T}_0)$
+
+            \end{itemize}
+            Substituons alors $\mathcal{D} \, (\tilde{v}')$ par sa
+            définition \textbf{H.6} dans \textbf{H.4}:
+            \begin{itemize}
+
+              \item \textbf{H.7}: $\domain{\mathcal{A}} \Gamma \vdash
+                (\tau'_0, \textrm{T}_0) \Wide (\tau', \textrm{T})$
+
+             \end{itemize}
+             \textbf{H.7} implique \textbf{PA.C.1}, et \textbf{PA.C.1}
+             implique par définition \textbf{PA.C}.\hfill $\Diamond$
+                       
+        \end{itemize}
+
+      \item Prouvons $\textbf{Hyp} \Rightarrow \textbf{C}$. On a: 
+        \begin{itemize}
+
+          \item \textbf{C}: $\domain{\mathcal{A}} \Gamma \models
+            \tilde{v} : \tau \, \textrm{T}$
+
+        \end{itemize}
+        \textbf{H.3.1} permet d'envisager l'application directe de la
+        règle~\RefTirName{[1]} \vpageref{controle_semantique_des_types_1}:
+        \begin{mathpar}
+        \inferrule
+          {\domain{\mathcal{A}} \Gamma \models \tilde{v}' : \tau' \,
+           \textrm{T}}
+          %-----
+          {\domain{\mathcal{A}} \Gamma \models (\psi,
+            \textsf{Const} \, [\tilde{v}']) : ((\textsf{Tag}
+            \,\, \psi \,\, \textsf{EXPLICIT}) \Cons \tau') \, \textrm{T}}
+          \;\TirName{[1]}
+        \end{mathpar}
+        Étiquetons sa prémisse: 
+        \begin{itemize}
+
+          \item \textbf{C.0}: $\domain{\mathcal{A}} \Gamma \models \tilde{v}'
+            : \tau' \, \textrm{T}$
+     
+        \end{itemize}
+        On a: \textbf{H.5} = \textbf{C.0}, et \textbf{C.0} implique,
+        par définition, \textbf{C}. \hfill $\Diamond$
+
+    \end{enumerate} 
+    Conclusion:
+     $\left. \begin{array}{l}
+                \textbf{Hyp} \Rightarrow \textbf{PA} \\
+                \textbf{Hyp} \Rightarrow \textbf{C}
+             \end{array}
+      \right\}
+      \,\,\, \textrm{impliquent} \,\,\,
+      \textbf{Hyp} \Rightarrow (\textbf{PA} \AND \textbf{C})
+     $.\hfill $\triangle$ 
+
+   \item $\textrm{T} \lhd \textsf{TRef} \, (x')$ et $\tau \lhd
+     \emptyL$.  Les autres hypothèses sont
+     \begin{itemize}
+ 
+       \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma, x \vdashC
+         \tau \, \textrm{T}$. C'est la règle~\RefTirName{[2]}
+         \vpageref{types_canoniques_2} qui s'applique:
+         \begin{mathpar}
+           \inferrule
+             {x' \in \mathcal{A}\\
+              \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}',
+              \sigma')\})\\
+              \domain{\mathcal{A}} \Gamma, x' \vdashC \tau' \,
+              \textrm{T}'}
+            %-----
+            {\domain{\mathcal{A}} \Gamma, x \vdashC \emptyL \,
+              (\textsf{TRef} \, x')}
+            \;\TirName{[2]}
+         \end{mathpar}
+         Appliquons directement la règle (i.e. toutes les variables de
+         la règle sont liées aux variables de même nom dans
+         l'environnement du cas courant de la preuve). Étiquetons ses
+         prémisses (nous avons regroupé les deux premières):
+         \begin{itemize}
+
+           \item \textbf{H.1.0}: $x' \in \mathcal{A} \AND \Gamma(x') \lhd
+             (\alpha', \tau', \{(\textrm{T}', \sigma')\})$
+
+           \item \textbf{H.1.1}: $\domain{\mathcal{A}} \Gamma, x
+             \vdashC \tau' \, \textrm{T}'$  
+
+         \end{itemize}
+
+       \item \textbf{H.2}: $\domain{\mathcal{A}} \Gamma, x \vdash v :
+         \textrm{T}$. C'est la règle~\RefTirName{[1]}
+         \vpageref{controle_des_types_1} qui s'applique:
+         \begin{mathpar}
+           \inferrule
+             {x' \in \mathcal{A}\\
+              \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}',
+              \sigma')\})\\
+              \Gamma, x' \vdash v : \textrm{T}'}
+            %-----
+            {\domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{TRef}
+              \, (x')}
+            \;\TirName{[1]}
+         \end{mathpar}
+         Appliquons-là directement puis étiquetons ses prémisses (nous
+         avons regroupé les deux premières):
+         \begin{itemize}
+
+           \item \textbf{H.2.0}: $x' \in \mathcal{A} \AND \Gamma(x') \lhd
+             (\alpha', \tau', \{(\textrm{T}', \sigma')\})$
+ 
+           \item \textbf{H.2.1}: $\domain{\mathcal{A}} \Gamma, x' \vdash
+             v : \textrm{T}'$
+
+         \end{itemize}
+
+       \item \textbf{H.3}: $\domain{\mathcal{A}} \Gamma \vdash v :
+         \tau \, \textrm{T} \Rightarrow \tilde{v}$. C'est la
+         règle~\RefTirName{[2]} \vpageref{codage_2} qui s'applique:
+         \begin{mathpar}
+           \inferrule
+             {x' \in \mathcal{A}\\
+              \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+              \domain{\mathcal{A}} \Gamma \vdash v : \tau' \,
+              \textrm{T}' \Rightarrow \tilde{v}}
+            %-----
+            {\domain{\mathcal{A}} \Gamma \vdash v : \emptyL \,
+              (\textsf{TRef} \, x') \Rightarrow \tilde{v}}
+            \;\TirName{[2]}
+         \end{mathpar}
+         Appliquons-là directement puis étiquetons ses prémisses (nous
+         avons regroupé les deux premières):
+         \begin{itemize}
+
+           \item \textbf{H.3.0}: $x' \in \mathcal{A} \AND \Gamma(x') \lhd
+             (\alpha', \tau', \{(\textrm{T}', \sigma')\})$
+
+           \item \textbf{H.3.1}: $\domain{\mathcal{A}} \Gamma \vdash v
+             : \tau'\, \textrm{T}' \Rightarrow \tilde{v}$
+
+         \end{itemize}
+
+     \end{itemize}
+     Reprenons l'énoncé du théorème et effectuons-y les renommages
+     suivants:
+     \begin{itemize}
+
+       \item $\tau \stackrel{\alpha}{\longleftarrow} \tau'$
+
+       \item $\textrm{T} \stackrel{\alpha}{\longleftarrow} \textrm{T}'$ 
+
+     \end{itemize}
+     Nous obtenons alors:
+     \begin{equation*}
+       \begin{array}{ll}
+         Soit  & \domain{\mathcal{A}} \Gamma, x \vdashC \tau' \, \textrm{T}' \\
+         Si    & \domain{\mathcal{A}} \Gamma, x \vdash v : \textrm{T}' \\
+         et    & \domain{\mathcal{A}} \Gamma \vdash v : \tau' \,
+                 \textrm{T}' \Rightarrow \tilde{v} \\
+         alors & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+                 (\tilde{v}) \Wide (\tau', \textrm{T}') \\
+         et    & \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau'
+                 \, \textrm{T}' \\
+     \end{array}
+     \end{equation*}
+     Nous reconnaissons en cet énoncé une instance de l'hypothèse
+     d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+     \textbf{H.1.1}, \textbf{H.2.1} et \textbf{H.3.1}. En l'appliquant
+     il vient donc:
+     \begin{itemize}
+
+       \item \textbf{H.4}: $\domain{\mathcal{A}} \Gamma
+           \vdash \mathcal{D} \, (\tilde{v}) \Wide (\tau',
+           \textrm{T}')$
+
+         \item \textbf{H.5}: $\domain{\mathcal{A}} \Gamma \models
+           \tilde{v} : \tau' \, \textrm{T}'$
+
+     \end{itemize}
+     Maintenant
+     \begin{enumerate}
+
+       \item Prouvons $\textbf{Hyp} \Rightarrow \textbf{PA}$.
+         \begin{itemize}
+
+           \item \textbf{PA}: $\domain{\mathcal{A}} \Gamma \vdash
+             \mathcal{D} \, (\tilde{v}) \Wide (\tau, \textrm{T})$.
+             C'est la règle~\RefTirName{[3]}
+             \vpageref{inclusion_d_etiquetages_3} qui s'applique:
+             \begin{mathpar}
+               \inferrule
+                 {x' \in \mathcal{A}\\
+                  \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}',
+                  \sigma')\})\\
+                  \domain{\mathcal{A}} \Gamma \vdash e_0 \Wide (\tau',
+                  \textrm{T}')}
+                %-----
+                {\domain{\mathcal{A}} \Gamma \vdash e_0 \Wide
+                  (\emptyL\!, \textsf{TRef} \, x')}
+                \;\TirName{[3]}
+             \end{mathpar}
+             Appliquons-là. Ce faisant nous effectuons la substitution
+             suivante sur la règle (les autres consistant à substituer
+             les termes liés dans l'environnement courant du cas de la
+             preuve aux termes \emph{de même nom} dans la règle):
+             \begin{itemize}
+
+               \item $e_0 \stackrel{\beta}{\longleftarrow} \mathcal{D} \,
+                 (\tilde{v})$
+  
+             \end{itemize}
+             Puis étiquetons les prémisses (nous avons regroupé les
+             deux premières):
+             \begin{itemize}
+
+               \item \textbf{PA.0}: $x' \in \mathcal{A} \AND \Gamma(x')
+                 \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})$
+
+               \item \textbf{PA.1}: $\domain{\mathcal{A}} \Gamma \vdash
+                 \mathcal{D} \, (\tilde{v}) \Wide (\tau', \textrm{T}')$
+
+             \end{itemize}
+             Il est immédiat que \textbf{H.1.0} = \textbf{H.2.0} =
+             \textbf{H.3.0} = \textbf{PA.0}. La proposition
+             \textbf{H.4} implique \textbf{PA.1}. Les propositions
+             \textbf{PA.0} et \textbf{PA.1} impliquent par définition
+             \textbf{PA}. \hfill $\Diamond$
+
+         \end{itemize}
+
+       \item Prouvons $\textbf{Hyp} \Rightarrow \textbf{C}$. On a: 
+         \begin{itemize}
+ 
+           \item \textbf{C}: $\domain{\mathcal{A}} \Gamma \models
+             \tilde{v} : \tau \, \textrm{T}$. C'est la
+             règle~\RefTirName{[2]}
+             \vpageref{controle_semantique_des_types_2} qui
+             s'applique:
+             \begin{mathpar}
+               \inferrule
+                 {x'\in \mathcal{A}\\
+                  \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}',
+                  \sigma')\})\\
+                  \domain{\mathcal{A}} \Gamma \models \tilde{v} :
+                  \tau' \, \textrm{T}'}
+                %-----
+                {\domain{\mathcal{A}} \Gamma \models \tilde{v} :
+                  \emptyL \, (\textsf{TRef} \, x')}
+                \;\TirName{[2]}
+            \end{mathpar}
+            Appliquons-là directement puis étiquetons ses prémisses
+            (nous avons regroupé les deux premières):
+            \begin{itemize}
+
+              \item \textbf{C.0}: $x' \in \mathcal{A} \AND \Gamma(x') \lhd
+                (\alpha', \tau', \{(\textrm{T}', \sigma')\})$
+                  
+              \item \textbf{C.1}: $\domain{\mathcal{A}} \Gamma \models
+                \tilde{v} : \tau' \, \textrm{T}'$
+
+            \end{itemize}
+        \end{itemize}
+        Il est immédiat que \textbf{H.1.0} = \textbf{H.2.0} =
+        \textbf{H.3.0} = \textbf{C.0}. D'autre part, \textbf{H.5} =
+        \textbf{C.1}. Les propositions \textbf{C.0} et \textbf{C.1}
+        impliquent par définition~\textbf{C}. \hfill$\Diamond$
+
+     \end{enumerate}
+     Conclusion:
+     $\left. \begin{array}{l}
+                \textbf{Hyp} \Rightarrow \textbf{PA} \\
+                \textbf{Hyp} \Rightarrow \textbf{C}
+             \end{array}
+      \right\}
+      \,\,\, \textrm{impliquent} \,\,\,
+      \textbf{Hyp} \Rightarrow (\textbf{PA} \AND \textbf{C})
+     $.\hfill$\triangle$
+
+   \item $\textrm{T} \lhd \textsf{SET OF} \, \tau' \, \textrm{T}' \,
+     \sigma'$\\
+     et $v \lhd \bob [(\textsf{None}, v')] \sqcup V' \bcb$\\
+     et $\tau \lhd [\textsf{Tag} \,\, ((\textsf{UNIVERSAL}, \textsf{Imm}
+     \, 17) \AS \psi) \,\, \textsf{IMPLICIT}]$.\\
+     Distinguons des
+     hypothèses de filtre:
+     \begin{itemize}
+
+       \item \textbf{HF.0}: $\tau \lhd [\textsf{Tag} \,\,
+         ((\textsf{UNIVERSAL}, \textsf{Imm} \, 17) \AS \psi) \,\,
+         \textsf{IMPLICIT}]$
+
+       \item \textbf{HF.1}:$\textrm{T} \lhd \textsf{SET OF} \, \tau' \,
+         \textrm{T}' \, \sigma'$
+
+     \end{itemize}
+     Les autres hypothèses sont
+     \begin{itemize}
+
+       \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma, x \vdashC
+         \tau \, \textrm{T}$. La règle~\RefTirName{[19]}
+         \vpageref{types_canoniques_19} s'applique:
+         \begin{mathpar}
+           \inferrule
+             {\tau \lhd[\textsf{Tag} \,\, (\textsf{UNIVERSAL},
+               \textsf{Imm} \, 17) \,\, \textsf{IMPLICIT}]\\
+               \domain{\mathcal{A}} \Gamma, x \vdashC \tau' \,\,
+               \textrm{T}'}
+             %-----
+             {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\,
+               (\textsf{SET OF} \, \tau' \, \textrm{T}' \, \sigma')}
+             \;\TirName{[19]}
+         \end{mathpar}
+         Appliquons directement cette règle (i.e. toutes les variables
+         de la règle sont liées aux variables de même nom dans
+         l'environnement du cas courant de la preuve). Étiquetons sa
+         prémisse non redondante (la première est en effet
+         \textbf{HF.0}):
+         \begin{itemize}
+
+         \item \textbf{H.1.0}: $\domain{\mathcal{A}} \Gamma, x \vdashC
+           \tau' \, \textrm{T}'$
+
+         \end{itemize}
+
+       \item \textbf{H.2}: $\domain{\mathcal{A}} \Gamma, x \vdash v :
+         \textrm{T}$. C'est la règle~\RefTirName{[11]}
+         \vpageref{controle_des_types_11} qui s'applique:
+         \begin{mathpar}
+           \inferrule
+             {\textrm{T} \lhd (\textsf{SEQUENCE OF} \mid \textsf{SET
+                 OF}) \,\, \tau' \, \textrm{T}' \, \sigma'\\
+               \domain{\mathcal{A}} \Gamma, \emptyStr \vdash v' :
+               \textrm{T}'\\
+               \domain{\mathcal{A}} \Gamma, x \vdash \bob V' \bcb :
+               \textrm{T}}
+             %-----
+             {\domain{\mathcal{A}} \Gamma, x \vdash \bob
+               [(\textsf{None}, v')] \sqcup V' \bcb : \textrm{T}}
+             \;\TirName{[11]}
+         \end{mathpar}
+         Appliquons directement cette règle et étiquetons ses
+         prémisses non redondantes avec les hypothèses de filtre:
+         \begin{itemize}
+         
+           \item \textbf{H.2.0}: $\domain{\mathcal{A}} \Gamma, \emptyStr
+             \vdash v' : \textrm{T}'$
+               
+           \item \textbf{H.2.1}: $\domain{\mathcal{A}} \Gamma, x
+             \vdash \bob V' \bcb : \textrm{T}$
+
+         \end{itemize}
+
+       \item \textbf{H.3}: $\domain{\mathcal{A}} \Gamma \vdash v :
+         \tau \, \textrm{T} \Rightarrow \tilde{v}$. C'est la
+         règle~\RefTirName{[14]} \vpageref{codage_14} qui s'applique:
+         \begin{mathpar}
+           \inferrule
+             {\textrm{T} \lhd \textsf{SET OF} \, \tau' \, \textrm{T}'
+               \, \sigma'\\
+               \domain{\mathcal{A}} \Gamma \vdash v' : \tau' \,
+               \textrm{T}' \Rightarrow \tilde{v}'\\
+               \domain{\mathcal{A}} \Gamma \vdash \bob V' \bcb : \tau
+               \, \textrm{T} \Rightarrow (\psi, \textsf{Const}
+               \, \tilde{V}')\\
+               \tilde{v} \triangleq (\psi, \textsf{Const} \,
+               ([\tilde{v}'] \sqcup \tilde{V}'))}
+             %------
+             {\domain{\mathcal{A}} \Gamma \vdash \bob [(\textsf{None},
+               v')] \sqcup V' \bcb : \tau \, \textrm{T} \Rightarrow
+               \tilde{v}}
+           \;\TirName{[14]}
+         \end{mathpar}
+         Pour éviter une capture \emph{a priori} du nom~$\psi$ (lié
+         dans l'environnement courant du cas de la preuve par
+         \textbf{HF.0}) lors de l'application, effectuons tout de
+         suite le renommage suivant:
+         \begin{itemize}
+
+           \item $\psi \stackrel{\alpha}{\longleftarrow} \overline\psi$
+
+         \end{itemize}
+         et appliquons alors la nouvelle règle directement. (Insistons
+         sur le fait qu'il ne s'agissait pas d'une substitution
+         de~$\psi$, car la variable~$\psi$ n'est pas liée dans un
+         champ projeté de la conclusion.) Étiquetons alors ses
+         prémisses non redondantes avec les hypothèses de filtre:
+         \begin{itemize}
+ 
+           \item \textbf{H.3.0}: $\domain{\mathcal{A}} \Gamma \vdash v'
+             : \tau' \, \textrm{T}' \Rightarrow \tilde{v}'$
+
+           \item \textbf{H.3.1}: $\domain{\mathcal{A}} \Gamma
+                          \vdash \bob V' \bcb : \tau \, \textrm{T}
+                          \Rightarrow (\overline\psi,
+                          \textsf{Const} \, \tilde{V}')$
+
+         \end{itemize}
+         et aussi le jugement résultant de la projection du champ
+         inféré:
+         \begin{itemize}
+
+           \item \textbf{H.3.2}: $(\overline\psi, \textsf{Const}
+             \, ([\tilde{v}'] \sqcup \tilde{V}')) \lhd \tilde{v}$
+
+         \end{itemize}
+
+     \end{itemize}
+     Il est aisé de démontrer par induction le théorème suivant
+     (considérer les règles~\RefTirName{[14]} \vpageref{codage_14}
+     et~\RefTirName{[15]} \vpageref{codage_15} du codage):
+     \begin{equation*}
+       \begin{array}{ll}
+         Soit & \textrm{T} \lhd \textsf{SET OF} \, \tau' \,
+                \textrm{T}' \, \sigma'\\
+         et   & \tau \lhd [\textsf{Tag} \,\, \psi \,\,
+                \textsf{IMPLICIT}] \\
+         Si   & \domain{\mathcal{A}} \Gamma \vdash v : \tau \,
+                \textrm{T} \Rightarrow (\overline\psi,
+                \textsf{Const} \, \tilde{V}) \\
+        alors & \overline\psi = \psi
+      \end{array}
+    \end{equation*}
+    Il découle de l'application de ce théorème:
+    \begin{itemize}
+
+      \item \textbf{H.4}: $\overline\psi = \psi$.
+
+    \end{itemize}
+    Maintenant
+    \begin{enumerate}
+
+      \item Prouvons $\textbf{Hyp} \Rightarrow \textbf{PA}$. On se donne:
+        \begin{itemize}
+
+          \item \textbf{PA.H}: $\vdashD \tilde{v} \rightarrow e$. La
+            proposition \textbf{HF.0} implique 
+            \begin{itemize}
+
+              \item is\_built\_in\_type $(\psi)$ = \textbf{true}
+
+            \end{itemize}
+            Donc, en tenant compte aussi de la proposition
+            \textbf{H.3.2} où~$\psi$ remplace~$\overline\psi$ (comme
+            le permet l'identité~\textbf{H.4}), la
+            règle~\RefTirName{[2]} page~\pageref{decodage_2}
+            s'applique:
+            \begin{mathpar}
+              \inferrule
+              {\textrm{is\_built\_in\_tag} \, (\psi)\\
+                \textrm{T} \neq \wildTRef \mid \wildSelect \mid
+                \wildCHOICE}
+              %-----
+              {\vdashD (\psi, \textsf{Const} \wild\!)
+                \rightarrow ([\textsf{Tag} \,\, \psi \,\,
+                \textsf{IMPLICIT}], \textrm{T})}
+              \;\TirName{[2]}
+            \end{mathpar}
+            Appliquons directement cette règle, après le renommage
+            \begin{itemize}
+
+              \item $\textrm{T} \stackrel{\alpha}{\longleftarrow}
+                \textrm{T}_0$
+
+            \end{itemize}
+            Étiquetons alors sa prémisse non redondante:
+            \begin{itemize}   
+
+              \item \textbf{PA.H.0}: $\textrm{T}_0 \neq \wildTRef \mid
+                \wildSelect \mid \wildCHOICE$
+
+            \end{itemize}
+            et le jugement résultant de la projection du chanmp
+            inféré:
+            \begin{itemize}
+
+              \item \textbf{PA.H.1}: $([\textsf{Tag} \,\, \psi \,\,
+                \textsf{IMPLICIT}], \textrm{T}_0) \lhd e$
+    
+            \end{itemize}
+        \end{itemize}
+        Prouvons alors:
+        \begin{itemize} 
+
+          \item \textbf{PA.C}: $\domain{\mathcal{A}} \Gamma \vdash e
+            \Wide (\tau, \textrm{T})$. Les propositions \textbf{HF.0}
+            et \textbf{HF.1} et \textbf{PA.H.0} et \textbf{PA.H.1}
+            font que la règle~\RefTirName{[4]}
+            \vpageref{inclusion_d_etiquetages_4} est applicable:
+            \begin{mathpar}
+              \inferrule
+                {\domain{\mathcal{A}} \Gamma \vdash (\tau'_0,
+                  \textrm{T}_0) \Wide (\tau'_1, \textrm{T}_1)}
+                %------
+                {\domain{\mathcal{A}} \Gamma \vdash (t \Cons \tau'_0,
+                  \textrm{T}_0) \Wide (t \Cons \tau'_1, \textrm{T}_1)}
+                \;\TirName{[4]}
+            \end{mathpar}
+            Appliquons-là. Ce faisant nous effectuons les
+            substitutions suivantes sur la règle (les autres
+            consistant à substituer les termes liés dans
+            l'environnement courant du cas de la preuve aux termes
+            \emph{de même nom} dans la règle):
+            \begin{itemize}
+          
+              \item $t \stackrel{\beta}{\longleftarrow} \textsf{Tag} \,\,
+                \psi \,\, \textsf{EXPLICIT}$
+                      
+              \item $\tau'_0 \stackrel{\beta}{\longleftarrow} \emptyL$
+  
+              \item $\tau'_1 \stackrel{\beta}{\longleftarrow} \emptyL$
+
+              \item $\textrm{T}_1 \stackrel{\beta}{\longleftarrow}
+                \textrm{T}$
+
+            \end{itemize}
+            Étiquetons ensuite sa prémisse:
+            \begin{itemize}
+
+              \item \textbf{PA.C.0}: $\domain{\mathcal{A}} \Gamma \vdash
+                (\emptyL\!, \textrm{T}_0) \Wide (\emptyL\!, \textrm{T})$
+
+            \end{itemize}
+            Les propositions \textbf{PA.H.0} et \textbf{HF.1}
+            impliquent \textbf{PA.C.0} par application de la
+            règle~\RefTirName{[8]}
+            \vpageref{inclusion_d_etiquetages_8} de la relation
+            d'inclusion d'étiquetage
+            \begin{mathpar}
+              \inferrule
+                {\textrm{T}_0 \nlhd \wildCHOICE \mid \wildTRef \mid
+                  \wildSelect\\
+                  \textrm{T}_1 \nlhd \wildCHOICE \mid \wildTRef \mid
+                  \wildSelect}
+                %-----
+                {\domain{\mathcal{A}} \Gamma \vdash (\emptyL\!,
+                  \textrm{T}_0) \Wide (\emptyL\!, \textrm{T}_1)}
+                \;\TirName{[8]}
+            \end{mathpar}
+            en effectuant la substitution $\textrm{T}_1
+            \stackrel{\beta}{\longleftarrow} \textrm{T}$. Et
+            \textbf{PA.C.0} implique par définition
+            \textbf{PA.C}.\hfill$\Diamond$
+
+        \end{itemize}
+
+      \item Prouvons $\textbf{Hyp} \Rightarrow \textbf{C}$. On a: 
+        \begin{itemize}
+
+          \item \textbf{C}: $\domain{\mathcal{A}} \Gamma \models
+            \tilde{v} : \tau \, \textrm{T}$
+
+        \end{itemize}
+        La proposition \textbf{H.3.2} nous permet d'envisager
+        l'application de la règle~\RefTirName{[12]}
+        \vpageref{controle_semantique_des_types_12}:
+        \begin{mathpar}
+          \inferrule
+            {\textrm{T} \lhd (\textsf{SET OF} \mid \textsf{SEQUENCE
+                OF}) \, \tau' \, \textrm{T}' \, \sigma'\\
+              \domain{\mathcal{A}} \Gamma \models \tilde{v}' : \tau'
+              \, \textrm{T}'\\
+              \domain{\mathcal{A}} \Gamma \models (\psi,
+              \textsf{Const} \, \tilde{V}') : \tau \, \textrm{T}}
+            %-----
+            {\domain{\mathcal{A}} \Gamma \models (\psi,
+              \textsf{Const} \, ([\tilde{v}'] \sqcup
+              \tilde{V}')) : \tau \, \textrm{T}}
+          \;\TirName{[12]}
+        \end{mathpar}
+        Appliquons directement cette règle et étiquetons ses prémisses
+        non redondantes avec les hypothèses de filtre:
+        \begin{itemize}
+
+          \item \textbf{C.0}: $\domain{\mathcal{A}} \Gamma \models
+            \tilde{v}' : \tau' \, \textrm{T}'$
+
+          \item \textbf{C.1}: $\domain{\mathcal{A}} \Gamma \models (\psi,
+            \textsf{Const} \, \tilde{V}') : \tau \, \textrm{T}$
+
+        \end{itemize}
+        Dans un premier temps reprenons l'énoncé du théorème et
+        effectuons-y les renommages suivants:
+        \begin{itemize}
+      
+          \item $\tau \stackrel{\alpha}{\longleftarrow} \tau'$
+
+          \item $\textrm{T} \stackrel{\alpha}{\longleftarrow} \textrm{T}'$
+
+          \item $\tilde{v} \stackrel{\alpha}{\longleftarrow}
+            \tilde{v}'$
+
+        \end{itemize}
+        Nous obtenons alors:
+        \begin{equation*}
+          \begin{array}{ll}
+            Soit  & \domain{\mathcal{A}} \Gamma, x \vdashC \tau' \,
+                    \textrm{T}' \\
+            Si    & \domain{\mathcal{A}} \Gamma, x \vdash v :
+                    \textrm{T}' \\
+            et    & \domain{\mathcal{A}} \Gamma \vdash v : \tau' \,
+                    \textrm{T}' \Rightarrow \tilde{v}' \\
+            alors & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+                    (\tilde{v}') \Wide (\tau', \textrm{T}') \\
+            et    & \domain{\mathcal{A}} \Gamma \models \tilde{v}' :
+            \tau' \, \textrm{T}'
+          \end{array}
+        \end{equation*}
+        Nous reconnaissons en cet énoncé une instance de l'hypothèse
+        d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+        \textbf{H.1.0}, \textbf{H.2.0} et \textbf{H.3.0}. En
+        l'appliquant il vient donc:
+        \begin{itemize}
+        
+          \item \textbf{H.5}: $\domain{\mathcal{A}} \Gamma \vdash
+            \mathcal{D} \, (\tilde{v}') \Wide (\tau', \textrm{T}')$
+
+          \item \textbf{H.6}: $\domain{\mathcal{A}} \Gamma \models
+            \tilde{v}' : \tau' \, \textrm{T}'$
+
+        \end{itemize}
+        On a immédiatement: \textbf{H.6} = \textbf{C.0}. Dans un
+        deuxième temps, reprenons l'énoncé du théorème et effectuons-y
+        les renommages suivants:
+        \begin{itemize}
+   
+          \item $v \stackrel{\alpha}{\longleftarrow} \bob V' \bcb$
+
+          \item $\tilde{v} \stackrel{\alpha}{\longleftarrow} (\psi,
+            \textsf{Const} \, \tilde{V}')$
+
+        \end{itemize}
+        Nous obtenons alors:
+        \begin{equation*}
+          \begin{array}{ll}
+            Soit  & \domain{\mathcal{A}} \Gamma, x \vdashC \tau \,
+                    \textrm{T} \\
+            Si    & \domain{\mathcal{A}} \Gamma, x \vdash \bob V' \bcb
+                    : \textrm{T} \\
+            et    & \domain{\mathcal{A}} \Gamma \vdash \bob V' \bcb :
+                    \tau \, \textrm{T} \Rightarrow (\psi,
+                    \textsf{Const} \, \tilde{V}') \\
+            alors & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D}
+                    \, (\psi, \textsf{Const} \, \tilde{V}')
+                    \Wide (\tau, \textrm{T}) \\
+            et    & \domain{\mathcal{A}} \Gamma \models (\psi,
+                    \textsf{Const} \, \tilde{V}') : \tau \,
+                    \textrm{T}\\
+          \end{array}
+        \end{equation*}
+        Nous reconnaissons en cet énoncé une instance de l'hypothèse
+        d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+        \textbf{H.1}, \textbf{H.2.1} et \textbf{H.3.1} où~$\psi$
+        remplace~$\overline\psi$ (comme le permet l'identité
+        \textbf{H.4}). En l'appliquant il vient alors:
+        \begin{itemize}
+
+          \item \textbf{H.7}: $\domain{\mathcal{A}} \Gamma \vdash
+            \mathcal{D} \, (\psi, \textsf{Const} \, \tilde{V}')
+            \Wide (\tau, \textrm{T})$
+
+          \item \textbf{H.8}: $\domain{\mathcal{A}} \Gamma \models
+            (\psi, \textsf{Const} \, \tilde{V}') : \tau \,
+            \textrm{T}$
+
+        \end{itemize} 
+        On a immédiatement: \textbf{H.8} = \textbf{C.1}. Finalement,
+        \textbf{C.0} et \textbf{C.1} impliquent par
+        définition~\textbf{C}. \hfill$\Diamond$
+
+    \end{enumerate} 
+    Conclusion:
+    $\left. \begin{array}{l}
+               \textbf{Hyp} \Rightarrow \textbf{PA} \\
+               \textbf{Hyp} \Rightarrow \textbf{C}
+            \end{array}
+     \right\}
+     \,\,\, \textrm{impliquent} \,\,\,
+     \textbf{Hyp} \Rightarrow (\textbf{PA} \AND
+     \textbf{C})$. \hfill$\triangle$
+
+     On note que \textbf{H.5} et \textbf{H.7} sont inutiles.
+
+% CHOICE1
+   \item $\textrm{T} \lhd \textsf{CHOICE} \, \mathcal{F}$ et
+     $\mathcal{F} \lhd [f'] \sqcup \mathcal{F}'$\\ et $f' \lhd (l',
+     \tau', \textrm{T}', \sigma', s')$\\ et $v \lhd l' : v'$\\ et
+     $\tau \lhd \emptyL$.\\ Distinguons des hypothèses de filtre:
+     \begin{itemize}
+
+       \item \textbf{HF.0}: $f' \lhd (l', \tau', \textrm{T}', \sigma',
+         s')$
+
+       \item \textbf{HF.1}: $\textrm{T} \lhd \textsf{CHOICE} \, ([f'] \sqcup
+          \mathcal{F}')$ 
+
+     \end{itemize}
+     Les autres hypothèses sont
+     \begin{itemize}
+
+     \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma, x \vdashC \tau
+       \, \textrm{T}$. La règle~\RefTirName{[20]}
+       \vpageref{types_canoniques_20} qui peut s'appliquer:
+       \begin{mathpar}
+         \inferrule
+           {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+            \domain{\mathcal{A}} \Gamma, \emptyStr \vdashC \tau' \,\,
+            \textrm{T}'\\
+            \domain{\mathcal{A}} \Gamma, x \vdashC \emptyL \,
+            (\textsf{CHOICE} \, \mathcal{F}')}
+           %----
+           {\domain{\mathcal{A}} \Gamma, x \vdashC \emptyL \,
+            (\textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}'))}
+           \;\TirName{[20]}
+       \end{mathpar}
+       Appliquons directement la règle (i.e. toutes les variables de
+       la règle sont liées aux variables de même nom dans
+       l'environnement du cas courant de la preuve). Étiquetons sa
+       prémisse:
+       \begin{itemize}
+
+         \item \textbf{H.1.0}: $\domain{\mathcal{A}} \Gamma, \emptyStr
+           \vdashC \tau' \, \textrm{T}'$
+
+       \end{itemize}
+
+     \item \textbf{H.2}: $\domain{\mathcal{A}} \Gamma, x \vdash v :
+       \textrm{T}$.  La règle~\RefTirName{[13]}
+       \vpageref{controle_des_types_13} peut s'appliquer:
+       \begin{mathpar}
+         \inferrule
+           {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+            \domain{\mathcal{A}} \Gamma, \emptyStr \vdash v' :
+            \textrm{T}'}
+          %-----
+           {\domain{\mathcal{A}} \Gamma, x \vdash (l' \colon v') :
+             \textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}')}
+         \;\TirName{[13]}
+       \end{mathpar}
+       Appliquons directement cette règle et étiquetons ses prémisses
+       non redondantes avec les hypothèses de filtre:
+       \begin{itemize}
+
+         \item \textbf{H.2.0}: $\domain{\mathcal{A}} \Gamma, \emptyStr
+           \vdash v' : \textrm{T}'$
+
+       \end{itemize}
+
+     \item \textbf{H.3}: $\domain{\mathcal{A}} \Gamma \vdash v : \tau
+       \, \textrm{T} \Rightarrow \tilde{v}$. La
+       règle~\RefTirName{[16]} \vpageref{codage_16} peut s'appliquer:
+       \begin{mathpar}
+         \inferrule
+           {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+            \domain{\mathcal{A}} \Gamma \vdash v' : \tau' \,
+            \textrm{T}' \Rightarrow \tilde{v}}
+          %------
+           {\domain{\mathcal{A}} \Gamma \vdash (l' \colon v') : \tau
+             \, (\textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}'))
+             \Rightarrow \tilde{v}}
+           \;\TirName{[16]}
+       \end{mathpar}
+       Appliquons directement cette règle et étiquetons une des
+       prémisses:
+       \begin{itemize}
+
+         \item \textbf{H.3.0}: $\domain{\mathcal{A}} \Gamma \vdash v' :
+           \tau' \, \textrm{T}' \Rightarrow \tilde{v}$
+
+       \end{itemize}
+
+   \end{itemize}
+   Reprenons l'énoncé du théorème et effectuons-y les renommages
+   suivants:
+   \begin{itemize}
+
+     \item $\tau \stackrel{\alpha}{\longleftarrow} \tau'$
+ 
+     \item $\textrm{T} \stackrel{\alpha}{\longleftarrow} \textrm{T}'$
+
+   \end{itemize}
+   Nous obtenons alors:
+   \begin{equation*}
+     \begin{array}{ll}
+       Soit  & \domain{\mathcal{A}} \Gamma, x \vdashC \tau' \,
+               \textrm{T}' \\
+       Si    & \domain{\mathcal{A}} \Gamma, x \vdash v : \textrm{T}'\\
+       et    & \domain{\mathcal{A}} \Gamma \vdash v : \tau' \,
+               \textrm{T}' \Rightarrow \tilde{v}\\
+       alors & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+               (\tilde{v}) \Wide (\tau', \textrm{T}')\\ 
+       et    & \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau'
+       \, \textrm{T}'\\
+     \end{array}
+   \end{equation*}
+   Nous reconnaissons en cet énoncé une instance de l'hypothèse
+   d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+   \textbf{H.1.0}, \textbf{H.2.0} et \textbf{H.3.0}. En l'appliquant
+   il vient:
+   \begin{itemize}
+
+     \item \textbf{H.4}: $\domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+       (\tilde{v}) \Wide (\tau', \textrm{T}')$
+
+     \item \textbf{H.5}: $\domain{\mathcal{A}} \Gamma \models
+       \tilde{v} : \tau' \, \textrm{T}'$
+
+   \end{itemize} 
+   Maintenant
+   \begin{enumerate}
+
+     \item Prouvons $\textbf{Hyp} \Rightarrow \textbf{PA}$.
+       \begin{itemize}
+
+         \item \textbf{PA}: $\domain{\mathcal{A}} \Gamma \vdash
+           \mathcal{D} \, (\tilde{v}) \Wide (\tau, \textrm{T})$ \\
+
+           Les propositions \textbf{HF.1}, \textbf{HF.0} et
+           \textbf{H.4} sont des instances possibles des prémisses de
+           la règle~\RefTirName{[7]}
+           \vpageref{inclusion_d_etiquetages_7} de la relation
+           d'inclusion d'étiquetages
+           \begin{mathpar}
+             \inferrule
+               {\textrm{T} \lhd \textsf{CHOICE} \, ([f'] \sqcup
+                 \mathcal{F}')\\
+                f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+                \domain{\mathcal{A}} \Gamma \vdash e_0 \Wide (\tau',
+                \textrm{T}')}
+              %-----
+              {\domain{\mathcal{A}} \Gamma \vdash e_0 \Wide
+                (\emptyL\!, \textrm{T})}
+              \;\TirName{[7]}
+           \end{mathpar}
+           où on effectue le renommage $e_0
+           \stackrel{\alpha}{\longleftarrow} \mathcal{D} \,
+           (\tilde{v})$. Dérivons cette règle~\RefTirName{[7]}, après
+           ce renommage, et la conclusion est précisément
+           \textbf{PA}. \hfill$\Diamond$
+
+       \end{itemize}
+
+
+     \item Prouvons $\textbf{Hyp} \Rightarrow (\textbf{PA} \Rightarrow
+       \textbf{C})$. On a: 
+       \begin{itemize}
+ 
+         \item \textbf{C}: $\domain{\mathcal{A}} \Gamma \models
+           \tilde{v} : \tau \, \textrm{T}$
+    
+       \end{itemize}
+       La proposition \textbf{PA} nous permet d'envisager
+       l'application de la règle~\RefTirName{[14]}
+       \vpageref{controle_semantique_des_types_14}:
+       \begin{mathpar}
+         \inferrule
+           {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+            \domain{\mathcal{A}} \Gamma \vdash \mathcal{D}(\tilde{v})
+            \Wide (\tau', \textrm{T}')\\
+            \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau' \,
+            \textrm{T}'}
+          %-----
+          {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \emptyL
+            \,\, (\textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}'))}
+        \;\TirName{[14]}
+       \end{mathpar}
+       Appliquons directement cette règle et étiquetons ses prémisses:
+       \begin{itemize} 
+
+         \item \textbf{C.0}: $f' \lhd (l', \tau', \textrm{T}',
+           \sigma', s')$
+
+         \item \textbf{C.1}: $\domain{\mathcal{A}} \Gamma \vdash
+           \mathcal{D}(\tilde{v}) \Wide (\tau', \textrm{T}')$
+
+         \item \textbf{C.2}: $\domain{\mathcal{A}} \Gamma \models
+           \tilde{v} : \tau' \, \textrm{T}'$
+
+       \end{itemize}
+       On a \textbf{HF.0} = \textbf{C.0}. On a évidemment: \textbf{PA}
+       = \textbf{C.1}, et \textbf{H.5} = \textbf{C.2}. Enfin,
+       \textbf{C.0} et \textbf{C.1} et \textbf{C.2} impliquent par
+       définition~\textbf{C}. \hfill$\Diamond$
+
+   \end{enumerate}
+   Conclusion:\\
+   $\left.\begin{array}{l}
+              \textbf{Hyp} \Rightarrow \textbf{PA} \\
+              \textbf{Hyp} \Rightarrow (\textbf{PA} \Rightarrow \textbf{C})
+           \end{array}
+    \right\}
+    \,\,\, \textrm{impliquent} \,\,\,
+    \textbf{Hyp} \Rightarrow (\textbf{PA} \AND \textbf{C})$.\hfill$\triangle$ 
+
+  \item $\textrm{T} \lhd \textsf{CHOICE} \, \mathcal{F}$\\ et
+    $\mathcal{F} \lhd [f'] \sqcup \mathcal{F}'$\\ et $f' \lhd (l',
+    \tau', \textrm{T}', \sigma', s')$\\ et $\tau \lhd
+    \emptyL$.\\ Distinguons des hypothèses de filtre:
+    \begin{itemize}
+      
+      \item \textbf{HF.0}: $\textrm{T} \lhd \textsf{CHOICE} \, ([f']
+        \sqcup \mathcal{F}')$
+
+      \item \textbf{HF.1}: $\tau \lhd \emptyL$
+
+      \item \textbf{HF.2}: $f' \lhd (l', \tau', \textrm{T}', \sigma',
+        s')$
+
+    \end{itemize}
+    Les autres hypothèses sont
+    \begin{itemize}
+    
+      \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma, x \vdashC \tau
+        \, \textrm{T}$. C'est la règle~\RefTirName{[20]}
+        \vpageref{types_canoniques_20} qui s'applique:
+        \begin{mathpar}
+          \inferrule
+            {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+             \domain{\mathcal{A}} \Gamma, \emptyStr \vdashC \tau' \,\,
+             \textrm{T}'\\
+             \domain{\mathcal{A}} \Gamma, x \vdashC \emptyL \,
+             (\textsf{CHOICE} \, \mathcal{F}')}
+            %-----
+            {\domain{\mathcal{A}} \Gamma, x \vdashC \emptyL \,
+              (\textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}'))}
+            \;\TirName{[20]}
+        \end{mathpar}
+        Appliquons directement cette règle (i.e. toutes les variables
+        de la règle sont liées aux variables de même nom dans
+        l'environnement du cas courant de la preuve). Étiquetons alors
+        une des prémisses:
+        \begin{itemize}
+        
+          \item \textbf{H.1.0}: $\domain{\mathcal{A}} \Gamma, x
+            \vdashC \emptyL \, (\textsf{CHOICE} \, \mathcal{F}')$
+
+        \end{itemize}
+
+      \item \textbf{H.2}: $\domain{\mathcal{A}} \Gamma, x \vdash v :
+        \textrm{T}$. La règle~\RefTirName{[14]}
+        \vpageref{controle_des_types_14} peut s'appliquer:
+        \begin{mathpar}
+          \inferrule
+            {\domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{CHOICE}
+              \, \mathcal{F}'}
+            %-----
+            {\domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{CHOICE}
+              \, ([f'] \sqcup \mathcal{F}')}
+            \;\TirName{[14]}
+        \end{mathpar}
+        Appliquons directement cette règle et étiquetons sa prémisse:
+        \begin{itemize}
+        
+          \item \textbf{H.2.0}: $\domain{\mathcal{A}} \Gamma, x \vdash
+            v : \textsf{CHOICE} \, \mathcal{F}'$
+
+        \end{itemize}
+
+      \item \textbf{H.3}: $\domain{\mathcal{A}} \Gamma \vdash v : \tau
+        \, \textrm{T} \Rightarrow \tilde{v}$. La
+        règle~\RefTirName{[17]} \vpageref{codage_17} peut s'appliquer:
+        \begin{mathpar}
+          \inferrule
+            {\domain{\mathcal{A}} \Gamma \vdash v : \tau \,
+              (\textsf{CHOICE} \, \mathcal{F}') \Rightarrow \tilde{v}}
+            %-----
+            {\domain{\mathcal{A}} \Gamma \vdash v : \tau \,
+              (\textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}'))
+              \Rightarrow \tilde{v}}
+            \;\TirName{[17]}
+        \end{mathpar}
+        Appliquons directement cette règle et étiquetons sa prémisse:
+        \begin{itemize}
+        
+          \item \textbf{H.3.0}: $\domain{\mathcal{A}} \Gamma \vdash v
+            : \tau \, (\textsf{CHOICE} \, \mathcal{F}') \Rightarrow
+            \tilde{v}$
+
+        \end{itemize}
+
+    \end{itemize}
+    Reprenons l'énoncé du théorème et effectuons-y le renommage
+    suivant:
+    \begin{itemize}
+
+      \item $\textrm{T} \stackrel{\alpha}{\longleftarrow} \textsf{CHOICE}
+        \, \mathcal{F}'$
+
+    \end{itemize}
+    Nous obtenons alors:
+    \begin{equation*}
+      \begin{array}{ll}
+        Soit  & \domain{\mathcal{A}} \Gamma, x \vdashC \tau \,
+                (\textsf{CHOICE} \, \mathcal{F}')\\
+        Si    & \domain{\mathcal{A}} \Gamma, x \vdash v :
+                \textsf{CHOICE} \, \mathcal{F}' \\
+        et    & \domain{\mathcal{A}} \Gamma \vdash v : \tau \,
+                (\textsf{CHOICE} \, \mathcal{F}') \Rightarrow
+                \tilde{v} \\
+        alors & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+                (\tilde{v}) \Wide (\tau, \textsf{CHOICE} \,
+                \mathcal{F}') \\
+        et    & \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau
+                \, (\textsf{CHOICE} \, \mathcal{F}')
+      \end{array}
+    \end{equation*}
+    Nous reconnaissons en cet énoncé une instance de l'hypothèse
+    d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+    \textbf{H.1.0} où~$\emptyL\!$ remplace~$\tau$ (comme le permet
+    \textbf{HF.1}), \textbf{H.2.0} et \textbf{H.3.0}. En l'appliquant
+    il vient:
+    \begin{itemize}
+    
+       \item \textbf{H.4}: $\domain{\mathcal{A}} \Gamma \vdash
+         \mathcal{D} \, (\tilde{v}) \Wide (\tau, \textsf{CHOICE} \,
+         \mathcal{F}')$
+
+       \item \textbf{H.5}: $\domain{\mathcal{A}} \Gamma \models
+         \tilde{v} : \tau \,\, (\textsf{CHOICE} \, \mathcal{F}')$
+
+    \end{itemize} 
+    Maintenant
+    \begin{enumerate}
+
+      \item Prouvons $\textbf{Hyp} \Rightarrow \textbf{PA}$.
+        \begin{itemize}
+
+          \item \textbf{PA}: $\domain{\mathcal{A}} \Gamma \vdash
+            \mathcal{D} \, (\tilde{v}) \Wide (\tau, \textrm{T})$.
+            Pour déduire \textbf{H.4} nous pouvons appliquer la
+            règle~\RefTirName{[7]}
+            \vpageref{inclusion_d_etiquetages_7}:
+            \begin{mathpar}
+              \inferrule
+              {\textrm{T} \lhd \textsf{CHOICE} \, ([f'] \sqcup
+                \mathcal{F}')\\
+               f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+               \domain{\mathcal{A}} \Gamma \vdash e_0 \Wide (\tau',
+               \textrm{T}')}
+              %-----
+              {\domain{\mathcal{A}} \Gamma \vdash e_0 \Wide
+                (\emptyL\!, \textrm{T})}
+              \;\TirName{[7]} 
+            \end{mathpar}
+            Appliquons-là. Ce faisant nous effectuons les
+            substitutions suivantes sur la règle (les autres
+            consistant à substituer les termes liés dans
+            l'environnement courant du cas de la preuve aux termes
+            \emph{de même nom} dans la règle):
+            \begin{itemize}
+
+              \item $e_0 \stackrel{\beta}{\longleftarrow} \mathcal{D}
+                \, (\tilde{v})$
+
+              \item $\mathcal{F} \stackrel{\beta}{\longleftarrow}
+                \mathcal{F}'$
+
+            \end{itemize}
+            Puis étiquetons ses prémisses non redondantes avec les
+            hypothèses de filtre:
+            \begin{itemize}
+      
+              \item \textbf{H.4.0}: $\domain{\mathcal{A}} \Gamma \vdash
+                \mathcal{D} \, (\tilde{v}) \Wide (\tau', \textrm{T}')$
+  
+            \end{itemize}
+            Les propositions \textbf{HF.0}, \textbf{HF.2} et
+            \textbf{H.4.0} sont des instances possibles des deux
+            prémisses de la même règle~\RefTirName{[7]} ci-dessus,
+            après le renommage $e_0 \stackrel{\alpha}{\longleftarrow}
+            \mathcal{D} \, (\tilde{v})$. Cette dérivation (après ce
+            renommage) engendre alors~\textbf{PA}.\hfill$\Diamond$
+
+        \end{itemize}
+
+      \item Prouvons $\textbf{Hyp} \Rightarrow \textbf{C}$. On a: 
+        \begin{itemize}
+        
+          \item \textbf{C}: $\domain{\mathcal{A}} \Gamma \models
+            \tilde{v} : \tau \, \textrm{T}$
+
+        \end{itemize}
+        La proposition \textbf{H.5} est la prémisse de la
+        règle~\RefTirName{[15]}
+        \vpageref{controle_semantique_des_types_15}:
+        \begin{mathpar}
+          \inferrule
+            {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+              (\textsf{CHOICE} \, \mathcal{F}')}
+            %-----
+            {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+              (\textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}'))}
+            \;\TirName{[15]}
+        \end{mathpar}
+        dont la conclusion est précisément~\textbf{C}.\hfill$\Diamond$
+
+    \end{enumerate}
+    Conclusion:
+    $\left. \begin{array}{l}
+               \textbf{Hyp} \Rightarrow \textbf{PA} \\
+               \textbf{Hyp} \Rightarrow \textbf{C}
+            \end{array}
+     \right\}
+     \,\,\, \textrm{impliquent} \,\,\,
+     \textbf{Hyp} \Rightarrow (\textbf{PA} \AND \textbf{C})
+    $.\hfill$\triangle$ 
+
+%SEQUENCE
+
+  \item $\textrm{T} \lhd \textsf{SEQUENCE} \, (\varphi' \Cons
+    \Phi')$\\ et $\varphi' \lhd \textsf{Field} \, (l', \tau',
+    \textrm{T}', \sigma', s')$\\ et $v \lhd \bob V \bcb$\\ et $V \lhd
+           [(\textsf{Some} \, l', v')] \sqcup V'$\\ et $\tau \lhd
+           [\textsf{Tag} \,\, \psi \,\,
+             \textsf{IMPLICIT}]$.\\ Distinguons deux hypothèses de
+           filtre:
+    \begin{itemize}
+
+      \item \textbf{HF.0}: $\tau \lhd [\textsf{Tag} \,\, \psi \,\,
+        \textsf{IMPLICIT}]$
+
+      \item \textbf{HF.1}: $\textrm{T} \lhd \textsf{SEQUENCE} \,
+        (\varphi' \Cons \Phi')$
+
+    \end{itemize}
+    Les autres hypothèses sont
+
+    \begin{itemize}
+
+      \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma, x \vdashC \tau
+        \, \textrm{T}$. Remarquons que $\Phi \lhd \varphi'\Cons \Phi'$
+        implique $\Phi \lhd [\varphi'] \sqcup \Phi'$, où~$\varphi'$
+        et~$\Phi'$ sont identiques dans les deux jugements. Par
+        conséquent, en tenant compte des hypothèses ci-dessus, nous
+        pouvons envisager l'application de la règle~\RefTirName{[24]}
+        \vpageref{types_canoniques_24}:
+        \begin{mathpar}
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+              \domain{\mathcal{A}} \Gamma, \emptyStr \vdashC \tau' \,
+              \textrm{T}'\\
+              \domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\,
+              (\textsf{SEQUENCE} \, \Phi')}
+            %-----
+            {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,
+              (\textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi'))}
+            \;\TirName{[24]}
+        \end{mathpar}
+        Appliquons directement cette règle (i.e. toutes les variables
+        de la règle sont liées aux variables de même nom dans
+        l'environnement du cas courant de la preuve). Étiquetons ses
+        prémisses non redondantes avec les hypothèses de filtre:
+        \begin{itemize}
+
+          \item \textbf{H.1.0}: $\domain{\mathcal{A}} \Gamma, x
+            \vdashC \tau' \, \textrm{T}'$
+
+          \item \textbf{H.1.1}: $\domain{\mathcal{A}} \Gamma, x
+            \vdashC \tau \,\, (\textsf{SEQUENCE} \, \Phi')$
+
+        \end{itemize}
+      
+      \item \textbf{H.2}: $\domain{\mathcal{A}} \Gamma, x \vdash v :
+        \textrm{T}$. Remarquons que $\Phi \lhd \varphi'\Cons \Phi'$
+        implique $\Phi \lhd [\varphi'] \sqcup \Phi'$, où~$\varphi'$
+        et~$\Phi'$ sont identiques dans les deux jugements. Par
+        conséquent, en tenant compte des hypothèses ci-dessus, nous
+        pouvons envisager l'application de la règle~\RefTirName{[15]}
+        \vpageref{controle_des_types_15}:
+        \begin{mathpar}
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+             V \lhd [(\textsf{Some} \, l', v')] \sqcup V'\\
+             \domain{\mathcal{A}} \Gamma, \emptyStr \vdash v' :
+             \textrm{T}'\\
+             \domain{\mathcal{A}} \Gamma, x \vdash \bob V' \bcb :
+             \textsf{SEQUENCE} \, \Phi'}
+            %-----
+            {\domain{\mathcal{A}} \Gamma, x \vdash \bob V \bcb :
+              \textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi')}
+            \;\TirName{[15]}
+        \end{mathpar}
+        Appliquons directement cette règle et étiquetons ses prémisses
+        non redondantes avec les hypothèses de filtre:
+        \begin{itemize}
+
+          \item \textbf{H.2.0}: $\domain{\mathcal{A}} \Gamma,
+            \emptyStr \vdash v' : \textrm{T}'$
+
+          \item \textbf{H.2.1}: $\domain{\mathcal{A}} \Gamma, x \vdash
+            \bob V'\bcb : \textsf{SEQUENCE} \, \Phi'$
+          
+        \end{itemize}
+
+      \item \textbf{H.3}: $\domain{\mathcal{A}} \Gamma \vdash v : \tau
+        \, \textrm{T} \Rightarrow \tilde{v}$. Remarquons que $\Phi
+        \lhd \varphi'\Cons \Phi'$ implique $\Phi \lhd [\varphi']
+        \sqcup \Phi'$, où~$\varphi'$ et~$\Phi'$ sont identiques dans
+        les deux jugements. Par conséquent, en tenant compte des
+        hypothèses ci-dessus, nous pouvons envisager l'application de
+        la règle~\RefTirName{[18]} à la page~\pageref{codage_18}:
+        \begin{mathpar}
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+              V \lhd [(\textsf{Some} \, l', v')] \sqcup V'\\
+              \domain{\mathcal{A}} \Gamma \vdash v' : \tau' \,
+              \textrm{T}' \Rightarrow \tilde{v}'\\
+              \domain{\mathcal{A}} \Gamma \vdash \bob V' \bcb : \tau
+              \, (\textsf{SEQUENCE} \, \Phi') \Rightarrow (\psi,
+              \textsf{Const} \, \tilde{V}')\\
+              \tilde{v} \triangleq (\psi, \textsf{Const} \,
+              (\tilde{v}'\Cons\tilde{V}'))}
+            %-----
+            {\domain{\mathcal{A}} \Gamma \vdash \bob V \bcb : \tau \,
+              (\textsf{SEQUENCE} \, (\varphi' \Cons \Phi'))
+              \Rightarrow \tilde{v}}
+            \;\TirName{[18]}
+        \end{mathpar}
+        Pour éviter une capture \emph{a priori} du nom~$\psi$ (lié
+        dans l'environnement courant du cas de la preuve par
+        \textbf{HF.0}) lors de l'application, effectuons tout de suite
+        le renommage suivant:
+        \begin{itemize}
+
+          \item $\psi \stackrel{\alpha}{\longleftarrow} \overline\psi$
+
+        \end{itemize}
+        et appliquons alors la nouvelle règle directement. (Insistons
+        sur le fait qu'il ne s'agissait pas d'une substitution
+        de~$\psi$, car la variable~$\psi$ n'est pas liée dans un champ
+        projeté de la conclusion.) Étiquetons alors ses prémisses non
+        redondantes avec les hypothèses de filtre:
+        \begin{itemize}
+
+          \item \textbf{H.3.0}: $\domain{\mathcal{A}} \Gamma \vdash v'
+            : \tau' \, \textrm{T}' \Rightarrow \tilde{v}'$
+   
+          \item \textbf{H.3.1}: $\domain{\mathcal{A}} \Gamma \vdash
+            \bob V' \bcb : \tau \, (\textsf{SEQUENCE} \, \Phi')
+            \Rightarrow (\overline\psi, \textsf{Const} \,
+            \tilde{V}')$
+            
+        \end{itemize}
+        et aussi le jugement résultant de la projection du champ
+        inféré:
+        \begin{itemize}
+
+          \item \textbf{H.3.2}: $(\overline\psi, \textsf{Const}
+            \, (\tilde{v}' \Cons \tilde{V}')) \lhd \tilde{v}$
+                    
+        \end{itemize}
+
+    \end{itemize}
+    Il est aisé de démontrer par induction le théorème suivant
+    (considérer les règle~\RefTirName{[18]} \vpageref{codage_18},
+    \RefTirName{[19]} \vpageref{codage_19} et~\RefTirName{[20]}
+    \vpageref{codage_20} du codage):
+    \begin{equation*}
+      \begin{array}{ll}
+        Soit & \textrm{T} \lhd \textsf{SEQUENCE} \, \Phi \\
+        et   & \tau \lhd [\textsf{Tag} \,\, \psi \,\,
+               \textsf{IMPLICIT}] \\
+        Si   & \domain{\mathcal{A}} \Gamma \vdash v : \tau \,
+               \textrm{T} \Rightarrow (\overline\psi,
+               \textsf{Const} \, \tilde{V}) \\ 
+       alors & \overline\psi = \psi
+      \end{array}
+    \end{equation*}
+    Il découle de l'application de ce théorème:
+    \begin{itemize}
+
+      \item \textbf{H.4}: $\overline\psi = \psi$
+
+    \end{itemize}
+    Maintenant
+    \begin{enumerate}
+    
+      \item Prouvons $\textbf{Hyp} \Rightarrow \textbf{PA}$. On se
+        donne:
+        \begin{itemize}
+        
+          \item \textbf{PA.H}: $\vdashD \tilde{v} \rightarrow e$.  La
+            proposition \textbf{HF.0} implique
+            \begin{itemize}
+            
+               \item is\_built\_in\_type $(\psi)$ = \textbf{true}
+
+            \end{itemize}
+            Donc, en tenant compte de \textbf{H.3.2} où~$\psi$
+            remplace~$\overline\psi$ (comme le permet l'identité
+            \textbf{H.4}), la règle~\RefTirName{[2]}
+            \vpageref{decodage_2} s'applique:
+            \begin{mathpar}
+              \inferrule
+                  {\textrm{is\_built\_in\_tag} \, (\psi)\\
+                    \textrm{T} \neq \wildTRef \mid \wildSelect \mid
+                    \wildCHOICE}
+                  %-----
+                  {\vdashD (\psi, \textsf{Const} \wild\!)
+                    \rightarrow ([\textsf{Tag} \,\, \psi \,\,
+                      \textsf{IMPLICIT}], \textrm{T})}
+                  \;\TirName{[2]}
+            \end{mathpar}
+            Appliquons directement cette règle, après le renommage
+            \begin{itemize}
+
+              \item $\textrm{T} \stackrel{\alpha}{\longleftarrow}
+                \textrm{T}_0$
+
+            \end{itemize}
+            Étiquetons alors sa prémisse non redondante:
+            \begin{itemize}   
+            
+              \item \textbf{PA.H.0}: $\textrm{T}_0 \neq \wildTRef \mid
+                \wildSelect \mid \wildCHOICE$
+
+            \end{itemize}
+            et aussi le jugement résultant de la projection du champ
+            inféré:
+            \begin{itemize}
+            
+              \item \textbf{PA.H.1}: $([\textsf{Tag} \,\, \psi \,\,
+                \textsf{IMPLICIT}], \textrm{T}_0) \lhd e$
+  
+            \end{itemize}
+
+        \end{itemize}
+        Prouvons alors:
+        \begin{itemize}
+
+          \item \textbf{PA.C}: $\domain{\mathcal{A}} \Gamma \vdash e
+            \Wide (\tau, \textrm{T})$. Les propositions \textbf{HF.0}
+            et \textbf{HF.1} et \textbf{PA.H.0} et \textbf{PA.H.1}
+            impliquent que c'est la règle~\RefTirName{[4]}
+            \vpageref{inclusion_d_etiquetages_4} qui s'applique:
+            \begin{mathpar}
+              \inferrule
+                {\domain{\mathcal{A}} \Gamma \vdash (\tau'_0,
+                  \textrm{T}_0) \Wide (\tau'_1, \textrm{T}_1)}
+                %-----
+                {\domain{\mathcal{A}} \Gamma \vdash (t \Cons \tau'_0,
+                  \textrm{T}_0) \Wide (t \Cons \tau'_1, \textrm{T}_1)}
+                \;\TirName{[4]}
+            \end{mathpar}
+            Appliquons-là. Ce faisant nous effectuons sur la règle les
+            substitutions suivantes:
+            \begin{itemize}
+
+              \item $\textrm{T}_1 \stackrel{\beta}{\longleftarrow}
+                \textrm{T}$
+
+              \item $t \stackrel{\beta}{\longleftarrow} \textsf{Tag}
+                \,\, \psi \,\, \textsf{IMPLICIT}$
+
+              \item $\tau_0 \stackrel{\beta}{\longleftarrow} \emptyL$
+
+              \item $\tau_1 \stackrel{\beta}{\longleftarrow} \emptyL$
+                   
+            \end{itemize}
+            Puis étiquetons alors sa prémisse:
+            \begin{itemize}
+
+              \item \textbf{PA.C.0}: $\domain{\mathcal{A}} \Gamma
+                \vdash (\emptyL\!, \textrm{T}_0) \Wide (\emptyL\!,
+                \textrm{T})$
+
+            \end{itemize}
+            Or, \textbf{PA.C.0} peut être dérivée par application
+            directe de la règle~\RefTirName{[8]}
+            \vpageref{inclusion_d_etiquetages_8} de la relation
+            d'inclusion d'étiquetage:
+            \begin{mathpar}
+              \inferrule
+                {\textrm{T}_0 \nlhd \wildCHOICE \mid \wildTRef \mid
+                  \wildSelect\\
+                 \textrm{T}_1 \nlhd \wildCHOICE \mid \wildTRef \mid
+                 \wildSelect}
+                %-----
+                {\domain{\mathcal{A}} \Gamma \vdash (\emptyL\!,
+                  \textrm{T}_0) \Wide (\emptyL\!, \textrm{T}_1)}
+                \;\TirName{[8]}
+            \end{mathpar}
+            (ce faisant on effectue la substitution $\textrm{T}_1
+            \stackrel{\beta}{\longleftarrow} \textrm{T}$), car
+            \textbf{PA.H.0} et \textbf{HF.1} sont des instances des
+            prémisses. Et \textbf{PA.C.0} implique par définition
+            \textbf{PA.C}.\hfill$\Diamond$
+
+        \end{itemize}
+
+      \item Prouvons $\textbf{Hyp} \Rightarrow \textbf{C}$. On a: 
+        \begin{itemize}
+        
+          \item \textbf{C}: $\domain{\mathcal{A}} \Gamma \models
+            \tilde{v} : \tau \, \textrm{T}$
+
+        \end{itemize}
+        La proposition \textbf{H.3.2} nous permet d'envisager
+        l'application de la règle~\RefTirName{[16]}
+        \vpageref{controle_semantique_des_types_16}:
+        \begin{mathpar}
+          \inferrule
+            {\textrm{T} \lhd \textsf{SEQUENCE} \, (\varphi' \Cons
+              \Phi')\\
+              \varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+              \tilde{V} \lhd \tilde{v}' \Cons \tilde{V}'\\
+              \domain{\mathcal{A}} \Gamma \vdash
+              \mathcal{D}(\tilde{v}') \Wide (\tau', \textrm{T}')\\
+              \domain{\mathcal{A}} \Gamma \models \tilde{v}' : \tau'
+              \, \textrm{T}'\\
+              \domain{\mathcal{A}} \Gamma \models (\psi,
+              \textsf{Const} \, \tilde{V}') : \tau \,\,
+              (\textsf{SEQUENCE} \, \Phi')}
+            %-----
+            {\domain{\mathcal{A}} \Gamma \models (\psi,
+              \textsf{Const} \, \tilde{V}) : \tau \, \textrm{T}}
+            \;\TirName{[16]}
+        \end{mathpar}
+        Appliquons-là directement et étiquetons les prémisses non
+        redondantes avec les hypothèses de filtre:
+        \begin{itemize}
+
+          \item \textbf{C.0}: $\domain{\mathcal{A}} \Gamma \vdash
+            \mathcal{D}(\tilde{v}') \Wide (\tau', \textrm{T}')$
+
+          \item \textbf{C.1}: $\domain{\mathcal{A}} \Gamma \models
+            \tilde{v}' : \tau' \, \textrm{T}'$
+                  
+          \item \textbf{ C.2}: $\domain{\mathcal{A}} \Gamma \models
+            (\psi, \textsf{Const} \, \tilde{V}') : \tau \,\,
+            (\textsf{SEQUENCE} \, \Phi')$
+
+        \end{itemize}
+        Dans un premier temps reprenons l'énoncé du théorème et
+        effectuons-y les renommages suivants:
+        \begin{itemize}
+
+          \item $v \stackrel{\alpha}{\longleftarrow} v'$
+
+          \item $\tau \stackrel{\alpha}{\longleftarrow} \tau'$
+
+          \item $\textrm{T} \stackrel{\alpha}{\longleftarrow}
+            \textrm{T}'$
+
+          \item $\tilde{v} \stackrel{\alpha}{\longleftarrow}
+            \tilde{v}'$
+
+        \end{itemize}
+        Nous obtenons alors:
+        \begin{equation*}
+          \begin{array}{ll}
+            Soit  & \domain{\mathcal{A}} \Gamma, x \vdashC \tau' \,
+                    \textrm{T}' \\
+            Si    & \domain{\mathcal{A}} \Gamma, x \vdash v' :
+                    \textrm{T}' \\
+            et    & \domain{\mathcal{A}} \Gamma \vdash v' : \tau' \,
+                    \textrm{T}' \Rightarrow \tilde{v}' \\
+            alors & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+                    (\tilde{v}') \Wide (\tau', \textrm{T}') \\
+            et    & \domain{\mathcal{A}} \Gamma \models \tilde{v}' :
+                    \tau' \, \textrm{T}' \\
+          \end{array}
+        \end{equation*}
+        Nous reconnaissons en cet énoncé une instance de l'hypothèse
+        d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+        \textbf{H.1.0}, \textbf{H.2.0} et \textbf{ H.3.0}. En
+        l'appliquant il vient
+        \begin{itemize}
+
+          \item \textbf{H.5}: $\domain{\mathcal{A}} \Gamma \vdash
+            \mathcal{D} \, (\tilde{v}') \Wide (\tau', \textrm{T}')$
+                 
+          \item \textbf{H.6}: $\domain{\mathcal{A}} \Gamma \models
+            \tilde{v}' : \tau' \,\, \textrm{T}'$
+
+        \end{itemize}
+        Dans un deuxième temps, reprenons l'énoncé du théorème et
+        effectuons-y les renommages suivants:
+        \begin{itemize}
+
+          \item $\textrm{T} \stackrel{\alpha}{\longleftarrow}
+            \textsf{SEQUENCE} \, \Phi'$
+
+          \item $\tilde{v} \stackrel{\alpha}{\longleftarrow} (\psi,
+            \textsf{Const} \, \tilde{V}')$
+
+          \item $v \stackrel{\alpha}{\longleftarrow} \bob V' \bcb$
+
+        \end{itemize}
+        Nous obtenons alors:
+        \begin{equation*}
+          \begin{array}{ll}
+            Soit  & \domain{\mathcal{A}} \Gamma, x \vdashC \tau \,
+                    (\textsf{SEQUENCE} \, \Phi') \\
+            Si    & \domain{\mathcal{A}} \Gamma, x \vdash \bob V' \bcb
+                    : \textsf{SEQUENCE} \, \Phi' \\
+            et    & \domain{\mathcal{A}} \Gamma \vdash \bob V' \bcb :
+                    \tau \, (\textsf{SEQUENCE} \, \Phi') \Rightarrow (\psi,
+                    \textsf{Const} \, \tilde{V}') \\
+            alors & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+                    (\psi, \textsf{Const} \, \tilde{V}')
+                    \Wide (\tau, \textsf{SEQUENCE} \, \Phi') \\
+            et    & \domain{\mathcal{A}} \Gamma \models (\psi,
+                    \textsf{Const} \, \tilde{V}') : \tau \,
+                    (\textsf{SEQUENCE} \, \Phi')
+          \end{array}
+        \end{equation*}
+        Nous reconnaissons en cet énoncé une instance de l'hypothèse
+        d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+        \textbf{H.1.1}, \textbf{H.2.1} et \textbf{ H.3.1} (où
+        $\overline\psi \stackrel{\beta}{\longleftarrow} \psi$, comme
+        le permet \textbf{H.4}). En l'appliquant il vient:
+        \begin{itemize}
+        
+          \item \textbf{H.7}: $\domain{\mathcal{A}} \Gamma \vdash
+            \mathcal{D} \, (\psi, \textsf{Const} \, \tilde{V}')
+            \Wide (\tau, \textsf{SEQUENCE} \, \Phi')$
+ 
+          \item \textbf{H.8}: $\domain{\mathcal{A}} \Gamma \models
+            (\psi, \textsf{Const} \, \tilde{V}') : \tau \,\,
+            (\textsf{SEQUENCE} \, \Phi')$
+
+        \end{itemize} 
+        On a: \textbf{H.5} = \textbf{C.0}, \textbf{H.6} = \textbf{C.1}
+        et \textbf{H.8} = \textbf{C.2}.  Les propositions
+        \textbf{C.0}, \textbf{C.1} et \textbf{C.2} impliquent par
+        définition~\textbf{C}.\hfill$\Diamond$
+
+    \end{enumerate}
+    Conclusion:
+    $\left. \begin{array}{l}
+                \textbf{Hyp} \Rightarrow \textbf{PA} \\
+                \textbf{Hyp} \Rightarrow \textbf{C}
+             \end{array}
+      \right\}
+      \,\,\, \textrm{impliquent} \,\,\,
+      \textbf{Hyp} \Rightarrow (\textbf{PA} \AND \textbf{C})
+     $.\hfill$\triangle$\\
+
+     (On note que \textbf{H.7} est inutile.)
+
+
+  \item $\textrm{T} \lhd \textsf{SEQUENCE} \, ([\varphi'] \sqcup
+    \Phi')$\\ et $\varphi' \lhd \textsf{Field} \, (l', \tau',
+    \textrm{T}', \sigma', s')$\\ et $s' \lhd \textsf{Some} \,
+    \textsf{OPTIONAL}$\\ et $\tau \lhd [\textsf{Tag} \,\, \psi \,\,
+      \textsf{IMPLICIT}]$.\\ Distinguons des hypothèses de filtre:
+    \begin{itemize}
+
+      \item \textbf{HF.0}: $\tau \lhd [\textsf{Tag} \,\, \psi \,\,
+        \textsf{IMPLICIT}]$
+  
+      \item \textbf{HF.1}: $\textrm{T} \lhd \textsf{SEQUENCE} \,
+        ([\varphi'] \sqcup \Phi')$
+
+    \end{itemize}
+    Les autres hypothèses sont
+    \begin{itemize} 
+    
+      \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma, x \vdashC \tau
+        \, \textrm{T}$.  La règle~\RefTirName{[24]}
+        \vpageref{types_canoniques_24} peut s'appliquer:
+        \begin{mathpar}
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+             \domain{\mathcal{A}} \Gamma, \emptyStr \vdashC \tau' \,
+             \textrm{T}'\\
+             \domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\,
+             (\textsf{SEQUENCE} \, \Phi')}
+            %-----
+            {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,
+              (\textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi'))}
+            \;\TirName{[24]}
+        \end{mathpar}
+        Appliquons directement cette règle (i.e. toutes les variables
+        de la règle sont liées aux variables de même nom dans
+        l'environnement du cas courant de la preuve). Étiquetons ses
+        prémisses non redondantes avec les hypothèses de filtre:
+        \begin{itemize}
+
+          \item \textbf{H.1.0}: $\domain{\mathcal{A}} \Gamma, x
+            \vdashC \tau' \, \textrm{T}'$
+
+          \item \textbf{H.1.1}: $\domain{\mathcal{A}} \Gamma, x
+            \vdashC \tau \,\, (\textsf{SEQUENCE} \, \Phi')$
+
+        \end{itemize}
+
+      \item \textbf{H.2}: $\domain{\mathcal{A}} \Gamma, x \vdash v :
+        \textrm{T}$. La règle~\RefTirName{[16]}
+        \vpageref{controle_des_types_16} peut s'appliquer:
+        \begin{mathpar}
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+              s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+              \domain{\mathcal{A}} \Gamma, x \vdash v :
+              \textsf{SEQUENCE} \, \Phi'}
+            %-------
+            {\domain{\mathcal{A}} \Gamma, x \vdash v :
+              \textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi')}
+            \;\TirName{[16]}
+        \end{mathpar}
+        Appliquons cette règle directement et étiquetons sa prémisse
+        non redondante:
+        \begin{itemize}
+
+          \item \textbf{H.2.0}: $\domain{\mathcal{A}} \Gamma, x \vdash
+            v : \textsf{SEQUENCE} \, \Phi'$
+
+        \end{itemize}
+
+      \item \textbf{H.3}: $\domain{\mathcal{A}} \Gamma \vdash v : \tau
+        \, \textrm{T} \Rightarrow \tilde{v}$. La
+        règle~\RefTirName{[19]} \vpageref{codage_19} peut s'appliquer
+        \begin{mathpar}
+          \inferrule
+           {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+             \sigma', s')\\
+             s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\\\
+            \domain{\mathcal{A}} \Gamma \vdash v : \tau \,
+            (\textsf{SEQUENCE} \, \Phi') \Rightarrow \tilde{v}}
+           %-----
+           {\domain{\mathcal{A}} \Gamma \vdash v : \tau \,
+             (\textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi'))
+             \Rightarrow \tilde{v}}
+           \;\TirName{[19]}
+        \end{mathpar}
+        Appliquons cette règle directement et étiquetons sa prémisse
+        non redondante:
+        \begin{itemize}
+
+          \item \textbf{H.3.0}: $\domain{\mathcal{A}} \Gamma \vdash v
+            : \tau \, (\textsf{SEQUENCE} \, \Phi') \Rightarrow
+            \tilde{v}$
+
+        \end{itemize}
+
+    \end{itemize}
+    Maintenant
+    \begin{enumerate}
+
+      \item Prouvons $\textbf{Hyp} \Rightarrow \textbf{PA}$. On se
+        donne:
+        \begin{itemize}
+        
+          \item \textbf{PA.H}: $\vdashD \tilde{v} \rightarrow e$. Il
+            est aisé de prouver par induction le théorème suivant
+            (considérer les règles~\RefTirName{[18]}
+            \vpageref{codage_18}, \RefTirName{[19]}
+            \vpageref{codage_19} et~\RefTirName{[20]}
+            \vpageref{codage_20} du codage):
+            \begin{equation*}
+              \begin{array}{ll}
+                Soit  & \textrm{T} \lhd \textsf{SEQUENCE} \, \Phi \\
+                et    & \tau \lhd [\textsf{Tag} \,\, \psi \,\,
+                        \textsf{IMPLICIT}] \\
+                Si    & \domain{\mathcal{A}} \Gamma \vdash v : \tau \,
+                        \textrm{T} \Rightarrow \tilde{v} \\
+                alors & \tilde{v} \lhd (\overline\psi,
+                        \textsf{Const} \, \wild\!) \\
+                et    & \overline\psi = \psi
+              \end{array}
+            \end{equation*}
+            Il découle de l'application de ce théorème que la règle
+            qui débute la preuve de \textbf{PA.H} est
+            forcément~\RefTirName{[2]} \vpageref{decodage_2}:
+            \begin{mathpar}
+              \inferrule
+                {\textrm{is\_built\_in\_tag} \, (\psi)\\
+                 \textrm{T} \neq \wildTRef \mid \wildSelect \mid
+                 \wildCHOICE}
+                %-----
+                {\vdashD (\psi, \textsf{Const} \wild\!)
+                  \rightarrow ([\textsf{Tag} \,\, \psi \,\,
+                    \textsf{IMPLICIT}], \textrm{T})}
+                \;\TirName{[2]}
+            \end{mathpar}
+            Appliquons-là directement après le renommage:
+            \begin{itemize}
+
+              \item $\textrm{T} \stackrel{\alpha}{\longleftarrow}
+                \textrm{T}_0$
+
+            \end{itemize}
+            Étiquetons alors une prémisse utile pour la suite:
+            \begin{itemize}   
+
+              \item \textbf{PA.H.0}: $\textrm{T}_0 \neq \wildTRef \mid
+                \wildSelect \mid \wildCHOICE$
+
+            \end{itemize}
+            et aussi le jugement résultant de la projection du champ
+            inféré:
+            \begin{itemize}
+
+              \item \textbf{PA.H.1}: $([\textsf{Tag} \,\, \psi \,\,
+                \textsf{IMPLICIT}], \textrm{T}_0) \lhd e$
+
+            \end{itemize}
+
+        \end{itemize}
+        Prouvons alors:
+        \begin{itemize}
+
+          \item \textbf{PA.C}: $\domain{\mathcal{A}} \Gamma \vdash e
+            \Wide (\tau, \textrm{T})$. Les propositions \textbf{HF.0},
+            \textbf{HF.1}, \textbf{PA.H.0} et \textbf{PA.H.1}
+            impliquent que c'est la règle~\RefTirName{[4]}
+            \vpageref{inclusion_d_etiquetages_4} qui s'applique:
+            \begin{mathpar}
+              \inferrule
+                {\domain{\mathcal{A}} \Gamma \vdash (\tau'_0,
+                  \textrm{T}_0) \Wide (\tau'_1, \textrm{T}_1)}
+                %-----
+                {\domain{\mathcal{A}} \Gamma \vdash (t \Cons \tau'_0,
+                  \textrm{T}_0) \Wide (t \Cons \tau'_1, \textrm{T}_1)}
+                \;\TirName{[4]}
+            \end{mathpar}
+            Appliquons-là. Ce faisant nous effectuons les
+            substitutions suivantes:
+            \begin{itemize}
+
+              \item $t \stackrel{\beta}{\longleftarrow} \textsf{Tag}
+                \,\, \psi \,\, \textsf{IMPLICIT}$
+
+              \item $\tau'_0 \stackrel{\beta}{\longleftarrow} \emptyL$
+
+
+              \item $\tau'_1 \stackrel{\beta}{\longleftarrow} \emptyL$
+
+              \item $\textrm{T}_1 \stackrel{\beta}{\longleftarrow}
+                \textrm{T}$
+
+            \end{itemize}
+            Sa prémisse est:
+            \begin{itemize}
+
+              \item \textbf{PA.C.0}: $\domain{\mathcal{A}} \Gamma
+                \vdash (\emptyL\!, \textrm{T}_0) \Wide (\emptyL\!,
+                \textrm{T})$
+
+            \end{itemize}
+            Les propositions \textbf{PA.H.0} et \textbf{HF.1}
+            impliquent que \textbf{PA.C.0} est vraie, par application
+            de la règle~\RefTirName{[8]}
+            \vpageref{inclusion_d_etiquetages_8} de la relation
+            d'inclusion d'étiquetage:
+            \begin{mathpar}
+              \inferrule
+                {\textrm{T}_0 \nlhd \wildCHOICE \mid \wildTRef \mid
+                  \wildSelect\\
+                 \textrm{T}_1 \nlhd \wildCHOICE \mid \wildTRef \mid
+                 \wildSelect}
+                %-----
+                {\domain{\mathcal{A}} \Gamma \vdash (\emptyL\!,
+                  \textrm{T}_0) \Wide (\emptyL\!, \textrm{T}_1)}
+                \;\TirName{[8]}
+            \end{mathpar}
+            où la substitutions suivante est ce faisant effectuée:
+            \begin{itemize}
+
+              \item $\textrm{T}_1 \stackrel{\beta}{\longleftarrow}
+                \textrm{T}$
+
+            \end{itemize}
+            Et \textbf{PA.C.0} implique par définition
+            \textbf{PA.C}.\hfill$\Diamond$
+
+        \end{itemize}
+
+      \item Prouvons $\textbf{Hyp} \Rightarrow \textbf{C}$. On a: 
+        \begin{itemize}
+        
+          \item \textbf{C}: $\domain{\mathcal{A}} \Gamma \models
+            \tilde{v} : \tau \, \textrm{T}$
+  
+        \end{itemize}
+        Les hypothèses de filtre permettent l'application de la
+        règle~\RefTirName{[17]}
+        \vpageref{controle_semantique_des_types_17}:
+        \begin{mathpar}
+          \inferrule
+            {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T},
+              \sigma', s')\\
+              s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+             \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+             (\textsf{SEQUENCE} \, \Phi')}
+            %-----
+            {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+              (\textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi'))}
+            \;\TirName{[17]}
+        \end{mathpar}
+        Appliquons-là directement et étiquetons sa prémisse non
+        redondante avec les hypothèses de filtre:
+        \begin{itemize}
+        
+          \item \textbf{C.0}: $\domain{\mathcal{A}} \Gamma \models
+            \tilde{v} : \tau \,\, (\textsf{SEQUENCE} \, \Phi')$
+
+        \end{itemize}
+        Reprenons l'énoncé du théorème et effectuons-y le renommage
+        suivant:
+        \begin{itemize}
+
+          \item $\textrm{T} \stackrel{\alpha}{\longleftarrow}
+            \textsf{SEQUENCE} \, \Phi'$
+
+        \end{itemize}
+        Nous obtenons alors:
+        \begin{equation*}
+          \begin{array}{ll}
+            Soit  & \domain{\mathcal{A}} \Gamma, x \vdashC \tau \,
+                    (\textsf{SEQUENCE} \, \Phi') \\
+            Si    & \domain{\mathcal{A}} \Gamma, x \vdash v :
+                    \textsf{SEQUENCE} \, \Phi' \\
+            et    & \domain{\mathcal{A}} \Gamma \vdash v : \tau \,
+                    (\textsf{SEQUENCE} \, \Phi') \Rightarrow \tilde{v} \\
+           alors  & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+                    (\tilde{v}) \Wide (\tau, \textsf{SEQUENCE} \,
+                    \Phi') \\ 
+           et     & \domain{\mathcal{A}} \Gamma \models \tilde{v} :
+                    \tau \, (\textsf{SEQUENCE} \, \Phi')
+          \end{array}
+        \end{equation*}
+        Nous reconnaissons en cet énoncé une instance de l'hypothèse
+        d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+        \textbf{H.1.1}, \textbf{H.2.0} et \textbf{H.3.0}. En
+        l'appliquant il vient:
+        \begin{itemize}
+
+          \item \textbf{H.4}: $\domain{\mathcal{A}} \Gamma \vdash
+            \mathcal{D} \, (\tilde{v}) \Wide (\tau, \textsf{SEQUENCE}
+            \, \Phi')$
+
+          \item \textbf{H.5}: $\domain{\mathcal{A}} \Gamma \models
+            \tilde{v} : \tau \,\, (\textsf{SEQUENCE} \, \Phi')$
+
+        \end{itemize} 
+        On a: \textbf{H.5} = \textbf{C.0}, et \textbf{C.0} implique
+        par définition~\textbf{C}.\hfill$\Diamond$
+
+    \end{enumerate} 
+    Conclusion:
+    $\left. \begin{array}{l}
+               \textbf{Hyp} \Rightarrow \textbf{PA} \\
+               \textbf{Hyp} \Rightarrow \textbf{C}
+            \end{array}
+     \right\}
+     \,\,\, \textrm{impliquent} \,\,\,
+      \textbf{Hyp} \Rightarrow (\textbf{PA} \AND \textbf{C})
+     $.\hfill$\triangle$ \\
+
+     On note que \textbf{H.4} est inutile. 
+
+% SET
+
+  \item $\textrm{T} \lhd \textsf{SET} \, (\varphi' \Cons \Phi')$ et
+    $\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma',
+    s')$\\ et $v \lhd \bob V \bcb$\\ et $V \lhd [(\textsf{Some} \, l',
+      v')] \sqcup V'$\\ et $\tau \lhd [\textsf{Tag} \,\, \psi \,\,
+      \textsf{IMPLICIT}]$.\\ Distinguons des hypothèses de filtre:
+    \begin{itemize}
+
+      \item \textbf{HF.0}: $\tau \lhd [\textsf{Tag} \,\, \psi \,\,
+        \textsf{IMPLICIT}]$
+
+      \item \textbf{HF.1}: $\textrm{T} \lhd \textsf{SET} \, (\varphi'
+        \Cons \Phi')$
+
+    \end{itemize}
+    Les autres hypothèses sont
+    \begin{itemize}
+    
+       \item \textbf{H.1}: $\domain{\mathcal{A}} \Gamma, x \vdashC
+         \tau \, \textrm{T}$. Remarquons que $\Phi \lhd \varphi'\Cons
+         \Phi'$ implique $\Phi \lhd [\varphi'] \sqcup \Phi'$,
+         où~$\varphi'$ et~$\Phi'$ sont identiques dans les deux
+         jugements. Par conséquent, en tenant compte des hypothèses
+         ci-dessus, nous pouvons envisager l'application de la
+         règle~\RefTirName{[22]} \vpageref{types_canoniques_22}:
+         \begin{mathpar}
+           \inferrule
+             {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+               \sigma', s')\\
+               \domain{\mathcal{A}} \Gamma, \emptyStr \vdashC \tau' \,
+               \textrm{T}'\\
+               \domain{\mathcal{A}} \Gamma, x \vdashC \tau \,\,
+               (\textsf{SET} \, \Phi')}
+             %-------
+             {\domain{\mathcal{A}} \Gamma, x \vdashC \tau \,
+               (\textsf{SET} \, ([\varphi'] \sqcup \Phi'))}
+             \;\TirName{[22]}
+         \end{mathpar}
+         Appliquons directement cette règle (i.e. toutes les variables
+         de la règle sont liées aux variables de même nom dans
+         l'environnement du cas courant de la preuve). Étiquetons ses
+         prémisses non redondantes avec les hypothèses de filtre:
+         \begin{itemize}
+
+           \item \textbf{H.1.0}: $\domain{\mathcal{A}} \Gamma, x
+             \vdashC \tau' \, \textrm{T}'$
+
+           \item \textbf{H.1.1}: $\domain{\mathcal{A}} \Gamma, x
+             \vdashC \tau \,\, (\textsf{SET} \, \Phi')$
+
+         \end{itemize}
+
+       \item \textbf{H.2}: $\domain{\mathcal{A}} \Gamma, x \vdash v :
+         \textrm{T}$. La règle~\RefTirName{[18]}
+         \vpageref{controle_des_types_18} peut s'appliquer:
+         \begin{mathpar}
+           \inferrule
+             {\domain{\mathcal{A}} \Gamma, x \vdash v :
+               \textsf{SEQUENCE} \, \Phi}
+             %-----
+             {\domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{SET}
+               \, \Phi}
+             \;\TirName{[18]}
+         \end{mathpar}
+         Appliquons-là directement et étiquetons sa premisse:
+         \begin{itemize}
+         
+           \item \textbf{H.2.0}: $\domain{\mathcal{A}} \Gamma, x
+             \vdash v : \textsf{SEQUENCE} \, \Phi$
+
+         \end{itemize}
+         Remarquons que $\Phi \lhd \varphi'\Cons \Phi'$ implique $\Phi
+         \lhd [\varphi'] \sqcup \Phi'$, où~$\varphi'$ et~$\Phi'$ sont
+         identiques dans les deux jugements. Par conséquent, en tenant
+         compte des hypothèses ci-dessus, nous pouvons envisager
+         l'application de la règle~\RefTirName{[15]}
+         \vpageref{controle_des_types_15}:
+         \begin{mathpar}
+           \inferrule
+             {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+               \sigma', s')\\
+               V \lhd [(\textsf{Some} \, l', v')] \sqcup V'\\
+               \domain{\mathcal{A}} \Gamma, \emptyStr \vdash v' :
+               \textrm{T}'\\
+               \domain{\mathcal{A}} \Gamma, x \vdash \bob V' \bcb :
+               \textsf{SEQUENCE} \, \Phi'}
+             %-----
+             {\domain{\mathcal{A}} \Gamma, x \vdash \bob V \bcb :
+               \textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi')}
+             \;\TirName{[15]}
+         \end{mathpar}
+         Appliquons directement cette règle et étiquetons ses
+         prémisses non redondantes avec les hypothèses de filtre:
+         \begin{itemize}
+
+           \item \textbf{H.2.0.0}: $\domain{\mathcal{A}} \Gamma,
+             \emptyStr \vdash v' : \textrm{T}'$
+
+           \item \textbf{H.2.0.1}: $\domain{\mathcal{A}} \Gamma, x
+             \vdash \bob V'\bcb : \textsf{SEQUENCE} \, \Phi'$
+
+         \end{itemize}
+         \textbf{H.2.0.1} est une instance possible pour l'unique
+         prémisse de la règle~\RefTirName{[18]}
+         \vpageref{controle_des_types_18}:
+         \begin{mathpar}
+           \inferrule
+             {\domain{\mathcal{A}} \Gamma, x \vdash v :
+               \textsf{SEQUENCE} \, \Phi}
+             %-----
+             {\domain{\mathcal{A}} \Gamma, x \vdash v : \textsf{SET}
+               \, \Phi}
+             \;\TirName{[18]}
+         \end{mathpar}
+         qui permet alors de dériver directement
+         \begin{itemize}
+         
+           \item \textbf{H.9}: $\domain{\mathcal{A}} \Gamma, x \vdash
+             \bob V'\bcb : \textsf{SET} \, \Phi'$
+
+         \end{itemize}
+
+       \item \textbf{H.3}: $\domain{\mathcal{A}} \Gamma \vdash v :
+         \tau \, \textrm{T} \Rightarrow \tilde{v}$. La
+         règle~\RefTirName{[21]} \vpageref{codage_21} peut
+         s'appliquer:
+         \begin{mathpar}
+           \inferrule
+             {\domain{\mathcal{A}} \Gamma \vdash v : \tau \,
+               (\textsf{SEQUENCE} \, \Phi) \Rightarrow (\psi,
+               \textsf{Const} \, \tilde{V})\\
+               \permutation{\pi}{\tilde{V}}}
+             %-----
+             {\domain{\mathcal{A}} \Gamma \vdash v : \tau \,
+               (\textsf{SET} \, \Phi) \Rightarrow (\psi,
+               \textsf{Const} \,  ( \pi \,\, (\tilde{V})))}
+             \;\TirName{[21]}
+         \end{mathpar}
+         Pour éviter une capture \emph{a priori} du nom~$\psi$ (lié
+         dans l'environnement courant du cas de la preuve par
+         \textbf{HF.0}) lors de l'application, effectuons tout de
+         suite le renommage suivant:
+         \begin{itemize}
+
+           \item $\psi \stackrel{\alpha}{\longleftarrow}
+             \overline\psi$
+
+         \end{itemize}
+         et appliquons alors la nouvelle règle directement.
+         (Insistons sur le fait qu'il ne s'agissait pas d'une
+         substitution de~$\psi$, car la variable~$\psi$ n'est pas liée
+         dans un champ projeté de la conclusion.) Étiquetons alors ses
+         prémisses:
+         \begin{itemize}
+
+           \item \textbf{H.3.0}: $\domain{\mathcal{A}} \Gamma \vdash v
+             : \tau \, (\textsf{SEQUENCE} \, \Phi) \Rightarrow
+             (\overline\psi, \textsf{Const} \, \tilde{V})$
+ 
+           \item \textbf{H.3.1}: $\permutation{\pi}{\tilde{V}}$ 
+
+         \end{itemize}
+         et aussi le jugement résultant de la projection du champ
+         inféré:
+         \begin{itemize}
+
+           \item \textbf{H.3.2}: $(\overline\psi, \textsf{Const}
+             \, (\pi \,\, (\tilde{V}))) \lhd \tilde{v}$
+
+         \end{itemize}
+         Il est d'autre part aisé de démontrer par induction le
+         théorème suivant (considérer les règles~\RefTirName{[18]}
+         \vpageref{codage_18}, \RefTirName{[19]} \vpageref{codage_19}
+         et~\RefTirName{[20]} \vpageref{codage_20} du codage):
+         \begin{equation*}
+           \begin{array}{ll}
+             Soit  & \textrm{T} \lhd \textsf{SEQUENCE} \, \Phi \\
+             et    & \tau \lhd [\textsf{Tag} \,\, \psi \,\,
+                     \textsf{IMPLICIT}] \\
+             Si    & \domain{\mathcal{A}} \Gamma \vdash v : \tau \,
+                     \textrm{T}  \Rightarrow (\overline\psi,
+                     \textsf{Const} \, \tilde{V}) \\
+             alors & \overline\psi = \psi
+           \end{array}
+         \end{equation*}
+         Il découle de l'application de ce théorème:
+         \begin{itemize}
+
+           \item \textbf{H.4}: $\overline\psi = \psi$
+
+         \end{itemize}
+         Les propositions \textbf{H.3.0} et \textbf{H.4} impliquent:
+         \begin{itemize}
+
+           \item \textbf{H.10}: $\domain{\mathcal{A}} \Gamma \vdash v
+             : \tau \, (\textsf{SEQUENCE} \, \Phi) \Rightarrow (\psi,
+             \textsf{Const} \, \tilde{V})$
+             
+         \end{itemize}
+         Les propositions \textbf{H.3.2} et \textbf{H.4} impliquent:
+         \begin{itemize}
+
+           \item \textbf{H.11}: $(\psi, \textsf{Const} \, (\pi
+             \,\, (\tilde{V}))) \lhd \tilde{v}$
+
+         \end{itemize}
+         En tenant compte des hypothèses ci-dessus, nous pouvons
+         envisager l'application de la règle~\RefTirName{[18]}
+         \vpageref{codage_18}, à partir du jugement \textbf{H.10}:
+         \begin{mathpar}
+           \inferrule
+             {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+               \sigma', s')\\
+               V \lhd [(\textsf{Some} \, l', v')] \sqcup V'\\
+               \domain{\mathcal{A}} \Gamma \vdash v' : \tau' \,
+               \textrm{T}' \Rightarrow \tilde{v}'\\
+               \domain{\mathcal{A}} \Gamma \vdash \bob V' \bcb : \tau
+               \, (\textsf{SEQUENCE} \, \Phi') \Rightarrow (\psi,
+               \textsf{Const} \, \tilde{V}')\\
+               \tilde{v} \triangleq (\psi, \textsf{Const} \,
+               (\tilde{v}'\Cons\tilde{V}'))}
+             %-----
+             {\domain{\mathcal{A}} \Gamma \vdash \bob V \bcb : \tau \,
+               (\textsf{SEQUENCE} \, (\varphi' \Cons \Phi'))
+               \Rightarrow \tilde{v}}
+             \;\TirName{[18]}
+         \end{mathpar}
+         Pour éviter une capture du nom~$\tilde{v}$ qui est lié dans
+         l'environnement du cas courant de la preuve par
+         \textbf{H.11}, effectuons d'abord le renommage:
+         \begin{itemize}
+
+           \item $\tilde{v} \stackrel{\alpha}{\longleftarrow}
+             \tilde{v}_0$
+
+         \end{itemize}
+         Appliquons cette règle, et étiquetons alors ses prémisses non
+         redondantes avec les hypothèses de filtre.
+         \begin{itemize}
+
+           \item \textbf{H.10.0}: $\domain{\mathcal{A}} \Gamma \vdash
+             v' : \tau' \, \textrm{T}' \Rightarrow \tilde{v}'$
+   
+           \item \textbf{H.10.1}: $\domain{\mathcal{A}} \Gamma \vdash
+             \bob V' \bcb : \tau \, (\textsf{SEQUENCE} \, \Phi')
+             \Rightarrow (\psi, \textsf{Const} \, \tilde{V}')$
+
+           \item \textbf{H.10.3}: $\tilde{v}_0 \triangleq (\psi,
+             \textsf{Const} \, (\tilde{v}' \Cons \tilde{V}'))$
+           
+         \end{itemize}
+         Ici nous devons identifier le terme~$\tilde{v}_0$ et le champ
+         inféré du jugement \textbf{H.10} parce que, dans le jugement
+         \textbf{H.10}, à partir duquel nous appliquons cette règle,
+         $(\psi, \textsf{Const} \, \tilde{V})$ est une valeur,
+         et non un motif. Soit:
+         \begin{itemize}
+
+           \item \textbf{H.12}: $\tilde{v}_0 = (\psi,
+             \textsf{Const} \, \tilde{V})$
+
+         \end{itemize}
+         Les propositions \textbf{H.10.3} et \textbf{H.12} impliquent:
+         \begin{itemize}
+
+           \item \textbf{H.13}: $\tilde{v}' \Cons \tilde{V}' =
+             \tilde{V}$
+
+         \end{itemize}
+
+    \end{itemize}
+    La proposition \textbf{H.10.1} est une instance possible pour la
+    première prémisse de la règle~\RefTirName{[21]}
+    \vpageref{codage_21}:
+    \begin{mathpar}
+      \inferrule
+      {\domain{\mathcal{A}} \Gamma \vdash v : \tau \,
+        (\textsf{SEQUENCE} \, \Phi) \Rightarrow (\psi,
+        \textsf{Const} \, \tilde{V})\\
+        \permutation{\pi}{\tilde{V}}}
+      %----
+      {\domain{\mathcal{A}} \Gamma \vdash v : \tau \, (\textsf{SET} \,
+        \Phi)  \Rightarrow (\psi, \textsf{Const} \,  ( \pi \,\,
+        (\tilde{V})))}
+      \;\TirName{[21]}
+    \end{mathpar}
+    Pour éviter une capture \emph{a priori} du nom~$\pi$ (lié dans
+    l'environnement courant du cas de la preuve par \textbf{H.3.1})
+    lors de la dérivation, effectuons tout de suite le renommage
+    suivant:
+    \begin{itemize}
+
+      \item $\pi \stackrel{\alpha}{\longleftarrow} \overline\pi$
+
+    \end{itemize}
+    Dérivons un jugement à l'aide de cette règle, après ce
+    renommage. Ce faisant nous effectuons les substitutions suivantes:
+    \begin{itemize}
+
+      \item $\Phi \stackrel{\beta}{\longleftarrow} \Phi'$
+
+      \item $\tilde{V} \stackrel{\beta}{\longleftarrow} \tilde{V}'$
+
+      \item $v \stackrel{\beta}{\longleftarrow} \bob V' \bcb$
+
+    \end{itemize}
+    La conclusion est alors:
+    \begin{itemize}
+
+      \item \textbf{H.14}: $\domain{\mathcal{A}} \Gamma \vdash \bob V'
+        \bcb : \tau \, (\textsf{SET} \, \Phi') \Rightarrow (\psi,
+        \textsf{Const} \, (\overline\pi \,\, (\tilde{V}')))$
+
+    \end{itemize}
+    avec 
+    \begin{itemize}
+
+      \item \textbf{H.14.0}: $\permutation{\overline\pi}{\tilde{V}'}$
+
+    \end{itemize}
+    Maintenant
+    \begin{enumerate}
+    
+      \item Prouvons $\textbf{Hyp} \Rightarrow \textbf{PA}$. On se
+        donne:
+        \begin{itemize}
+        
+          \item \textbf{PA.H}: $\vdashD \tilde{v} \rightarrow e$. La
+            propositiion \textbf{HF.0} implique
+            \begin{itemize}
+            
+              \item is\_built\_in\_type $(\psi)$ = \textbf{true}
+
+            \end{itemize}
+            Donc, en tenant compte de \textbf{H.11}, la
+            règle~\RefTirName{[2]} \vpageref{decodage_2} s'applique:
+            \begin{mathpar}
+              \inferrule
+                {\textrm{is\_built\_in\_tag} \, (\psi)\\
+                  \textrm{T} \neq \wildTRef \mid \wildSelect \mid
+                  \wildCHOICE}
+                %-------
+                {\vdashD (\psi, \textsf{Const} \wild\!)
+                  \rightarrow ([\textsf{Tag} \,\, \psi \,\,
+                    \textsf{IMPLICIT}], \textrm{T})}
+                \;\TirName{[2]}
+            \end{mathpar}
+            Appliquons directement cette règle, après le renommage
+            \begin{itemize}
+
+              \item $\textrm{T} \stackrel{\alpha}{\longleftarrow}
+                \textrm{T}_0$
+
+            \end{itemize}
+            Étiquetons ses prémisses non redondantes:
+            \begin{itemize}   
+            
+              \item \textbf{PA.H.0}: $\textrm{T}_0 \neq \wildTRef \mid
+                \wildSelect \mid \wildCHOICE$
+
+              \item \textbf{PA.H.1}: $e \triangleq ([\textsf{Tag} \,\,
+                \psi \,\, \textsf{IMPLICIT}], \textrm{T}_0)$
+
+            \end{itemize}
+            Notons que la proposition \textbf{PA.H.1} définit la
+            liaison de nom~$e$ (la variable~$e$ n'est pas substituée
+            lors de l'application de la règle car elle lie une
+            inférence).
+
+        \end{itemize}
+        Prouvons alors:
+        \begin{itemize}
+
+          \item \textbf{PA.C}: $\domain{\mathcal{A}} \Gamma \vdash e
+            \Wide (\tau, \textrm{T})$. Les propositions \textbf{HF.0},
+            \textbf{HF.1}, \textbf{PA.H.0} et \textbf{PA.H.1}
+            impliquent que c'est la règle~\RefTirName{[4]}
+            \vpageref{inclusion_d_etiquetages_4} qui s'applique:
+            \begin{mathpar}
+              \inferrule
+                {\domain{\mathcal{A}} \Gamma \vdash (\tau'_0,
+                  \textrm{T}_0) \Wide (\tau'_1, \textrm{T}_1)}
+                %-----
+                {\domain{\mathcal{A}} \Gamma \vdash (t \Cons \tau'_0,
+                  \textrm{T}_0) \Wide (t \Cons \tau'_1, \textrm{T}_1)}
+                \;\TirName{[4]}
+            \end{mathpar}
+            Appliquons-là. Ce faisant nous effectuons sur la règle les
+            substitutions suivantes:
+            \begin{itemize}
+
+              \item $\textrm{T}_1 \stackrel{\beta}{\longleftarrow}
+                \textrm{T}$
+
+              \item $t \stackrel{\beta}{\longleftarrow} \textsf{Tag}
+                \,\, \psi \,\, \textsf{IMPLICIT}$
+
+              \item $\tau_0 \stackrel{\beta}{\longleftarrow} \emptyL$ 
+
+              \item $\tau_1 \stackrel{\beta}{\longleftarrow} \emptyL$ 
+                   
+            \end{itemize}
+            Puis étiquetons alors sa prémisse:
+            \begin{itemize}
+
+              \item \textbf{PA.C.0}: $\domain{\mathcal{A}} \Gamma
+                \vdash (\emptyL\!, \textrm{T}_0) \Wide (\emptyL\!,
+                \textrm{T})$
+
+            \end{itemize}
+            Or la proposition \textbf{PA.C.0} peut être dérivée par la
+            règle~\RefTirName{[8]}
+            \vpageref{inclusion_d_etiquetages_8} de la relation
+            d'inclusion d'étiquetage:
+            \begin{mathpar}
+              \inferrule
+              {\textrm{T}_0 \nlhd \wildCHOICE \mid \wildTRef \mid
+                \wildSelect\\
+                \textrm{T}_1 \nlhd \wildCHOICE \mid \wildTRef \mid
+                \wildSelect}
+              %-----
+              {\domain{\mathcal{A}} \Gamma \vdash (\emptyL\!,
+                \textrm{T}_0) \Wide (\emptyL\!, \textrm{T}_1)}
+              \;\TirName{[8]}
+            \end{mathpar}
+            Ce faisant nous effectuons la substitution suivante: 
+            \begin{itemize}
+
+              \item $\textrm{T}_1 \stackrel{\beta}{\longleftarrow}
+                \textrm{T}$
+
+            \end{itemize}
+            et nous reconnaissons que les propositions \textbf{PA.H.0}
+            et \textbf{HF.1} permettent d'instancier les premisses.
+            La proposition \textbf{PA.C.0} implique par définition
+            \textbf{PA.C}.\hfill$\Diamond$
+
+        \end{itemize}
+        
+      \item Prouvons $\textbf{Hyp} \Rightarrow \textbf{C}$.
+        \begin{itemize}
+        
+          \item \textbf{C}: $\domain{\mathcal{A}} \Gamma \models
+            \tilde{v} : \tau \, \textrm{T}$
+
+        \end{itemize}
+        La proposition \textbf{H.12} nous permet d'envisager
+        l'application de la règle~\RefTirName{[19]}
+        \vpageref{controle_semantique_des_types_19}:
+        \begin{mathpar}
+          \inferrule
+            {\textrm{T} \lhd \textsf{SET} \, ([\varphi'] \sqcup \Phi')\\
+              \varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}',
+              \sigma', s')\\
+              \tilde{V} \lhd [\tilde{v}'] \sqcup \tilde{V}'\\
+              \domain{\mathcal{A}} \Gamma \vdash
+              \mathcal{D}(\tilde{v}') \Wide (\tau', \textrm{T}')\\
+              \domain{\mathcal{A}} \Gamma \models \tilde{v}' : \tau'
+              \, \textrm{T}'\\
+              \domain{\mathcal{A}} \Gamma \models (\psi,
+              \textsf{Const} \, \tilde{V}') : \tau \,\,
+              (\textsf{SET} \, \Phi')}
+            %-----
+            {\domain{\mathcal{A}} \Gamma \models (\psi,
+              \textsf{Const} \, \tilde{V}) : \tau \, \textrm{T}}
+            \;\TirName{[19]}
+        \end{mathpar}
+        Pour éviter \emph{a priori} une capture des noms~$\tilde{v}'$
+        et~$\tilde{V}'$, Effectuons d'abord les renommages suivants:
+        \begin{itemize}
+       
+          \item $\tilde{v}' \stackrel{\alpha}{\longleftarrow}
+            \tilde{v}'_0$
+
+          \item $\tilde{V}' \stackrel{\alpha}{\longleftarrow}
+            \tilde{V}'_0$
+
+        \end{itemize}
+        Appliquons ensuite la règle, en effectuant la substitution
+        suivante (à cause de \textbf{H.12}):
+
+    \begin{itemize}
+
+  \item $\tilde{V} \stackrel{\beta}{\longleftarrow} \pi \,
+    (\tilde{V})$
+
+\end{itemize}
+Remarquons que $\Phi \lhd \varphi'\Cons \Phi'$ implique $\Phi \lhd
+[\varphi'] \sqcup \Phi'$, où~$\varphi'$ et~$\Phi'$ sont identiques
+dans les deux jugements. Étiquetons les prémisses non redondantes avec
+les hypothèses de filtre:
+\begin{itemize}
+ 
+  \item \textbf{C.0}: $\pi \, (\tilde{V}) \lhd [\tilde{v}'_0] \sqcup
+    \tilde{V}'_0$
+
+  \item \textbf{C.1}: $\domain{\mathcal{A}} \Gamma \vdash
+    \mathcal{D}(\tilde{v}_0') \Wide (\tau', \textrm{T}')$
+
+  \item \textbf{C.2}: $\domain{\mathcal{A}} \Gamma \models
+    \tilde{v}'_0 : \tau' \, \textrm{T}'$
+                  
+  \item \textbf{C.3}: $\domain{\mathcal{A}} \Gamma \models (\psi,
+    \textsf{Const} \, \tilde{V}'_0) : \tau \,\, (\textsf{SET} \,
+    \Phi')$
+
+\end{itemize}
+Par ailleurs, $\pi$~et~$\overline\pi$ sont des méta-variables dont les
+uniques prédicats sont \textbf{ H.3.1} et \textbf{H.10.1.1}, et nous
+avons \textbf{H.13}. Nous pouvons alors choisir
+$\pi$~et~$\overline\pi$ tels que:
+\begin{itemize}
+    
+  \item $\pi \, (\tilde{V}) = [\tilde{v}'] \sqcup \overline\pi \,
+    (\tilde{V}')$
+
+\end{itemize}
+Donc si l'on suppose:
+\begin{itemize}
+
+  \item \textbf{H.15}: $\tilde{v}'_0 = \tilde{v}'$ 
+ 
+  \item \textbf{H.16}: $\tilde{V}'_0 = \overline\pi \, (\tilde{V}')$
+
+\end{itemize}
+alors \textbf{C.0} est vraie et il nous reste à démontrer
+\textbf{C.1}, \textbf{C.2} et \textbf{C.3}. Dans un premier temps
+reprenons l'énoncé du théorème et effectuons-y les renommages
+suivants:
+\begin{itemize}
+
+  \item $v \stackrel{\alpha}{\longleftarrow} v'$
+
+  \item $\tau \stackrel{\alpha}{\longleftarrow} \tau'$
+
+  \item $\textrm{T} \stackrel{\alpha}{\longleftarrow} \textrm{T}'$
+
+  \item $\tilde{v} \stackrel{\alpha}{\longleftarrow} \tilde{v}'$
+
+\end{itemize}
+Nous obtenons alors:
+\begin{equation*}
+  \begin{array}{ll}
+    Soit  & \domain{\mathcal{A}} \Gamma, x \vdashC \tau' \,
+            \textrm{T}'\\
+    Si    & \domain{\mathcal{A}} \Gamma, x \vdash v' : \textrm{T}' \\
+    et    & \domain{\mathcal{A}} \Gamma \vdash v' : \tau' \,
+            \textrm{T}' \Rightarrow \tilde{v}' \\
+   alors  & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \,
+            (\tilde{v}')   \Wide (\tau', \textrm{T}') \\
+   et     & \domain{\mathcal{A}} \Gamma \models \tilde{v}' : \tau' \,
+            \textrm{T}'
+  \end{array}
+\end{equation*}
+Nous reconnaissons en cet énoncé une instance de l'hypothèse
+d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+\textbf{H.1.0}, \textbf{H.2.0.0} et \textbf{H.10.0}. En l'appliquant
+il vient
+\begin{itemize}
+
+  \item \textbf{H.5}: $\domain{\mathcal{A}} \Gamma \vdash \mathcal{D}
+    \, (\tilde{v}') \Wide (\tau', \textrm{T}')$
+                 
+  \item \textbf{H.6}: $\domain{\mathcal{A}} \Gamma \models \tilde{v}'
+    : \tau' \,\, \textrm{T}'$
+
+\end{itemize}
+Dans un deuxième temps, reprenons l'énoncé du théorème et effectuons-y
+les renommages suivants:
+\begin{itemize}
+
+  \item $\textrm{T} \stackrel{\alpha}{\longleftarrow} \textsf{SET} \,
+    \Phi'$
+
+  \item $\tilde{v} \stackrel{\alpha}{\longleftarrow} (\psi,
+    \textsf{Const} \, (\overline\pi \, (\tilde{V}')))$
+
+  \item $v \stackrel{\alpha}{\longleftarrow} \bob V' \bcb$
+
+\end{itemize}
+Nous obtenons alors:
+\begin{equation*}
+  \begin{array}{ll}
+    Soit  & \domain{\mathcal{A}} \Gamma, x \vdashC \tau \,
+            (\textsf{SET} \, \Phi') \\
+    Si    & \domain{\mathcal{A}} \Gamma, x \vdash \bob V' \bcb  :
+            \textsf{SET} \, \Phi' \\
+    et    & \domain{\mathcal{A}} \Gamma \vdash \bob V' \bcb : \tau \,
+            (\textsf{SET} \, \Phi') \Rightarrow (\psi,
+            \textsf{Const} \, (\overline\pi \, (\tilde{V}')))\\
+   alors  & \domain{\mathcal{A}} \Gamma \vdash \mathcal{D} \, (\psi,
+           \textsf{Const} \, (\overline\pi \, (\tilde{V}')))
+           \Wide (\tau, \textsf{SET} \, \Phi') \\
+   et     & \domain{\mathcal{A}} \Gamma \models (\psi,
+            \textsf{Const} \, (\overline\pi \, (\tilde{V}'))) :
+            \tau \, (\textsf{SET} \, \Phi')
+  \end{array}
+\end{equation*}
+Nous reconnaissons en cet énoncé une instance de l'hypothèse
+d'induction, car ses prémisses sont, dans l'ordre d'écriture,
+\textbf{H.1.1}, \textbf{H.9} et \textbf{ H.14}. En l'appliquant il
+vient:
+\begin{itemize}
+
+  \item \textbf{H.7}: $\domain{\mathcal{A}} \Gamma \vdash \mathcal{D}
+    \, (\psi, \textsf{Const} \, (\overline\pi \, (\tilde{V}')))
+    \Wide (\tau, \textsf{SET} \, \Phi')$
+ 
+  \item \textbf{H.8}: $\domain{\mathcal{A}} \Gamma \models (\psi,
+    \textsf{Const} \, (\overline\pi \, (\tilde{V}'))) : \tau
+    \,\, (\textsf{SET} \, \Phi')$
+
+\end{itemize} 
+On a: 
+\begin{itemize}
+
+  \item \textbf{H.5} et \textbf{H.15} impliquent \textbf{C.1}.
+
+  \item \textbf{H.6} et \textbf{H.15} impliquent \textbf{C.2}.
+
+  \item \textbf{H.8} et \textbf{H.16} impliquent \textbf{C.3}.
+
+\end{itemize}
+Les propositions \textbf{C.0}, \textbf{C.1}, \textbf{C.2} et
+\textbf{C.3} impliquent par définition~\textbf{C}.\hfill$\Diamond$
+
+\end{enumerate} 
+Conclusion:
+     $\left. \begin{array}{l}
+                \textbf{Hyp} \Rightarrow \textbf{PA} \\
+                \textbf{Hyp} \Rightarrow \textbf{C}
+             \end{array}
+      \right\}
+      \,\,\, \textrm{impliquent} \,\,\,
+      \textbf{Hyp} \Rightarrow (\textbf{PA} \AND \textbf{C})
+     $.\hfill$\triangle$ \\
+
+     On note que \textbf{H.7} est inutile.
+
+  \item $\textrm{T} \lhd \textsf{SET} \, ([\varphi'] \sqcup \Phi')$ et
+    $\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma',
+    s')$\\ et $s' \lhd \textsf{Some} \, \textsf{OPTIONAL}$\\ et $\tau
+    \lhd [\textsf{Tag} \,\, \psi \,\, \textsf{IMPLICIT}]$.\\ Cas
+    laissé au lecteur.
+
+\end{itemize}
+
+$\Box$ 

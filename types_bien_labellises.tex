@@ -1,0 +1,80 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \{\} \vdashL \textrm{T}}
+%-----
+  {\domain{\mathcal{A}} \Gamma \vdashL \textrm{T}}
+\;\TirName{[1]}
+\label{types_bien_labellises_1}
+
+% TRef
+%
+\inferrule
+  {x' \in \mathcal{A}\\
+  \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+  \domain{\mathcal{A}} \Gamma, \textrm{L} \vdashL \textrm{T}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{L} \vdashL \textsf{TRef} \,
+    (x')}
+\;\TirName{[2]}
+\label{types_bien_labellises_2}
+
+% CHOICE
+%
+\inferrule
+  {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+  \domain{\mathcal{A}} \Gamma, \{\} \vdashL \textrm{T}'\\
+  \domain{\mathcal{A}} \Gamma, \{l'\} \uplus \textrm{L} \vdashL
+  \textsf{CHOICE} \, \mathcal{F}'}
+%------
+  {\domain{\mathcal{A}} \Gamma, \textrm{L} \vdashL \textsf{CHOICE} \,
+    ([f'] \sqcup \mathcal{F}')}
+\;\TirName{[3]} 
+\label{types_bien_labellises_3}
+
+% SEQUENCE OF/SET OF
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \{\} \vdashL \textrm{T}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \{\} \vdashL (\textsf{SEQUENCE OF}
+    \mid \textsf{SET OF}) \, \tau' \, \textrm{T}' \, \sigma'}
+\;\TirName{[4]} 
+\label{types_bien_labellises_4}
+
+% SEQUENCE
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+  \domain{\mathcal{A}} \Gamma, \{\} \vdashL \textrm{T}'\\
+  \domain{\mathcal{A}} \Gamma, \{l'\} \uplus \textrm{L} \vdashL
+  \textsf{SEQUENCE} \, \Phi'}
+%------
+  {\domain{\mathcal{A}} \Gamma, \textrm{L} \vdashL \textsf{SEQUENCE}
+    \, ([\varphi'] \sqcup \Phi')}
+\;\TirName{[5]} 
+\label{types_bien_labellises_5}
+
+% SET
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \textrm{L} \vdashL \textsf{SEQUENCE}
+    \, \Phi}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{L} \vdashL \textsf{SET} \,
+    \Phi}
+\;\TirName{[6]} 
+\label{types_bien_labellises_6}
+
+% Constant type constructors (AXIOM)
+%
+\inferrule
+  {\textrm{T} \nlhd \wildTRef \mid \wildCHOICE \\
+              \mid \wildSETOF \mid \wildSEQUENCEOF \\
+              \mid \wildSET \mid \wildSEQUENCE}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{L} \vdashL \textrm{T}}
+\;\TirName{[7]}
+\label{types_bien_labellises_7}
+\end{mathparpagebreakable}

@@ -1,0 +1,125 @@
+\documentclass[a4paper,11pt,twoside,final]{book}
+
+% Page geometry for College Publications
+%
+\usepackage[bindingoffset=0cm,a4paper,centering,textheight=200mm,textwidth=120mm,includefoot,includehead,dvips]{geometry}
+
+% Bibliographic style
+%
+\usepackage[comma]{natbib}
+\bibliographystyle{plainnat-fr}
+\usepackage{etoolbox}
+\apptocmd{\thebibliography}{\raggedright}{}{} % No Underfull \hbox
+
+% Language and fonts
+%
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}       % Required for \DJ and hyphenation
+\usepackage[francais]{babel}
+\frenchspacing
+\usepackage{url}               % To typeset URLs
+\usepackage{microtype}         % Microtypographic enhancements
+\usepackage[french]{varioref}  % References with page numbers
+\usepackage{verbatim} 
+\usepackage{alltt}             % Extended verbatim environment
+
+\hyphenation{cons-tan-te cons-tan-tes}
+
+% Figures/Graphics
+%
+\usepackage{graphicx}          % Inclusion
+\usepackage{lettrine}
+
+% Maths & Logic
+%
+\usepackage{amsmath,amssymb,amsthm,stmaryrd}
+\theoremstyle{plain}
+\newtheorem{thm}{Théorème}
+\newtheorem{lemma}{Lemme}
+\usepackage{mathpartir}
+%% \usepackage{latexsym}
+
+% Page style
+%
+\usepackage{fancyhdr}
+\pagestyle{fancyplain}
+\setlength{\headheight}{14.0pt}
+% Remember chapter title
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+% Remember section and title
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+\lhead[\fancyplain{}{\bfseries\thepage}]{\fancyplain{}{\bfseries\rightmark}}
+\rhead[\fancyplain{}{\bfseries\leftmark}]{\bfseries\thepage}
+\cfoot{}
+
+% Miscellanea
+%
+\usepackage{framed}
+\usepackage{longtable}
+
+% User-defined macros
+%
+\input{commandes}
+
+\begin{document}
+
+\input{couverture}
+
+\thispagestyle{empty} \ \clearemptydoublepage
+\thispagestyle{empty} \ \clearemptydoublepage
+
+\thispagestyle{empty}
+\input{dedicace}
+
+\clearemptydoublepage
+
+\thispagestyle{empty}
+\input{exergue}
+
+\clearemptydoublepage
+
+\pagenumbering{arabic}
+
+\chapter*{Introduction}
+\markboth{Introduction}{Introduction}
+\addcontentsline{toc}{chapter}{\protect\numberline{}Introduction}
+\input{introduction}
+
+\chapter{Noyau}
+\label{noyau_ASN.1}
+\input{noyau}
+
+\chapter{Contrôle des types}
+\label{controle_des_types_informel}
+\input{controle_des_types_informel}
+
+\chapter{Sémantique}
+\label{semantique_informelle}
+\input{semantique_informelle}
+
+\chapter{Contrôle des sous-types}
+\label{controle_des_sous-types_informel}
+\input{controle_des_sous-types_informel}
+
+\chapter*{Conclusion}
+\markboth{Conclusion}{Conclusion}
+\addcontentsline{toc}{chapter}{\protect\numberline{}Conclusion}
+\input{conclusion}
+
+\chapter*{Annexe}
+\markboth{Annexe}{Annexe}
+\addcontentsline{toc}{chapter}{\protect\numberline{}Annexe}
+\input{annexe}
+
+\cleardoublepage
+
+\addcontentsline{toc}{chapter}{Bibliographie}
+\bibliography{biblio}
+\nocite{*}
+
+\tableofcontents
+
+\cleardoublepage
+\thispagestyle{empty} \ \clearemptydoublepage
+
+\end{document}

@@ -1,0 +1,227 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta
+    \bouchon{11} \domain{\mathcal{A}} \Gamma \rightarrow r}
+%-----
+  {\domain{\mathcal{B}} \Delta \bouchon{53} \domain{\mathcal{A}}
+    \Gamma \rightarrow r}
+
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \{(\textrm{T}, \sigma)\})\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x
+  \bouchon{22} \sigma \rightarrow (\overline\sigma,
+  \domain{\mathcal{B}_0} \Delta_0)\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}_0} \Delta_0
+  \bouchon{11} \domain{\mathcal{A}'} \Gamma \rightarrow
+  (\domain{\overline{\mathcal{A}}'} \overline\Gamma,
+  \domain{\mathcal{B}_1} \Delta_1)\\
+  \domain{\overline{\mathcal{A}}_0} \overline\Gamma_0 \triangleq
+  \domain{\overline{\mathcal{A}}'} \overline\Gamma \oplus x \mapsto
+  (\alpha, \tau, \{(\textrm{T}, \overline\sigma)\})}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta
+    \bouchon{11} \domain{\{x\} \uplus \mathcal{A}'} \Gamma \rightarrow
+    (\domain{\overline{\mathcal{A}}_0} \overline\Gamma_0,
+    \domain{\mathcal{B}_1} \Delta_1)}
+
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta
+    \bouchon{11} \domain{\varnothing} \Gamma \rightarrow
+    (\domain{\varnothing} \Gamma, \domain{\mathcal{B}} \Delta)}
+
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x
+    \bouchon{21} \nu \rightarrow (\overline\nu, \domain{\mathcal{B}_0}
+    \Delta_0)\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}_0} \Delta_0, x
+  \bouchon{22} \sigma \rightarrow (\overline\sigma,
+  \domain{\mathcal{B}_1} \Delta_1)}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x
+    \bouchon{22} \{\nu\} \uplus \sigma \rightarrow (\{\overline\nu\}
+    \cup \overline\sigma, \domain{\mathcal{B}_1} \Delta_1)}
+
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x
+    \bouchon{22} \{\} \rightarrow (\{\}, \domain{\mathcal{B}} \Delta)}
+
+% Intersection
+
+% .....non-empty
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x
+    \bouchon{22} \sigma' \rightarrow (\overline\sigma',
+    \domain{\mathcal{B}_0} \Delta_0)\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}_0} \Delta_0, x
+  \bouchon{21} \textsf{Inter} \, \Sigma' \rightarrow (\textsf{Inter} \,
+  \overline\Sigma', \domain{\mathcal{B}_1} \Delta_1)\\
+  \overline\nu \triangleq \textsf{Inter} \, (\overline\sigma' \Cons
+  \overline\Sigma')}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x
+    \bouchon{21} \textsf{Inter} \, (\sigma'\Cons\Sigma') \rightarrow
+    (\overline\nu, \domain{\mathcal{B}_1} \Delta_1)}
+
+% .....empty
+%
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x
+    \bouchon{21} \textsf{Inter} \, \emptyL \rightarrow (\textsf{Inter} \,
+    \emptyL\!, \domain{\mathcal{B}} \Delta)}
+
+% Single value
+%
+\inferrule
+  {y \not\in \mathcal{B}\\
+  \overline\nu \triangleq \textsf{Value} \, (\textsf{VRef} \, y)\\
+  \domain{\mathcal{B}_0} \Delta_0 \triangleq \domain{\mathcal{B}} \Delta
+  \oplus y \mapsto (\emptyL\!, \textsf{TRef} \, x, \{\}, v)}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x
+    \bouchon{21} \textsf{Value} \, (v) \rightarrow (\overline\nu,
+    \domain{\mathcal{B}_0} \Delta_0)}
+
+% Value range
+%
+\inferrule
+  {\nu \lhd (\textsf{Val} \, (\wildVRef\!)) \, \wild \textbf{..} \wild
+    \, (\textsf{Val} \, (\wildVRef\!))}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x
+    \bouchon{21} \nu \rightarrow (\nu, \domain{\mathcal{B}} \Delta)}
+
+\inferrule
+  {v_0 \nlhd \wildVRef\\
+  y_0 \not\in \mathcal{B}\\
+  \nu \triangleq (\textsf{Val} \, (\textsf{VRef} \, y_0)) \, b_0
+  \textsf{\textbf{..}} b_1 e_1\\
+  \delta \triangleq y_0 \mapsto (\emptyL\!, \textsf{TRef} \, x, \{\}, v_0)\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta \oplus
+  \delta, x \bouchon{21} \nu \rightarrow r}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x
+    \bouchon{21} (\textsf{Val} \, v_0) \, b_0 \textsf{\textbf{..}} b_1 e_1
+    \rightarrow r}
+
+\inferrule
+  {v_1 \nlhd \wildVRef\\
+  y_1 \not\in \mathcal{B}\\
+  \nu \triangleq e_0 b_0 \textbf{..} b_1 \, (\textsf{Val} \, (\textsf{VRef} \, y_1))\\
+  \delta \triangleq y_1 \mapsto (\emptyL\!, \textsf{TRef} \, x, \{\}, v_1)\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta \oplus
+  \delta, x \bouchon{21} \nu \rightarrow r}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x
+    \bouchon{21} e_0 b_0 \textbf{..} b_1 \, (\textsf{Val} \, v_1)
+    \rightarrow r}
+
+% SIZE
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, \INTEGER
+    \bouchon{22} \sigma \rightarrow (\overline\sigma,
+    \domain{\mathcal{B}_0} \Delta_0)}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x
+    \bouchon{21} \textsf{SIZE} \, \sigma \rightarrow (\textsf{SIZE} \,
+    \overline\sigma, \domain{\mathcal{B}_0} \Delta_0)}
+
+% FROM
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x
+    \bouchon{22} \sigma \rightarrow (\overline\sigma,
+    \domain{\mathcal{B}_0} \Delta_0)}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x
+    \bouchon{21} \textsf{FROM} \,\, \sigma \rightarrow (\textsf{FROM} \,\,
+    \overline\sigma, \domain{\mathcal{B}_0} \Delta_0)}
+
+% WITH COMPONENT
+%
+\inferrule
+  {x' \in \mathcal{A}\\
+  \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+  \textrm{T} \lhd (\textsf{SET OF} \mid \textsf{SEQUENCE OF}) \,\,
+  \emptyL \, (\textsf{TRef} \, x'') \, \{\}\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x''
+  \bouchon{22} \sigma \rightarrow (\overline\sigma,
+  \domain{\mathcal{B}_0} \Delta_0)\\
+  \overline\nu \triangleq \textsf{WITH COMPONENT} \,\, \overline\sigma}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x'
+    \bouchon{21} \textsf{WITH COMPONENT} \,\, \sigma \rightarrow
+    (\overline\nu, \domain{\mathcal{B}_0} \Delta_0)}
+
+% WITH COMPONENTS
+%
+% ....... SET or SEQUENCE
+%
+% ..... non-empty constraint list
+%
+\inferrule
+  {x' \in \mathcal{A}\\
+  \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+  \textrm{T}' \lhd (\textsf{SET} \mid \textsf{SEQUENCE}) \,\,
+  \OList{$\textsf{Field} \, (l'_i, \emptyL\!, \textsf{TRef} \, x'_i, \{\},
+    s'_i)$}{i}{n}\\
+  k' \lhd (l, \sigma, \hat\pi)\\
+  \exists i \in [1..n].(l = l'_i 
+  \AND
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x'_i
+  \bouchon{22} \sigma \rightarrow (\overline\sigma,
+  \domain{\mathcal{B}_0} \Delta_0))\\
+  \nu' \triangleq \textsf{WITH COMPONENTS} \,\, (m, \mathcal{K}')\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}_0} \Delta_0, x'
+  \bouchon{21} \nu' \rightarrow (\overline\nu', \domain{\mathcal{B}_1}
+  \Delta_1)\\
+  \overline\nu' \lhd \textsf{WITH COMPONENTS} \,\, (\wild\!,
+  \overline{\mathcal{K}}') \\
+  \overline\nu \triangleq \textsf{WITH COMPONENTS} \,\, (m, (l,
+  \overline\sigma, \hat\pi)\Cons\overline{\mathcal{K}}')}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x'
+    \bouchon{21} \textsf{WITH COMPONENTS} \,\, (m, k'\Cons \mathcal{K}')
+    \rightarrow (\overline\nu, \domain{\mathcal{B}_1} \Delta_1)}
+
+% ....... CHOICE
+%
+\inferrule
+  {x' \in \mathcal{A}\\
+  \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+  \textrm{T}' \lhd \textsf{CHOICE} \, \OList{$(l'_i, \emptyL\!,
+    \textsf{TRef} \, x'_i, \{\}, s'_i)$}{i}{n}\\
+  k' \lhd (l, \sigma, \hat\pi)\\
+  \exists i \in [1..n].(l = l'_i 
+  \AND
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x'_i
+  \bouchon{22} \sigma \rightarrow (\overline\sigma,
+  \domain{\mathcal{B}_0} \Delta_0))\\
+  \nu' \triangleq \textsf{WITH COMPONENTS} \,\, (m, \mathcal{K}')\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}_0} \Delta_0, x'
+  \bouchon{21} \nu' \rightarrow (\overline\nu', \domain{\mathcal{B}_1}
+  \Delta_1)\\
+  \overline\nu' \lhd \textsf{WITH COMPONENTS} \,\, (\wild\!,
+  \overline{\mathcal{K}}') \\
+  \overline\nu \triangleq \textsf{WITH COMPONENTS} \,\, (m, (l,
+  \overline\sigma, \hat\pi)\Cons\overline{\mathcal{K}}')}
+%------
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x'
+    \bouchon{21} \textsf{WITH COMPONENTS} \,\, (m, k'\Cons \mathcal{K}')
+    \rightarrow (\overline\nu, \domain{\mathcal{B}_1} \Delta_1)}
+
+% ....empty constraint list
+%
+\inferrule
+  {\nu \lhd \textsf{WITH COMPONENTS} \,\, (m, \emptyL\!)}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, x'
+    \bouchon{21} \nu \rightarrow (\nu, \domain{\mathcal{B}} \Delta)}
+
+\end{mathparpagebreakable}

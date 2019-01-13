@@ -1,0 +1,163 @@
+%%-*-latex-*-
+
+\lettrine{E}{n entreprenant cette thèse} notre objectif était
+double. D'une part il s'agissait d'appliquer une certaine logique
+mathématique, normalement employée en théorie des langages de
+programmation, comme méthode formelle de spécification pour
+ASN.1. D'autre part il était important que cette recherche aboutisse à
+la réalisation d'un outil logiciel fondé sur nos résultats théoriques
+et qui s'adresse aux télécommunicants dans l'industrie.
+
+L'intérêt de l'emploi en tant que formalisme logique de la sémantique
+opérationnelle structurée est que celle-ci se prête bien aux preuves
+inductives (analyse par cas) et permet d'exprimer tout aussi bien des
+algorithmes ---~éliminant ainsi une barrière entre spécification et
+algorithmique.
+
+Nous avons couvert tous les aspects d'ASN.1, tel que ce langage est
+normalisé dans X.680 \citep{ASN94}, sans concession d'aucune
+sorte. Nous avons établi une définition formelle d'ASN.1 en suivant
+une démarche pragmatique et expérimentale, validée par une fertile
+maïeutique avec Olivier Dubuisson (France Télécom (CNET), Lannion),
+Bancroft Scott (OSS Inc.\ \&~ISO), Paul Thorpe (OSS Inc.) et Heinz
+Schaefer (Siemens, Vienne, Autriche). Ce faisant nous avons ainsi mis
+au jour de grandes et coûteuses maladresses de conception d'ASN.1,
+ainsi que des incomplétudes importantes de la norme. Nous avons
+contribué auprès de l'ISO, via l'AFNOR, à l'amélioration de
+celle-ci.
+
+En formalisant un codage de référence, abstrait à partir de X.690
+(BER) \citep{X.690}, nous avons pu munir la spécification syntaxique
+d'une contrepartie sémantique. Nous avons démontré que, pour un noyau
+d'ASN.1 que nous avons défini rigoureusement, la composition du codage
+et du décodage est l'identité. Ce résultat implique la correction
+sémantique du codage de référence et est donc une contribution
+importante quant à la sûreté du protocole ASN.1/BER. Nous avons énoncé
+et prouvé deux théorèmes qui établissent la non ambigüité des
+contrôles des types (syntaxiques et sémantiques), c'est-à-dire, en
+termes plus opérationnels, le déterminisme des algorithmes qui leur
+sont associés. Ces résultats théoriques fournissent \emph{a
+  posteriori} une justification et une interprétation de certaines
+contraintes sur les types ASN.1: les contrôles (syntaxiques et
+sémantiques) des types, s'ils réussissent, ne peuvent le faire que
+d'une seule façon. En d'autres termes encore, cela implique qu'un
+éventuel décodage fondé sur ces contrôles s'exécutera sans
+rebroussements, donc efficacement. Cela implique aussi que l'analyse
+par cas de notre spécification formelle peut être reprise telle quelle
+pour écrire les algorithmes de contrôle (syntaxique et sémantique) des
+types.
+
+Notre recherche a été réalisée à l'INRIA-Rocquencourt (Institut
+National de la Recherche en Informatique et Automatique), dans le
+projet Cristal, dont les thèmes d'investigation sont la programmation
+typée et les compilateurs. L'outil logiciel par excellence y est le
+système Caml qui y est développé, offrant un langage de programmation
+et des compilateurs très expressifs et sûrs. En particulier OCaml est
+un langage fonctionnel impur de la famille ML, fortement et
+statiquement typé, modulaire, à objets et valeurs polymorphes,
+conjuguant l'inférence de type à la compilation, la compilation
+séparée ainsi que d'excellentes performances (en particulier en code
+natif). C'est ainsi que l'analyseur de protocoles ASN.1, fruit de
+notre thèse, est réalisé en OCaml. Son nom est \textsf{Asno} et c'est
+un contrôleur de spécifications ASN.1 dont l'ergonomie a été
+particulièrement soignée (en particulier la signalisation des erreurs)
+pour permettre une utilisation aisée de la part des
+industriels. Encore un avantage de l'emploi de la sémantique
+opérationnelle est ici que la sémantique du langage OCaml est
+elle-même spécifiée dans ce formalisme et qu'inversement OCaml se
+prête tout particulièrement à l'implémentation de ces spécifications
+formelles.
+
+Même la syntaxe d'ASN.1 (dans sa version X.208 \citep{ASN90}) n'a pas
+été laissée de côté. Celle-ci est normalisée mais est hautement
+inadéquate pour une génération automatique d'analyseurs syntaxiques (à
+l'aide d'outils comme Yacc ou Bison). Nous avons alors fourni une
+grammaire LL(1) que nous avons prouvé engendrer exactement le même
+langage que la grammaire normalisée d'ASN.1, et nous avons réalisé
+directement à partir de celle-ci un analyseur syntaxique en OCaml,
+établissant ainsi sa correction et sa complétude par rapport à la
+norme (en BNF). Même les macros, extensions dynamiques de la syntaxe
+de base, ont été traitées (avec certaines restrictions pour éviter
+l'écueil de l'indécidabilité) grâce au fait qu'OCaml est un langage
+fonctionnel permettant l'ordre supérieur.
+
+\textsf{Asno} est une contribution de la recherche publique française
+à la communauté internationale des télécommunications, et en
+particulier sa distribution en mode source et sa gratuité dans un
+monde où les informations circulent difficilement à cause des enjeux
+économiques, tout cela fait que cet outil a été très favorablement
+évalué, accueilli et réutilisé dans l'industrie (notamment une
+compagnie de téléphonie publique étasunienne: la Southwestern Bell
+Technology Inc.). Le Centre National de Recherche en Télécommunication
+de France Télécom (CNET) utilise notre ananlyseur syntaxique comme
+base de développement d'outils autour d'ASN.1, et notre formalisation
+y sert de base à des travaux de recherche actuellement.
+
+Nous pensons avoir tenu nos objectifs de satisfaire à la fois la
+communauté des théoriciens des langages par une étude formelle et des
+preuves rigoureuses, et la communauté des télécommunicants par un
+outil logiciel qui est déjà plus qu'un prototype et qui peut servir de
+point de départ pour lancer un produit commercial de haute
+technologie.
+
+Maintenant une piste de recherche intéressante concerne le codage. Les
+besoins d'utilisation optimale de la bande passante lors des
+transmissions (réseaux à hauts débits, vidéoconférence, multimédia,
+cables, satellites, etc.) a incité l'ISO et l'ITU-T à normaliser un
+codage compact des valeurs ASN.1, appelé \emph{Packed Encoding Rules}
+(PER, X.691) \citep{X.691}. À la différence de X.690 (BER), les PER ne
+transmettent pas ou très peu d'informations de contrôle, c'est-à-dire
+que les codes ne contiennent pas d'étiquetages, par exemple. Pour
+conserver une forme de contrôle sémantique des types (qui implique un
+décodage qui se fonderait sur lui, c'est-à-dire que le succès du
+contrôle implique celui du décodage), un certain nombre de
+vérifications et d'ordres canoniques sont imposés aux spécifications
+ASN.1, qui sont alors en hypothèse (en contexte) pour les deux
+communicants, et leur permet de bien se comprendre (malgré le
+non-dit). Le problème est que cette norme X.691 se présente comme une
+somme d'optimisations obscures, et il est très difficile d'en
+comprendre l'architecture. Une formalisation de tout ou partie des PER
+pour définir un autre codage de référence, et ensuite prouver à
+nouveau nos théorèmes serait une étape importante dans la conciliation
+de la sûreté des transmissions et leur rapidité.
+
+Quant à la portée de nos résultats théoriques (correction et
+déterminisme), nous avons montré informellement à la
+section~\vref{correction_de_la_reecriture_vers_le_noyau} que notre
+réécriture d'ASN.1:1994 vers un noyau plus simple (sur lequel
+s'appuient nos théorèmes) est correcte, c'est-à-dire qu'elle préserve
+les codes de référence (formalisant ceux obtenus via les BER
+\citep{X.690}). Nous pensons de même que cette réécriture préserve
+aussi les codes PER \citep{X.691}, ce qui constituerait un premier pas
+dans cette recherche future qui devrait englober les PER. Toujours
+concernant les PER, nous pensons que notre simplification des
+contraintes de sous-typage serait correcte vis-à-vis des PER,
+c'est-à-dire qu'elle préserverait les codes des valeurs des
+sous-types. Plus encore, puisque nous simplifions, nous faisons
+apparaître des contraintes que les PER sont susceptibles d'employer
+(X.691 les qualifie de \emph{PER-visible constraints}). Il nous semble
+tout à fait possible de poursuivre nos réécritures de façon à obtenir
+une réduction qui soit optimale pour les PER, c'est-à-dire qu'elle
+ferait apparaître le maximum de contraintes exploitables par les PER,
+et donc qui potentiellement ferait gagner du débit de
+transmission. Par exemple, nous nous arrêtons dans notre thèse à:
+\begin{verbatim}
+T ::= VisibleString (FROM ("A") | FROM ("A".."B"))
+\end{verbatim}
+car cela nous suffit pour nos vérification sémantique. Mais il est
+possible dans ce cas de poursuivre la réduction, de façon à faire
+apparaître une contrainte PER-visible:
+\begin{verbatim}
+T ::= VisibleString (FROM ("A".."B"))
+\end{verbatim}
+Cela suppose essentiellement de définir une inclusion entre
+contraintes pour simplifier les disjonctions. Un autre exemple serait
+la contrainte:
+\begin{verbatim}
+A ::= B (C EXCEPT D | C)
+\end{verbatim}
+qui devrait être simplifié en
+\begin{verbatim}
+A ::= B (C)
+\end{verbatim}
+pour devenir PER-visible.

@@ -1,0 +1,38 @@
+%%-*-latex-*-
+
+Nous avons montré à la
+section~\vref{definition_du_controle_des_types_informel} que le
+contrôle des types n'était pas un algorithme déterministe. Idem pour
+le codage à la section~\vref{codage_informel} et le contrôle
+sémantique des types à la
+section~\vref{controle_semantique_des_types_informel}. Cela signifie
+que l'exécution de ces algorithmes suppose la possibilité de
+rebroussement: si l'algorithme aboutit à une impasse alors le
+mécanisme d'exécution doit être à même de rebrousser chemin jusqu'à
+trouver un chemin de calcul qui réussisse, ou qui échoue si tous les
+chemins ont été essayés.
+
+À la section~\vref{unicite_du_controle_des_types} nous avons montré
+alors qu'en contraignant les champs des types structurés \texttt{SET},
+\texttt{SEQUENCE} et \texttt{CHOICE} à posséder des labels tous
+distincts entre eux, alors cela impliquait l'unicité de l'exécution de
+l'algorithme de contrôle des types. En d'autres termes, il n'y a alors
+jamais plus besoin de rebrousser chemin, quelque soit l'exécution: si
+l'algorithme échoue alors c'est qu'il n'y a pas d'autre
+possibilité. L'intérêt d'une telle propriété est essentiellement de
+l'ordre de la complexité dynamique, c'est-à-dire de l'efficacité en
+temps et en espace, et de la simplicité de la programmation.
+
+Cette contrainte sur les labels est prévue dans X.680 \citep{ASN94},
+mais aucune justification n'en est donnée. Notre thèse est que sa
+raison d'être et son utilité est d'assurer le déterminisme du contrôle
+des types et du codage, c'est-à-dire l'unicité des exécutions de
+ceux-ci, sachant qu'ils sont cohérents, c'est-à-dire qu'ils répondent
+toujours de la même façon aux mêmes questions. De même, la même
+contrainte sur les labels implique aussi que le codage devient
+déterministe. Cela se comprend si l'on prête attention à la structure
+de sa définition par cas, qui est isomorphe à celle du contrôle des
+types.
+
+
+

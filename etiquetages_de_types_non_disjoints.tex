@@ -1,0 +1,179 @@
+%%-*-latex-*-
+
+\newtheorem{Etiquettes}{Définition}[subsection]
+
+\begin{Etiquettes}
+\ \\
+
+\begin{tabular}{|l|}
+  \hline 
+  \\
+  Soient deux étiquetages $e_0$~et~$e_1$. \\
+  Ils sont dits \emph{non disjoints} dans un environnement de types
+  $\domain{\mathcal{A}} \Gamma$ si \\ 
+  $\exists x : \mathcal{E} \times \mathcal{T}.(\domain{\mathcal{A}}
+  \Gamma \vdash x \Wide e_0 \AND \domain{\mathcal{A}} \Gamma \vdash x
+  \Wide e_1)$ \\
+  On notera: $\domain{\mathcal{A}} \Gamma \vdash e_0 \PAR e_1$ \\
+  \\
+  \hline
+\end{tabular}
+\end{Etiquettes}
+
+\bigskip \bigskip
+
+\newtheorem{Reflexivite_PAR}[Etiquettes]{Propriété}
+\begin{Reflexivite_PAR}[Réflexivité]
+\label{Reflexivite_PAR}
+\begin{equation*}
+\begin{array}{|l|}
+  \hline
+  \\
+  \forall a : \mathcal{E} \times \mathcal{T}.\domain{\mathcal{A}}
+  \Gamma \vdash a \PAR a \\
+  \\
+  \hline
+ \end{array}
+\end{equation*}
+\end{Reflexivite_PAR}
+
+\bigskip
+
+\noindent \textbf{Preuve de la propriété~\ref{Reflexivite_PAR}} \\
+
+\noindent D'après~\ref{Reflexivite_inclusion}: $\forall a : \mathcal{E}
+\times \mathcal{T}.\domain{\mathcal{A}} \Gamma \vdash a \Wide a$. D'où:
+\begin{gather*}
+\forall a : \mathcal{E} \times \mathcal{T}.\domain{\mathcal{A}}
+   \Gamma \vdash a \Wide a \Rightarrow \exists x : \mathcal{E}
+   \times \mathcal{T}.\domain{\mathcal{A}} \Gamma \vdash x \Wide a \\
+\Leftrightarrow  \exists x : \mathcal{E} \times
+   \mathcal{T}.(\domain{\mathcal{A}} \Gamma \vdash x \Wide a \AND
+   \domain{\mathcal{A}} \Gamma \vdash x \Wide a)
+\Leftrightarrow \domain{\mathcal{A}} \Gamma \vdash a \PAR a
+\end{gather*}
+$\Box$
+
+\bigskip
+
+\newtheorem{Symetrie_PAR}[Etiquettes]{Propriété}
+\begin{Symetrie_PAR}[Symétrie]
+\label{Symetrie_PAR}
+\begin{equation*}
+\begin{array}{|l|}
+  \hline
+  \\
+  \forall a, b : \mathcal{E} \times \mathcal{T}.(\domain{\mathcal{A}}
+  \Gamma \vdash a \PAR b \Rightarrow \domain{\mathcal{A}} \Gamma
+  \vdash b \PAR a) \\
+  \\
+  \hline
+ \end{array}
+\end{equation*}
+\end{Symetrie_PAR}
+
+\bigskip
+
+\noindent \textbf{Preuve de la propriété~\ref{Symetrie_PAR}} \\
+
+\noindent Par définition:
+\begin{equation*}
+\begin{array}{ccc}
+  \domain{\mathcal{A}} \Gamma \vdash a \PAR b & \Leftrightarrow &
+  \exists x : \mathcal{E} \times \mathcal{T}.(\domain{\mathcal{A}}
+  \Gamma \vdash x \Wide a \AND \domain{\mathcal{A}} \Gamma \vdash x
+  \Wide b)\\
+    & \Leftrightarrow & \exists x : \mathcal{E}
+\times \mathcal{T}.(\domain{\mathcal{A}} \Gamma \vdash x \Wide b \AND
+\domain{\mathcal{A}} \Gamma \vdash x \Wide a) \\
+    & \Leftrightarrow & \domain{\mathcal{A}} \Gamma \vdash b \PAR
+    a.\hfill \Box
+\end{array}
+\end{equation*}
+
+\newtheorem{Theoreme_inclusion}[Etiquettes]{Théorème}
+\begin{Theoreme_inclusion} 
+\label{Theoreme_inclusion}
+\begin{equation*}
+\begin{tabular}{|l|}
+   \hline
+   \\
+   Soient $\domain{\mathcal{A}} \Gamma$ un environnement de types \\
+   et~$a$, $b$~et~$c$ trois étiquetages. \\
+   Alors: $\domain{\mathcal{A}} \Gamma \vdash a \Wide b \AND
+   \neg(\domain{\mathcal{A}} \Gamma \vdash c \PAR b) \Rightarrow
+   \neg(\domain{\mathcal{A}} \Gamma \vdash a \Wide c)$ \\ 
+   \\
+   \hline
+ \end{tabular}
+\end{equation*}
+\end{Theoreme_inclusion}
+
+\bigskip
+
+\noindent \textbf{Preuve du théorème~\ref{Theoreme_inclusion}} \\
+
+\noindent Par définition: $\domain{\mathcal{A}} \Gamma \vdash c \PAR b
+\Leftrightarrow \exists x.(\domain{\mathcal{A}} \Gamma \vdash x \Wide
+c \AND \domain{\mathcal{A}} \Gamma \vdash x \Wide b)$ \\
+Alors: $\neg(\domain{\mathcal{A}} \Gamma \vdash c \PAR b)  \Leftrightarrow \forall
+x.(\neg(\domain{\mathcal{A}} \Gamma \vdash x \Wide c) \OR
+\neg(\domain{\mathcal{A}} \Gamma \vdash x \Wide b))$ \\
+Prenons $x = a$. On a: $\neg(\domain{\mathcal{A}} \Gamma \vdash a \Wide c) \OR
+\neg(\domain{\mathcal{A}} \Gamma \vdash a \Wide b)$ \\
+Puisque $\domain{\mathcal{A}} \Gamma \vdash a \Wide b$, il reste:
+$\neg(\domain{\mathcal{A}} \Gamma \vdash a \Wide c)$. \hfill $\Box$
+
+\bigskip
+
+\newtheorem{Theoreme_PAR}[Etiquettes]{Théorème}
+\begin{Theoreme_PAR} 
+\label{Theoreme_PAR}
+\begin{equation*}
+\begin{tabular}{|ll|}
+   \hline
+   & \\
+   Soient & $\domain{\mathcal{A}} \Gamma$ un environnement de types \\
+   et     & $e$ un étiquetage \\
+   et     & E un ensemble d'étiquetages. \\
+   Si     & $\forall x, y \in \textrm{E}.(\domain{\mathcal{A}} \Gamma
+             \vdash x \PAR y \Rightarrow x = y)$ \\
+   et     & $\forall z \in \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma
+            \vdash z \PAR e)$ \\
+   alors  & $\forall x, y \in \{e\} \cup \textrm{E}.(\domain{\mathcal{A}}
+            \Gamma \vdash x \PAR y \Rightarrow x = y)$ \\
+   & \\
+   \hline
+ \end{tabular}
+\end{equation*}
+\end{Theoreme_PAR}
+
+\noindent \textbf{Preuve du théorème~\ref{Theoreme_PAR}} \\
+
+\noindent La propriété de réflexivité~\ref{Reflexivite_PAR} et
+$\forall z \in \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma \vdash
+z \PAR e)$ impliquent $e \not\in \textrm{E}$. Donc $\forall x, y \in e
+\cup \textrm{E}.(\domain{\mathcal{A}} \Gamma \vdash x \PAR y \Rightarrow x =
+y)$ est équivalente à la conjonction des cas suivants:
+\begin{equation*}
+\left\{
+\begin{array}{l}
+  x = e \AND \forall y \in \textrm{E}. (\domain{\mathcal{A}} \Gamma
+  \vdash x \PAR y \Rightarrow x = y) \\
+  \forall x,y \in \textrm{E}. (\domain{\mathcal{A}} \Gamma \vdash x \PAR y
+  \Rightarrow x = y) \\
+  y = e \AND \forall x \in \textrm{E}. (\domain{\mathcal{A}} \Gamma
+  \vdash x \PAR y \Rightarrow x = y) \\
+  x = e \AND y = e \AND (\domain{\mathcal{A}} \Gamma \vdash x \PAR y
+  \Rightarrow x = y) 
+\end{array}
+\right.
+\end{equation*}
+Le second cas est la première des deux hypothèses. Le troisième se
+ramène au premier en appliquant la propriété de
+symétrie~\ref{Symetrie_PAR} et en renommant $x$~en~$y$. Le dernier cas
+est trivial. Le premier cas est vrai à cause de la seconde hypothèse
+$\forall z \in \textrm{E}.\neg(\domain{\mathcal{A}} \Gamma \vdash
+z \PAR
+e)$ qui implique, avec la propriété de symétrie:
+$\neg(\domain{\mathcal{A}} \Gamma \vdash e \PAR y)$. $\Box$

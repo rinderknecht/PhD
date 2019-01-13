@@ -1,0 +1,1606 @@
+%%-*-latex-*-
+
+\lettrine{Q}{uand le spécifieur} veut réduire l'ensemble des valeurs
+d'un type, il contraint celui-ci, et forme alors un
+\emph{sous-type}. Ce chapitre présente de façon informelle comment
+vérifier que la donnée d'un type et d'une contrainte de sous-typage
+est valide. La contrepartie formelle de ce chapitre se trouve en
+annexe à la section~\vref{controle_des_sous-types}. Nous ne traiterons
+pas les cas des contraintes \texttt{EXCEPT} et \texttt{ALL}. Pour être
+très précis, nous étendrons la syntaxe du noyau d'ASN.1 par l'emploi
+généralisé des parenthèses. Par exemple nous préfèrerons écrire
+\begin{sverb}
+T ::= SET OF (VisibleString (SIZE (5)))
+\end{sverb}
+au lieu de
+\begin{sverb}
+T ::= SET OF VisibleString (SIZE (5))
+\end{sverb}
+Nous pourrons aussi écrire
+\begin{sverb}
+T ::= (SET OF VisibleString) (SIZE (5))
+\end{sverb}
+au lieu de
+\begin{sverb}
+T ::= SET (SIZE (5)) OF VisibleString
+\end{sverb}
+Nous pourrons aussi écrire
+\begin{sverb}
+T ::= (INTEGER) ((0) | (1))
+\end{sverb}
+au lieu de
+\begin{sverb}
+T ::= INTEGER (0 | 1)
+\end{sverb}
+même si cela ne présente \emph{a priori} aucun intérêt.
+
+Quel est le but fondamental du contrôle des sous-types? Le contrôle
+des types avait ignoré les contraintes de sous-typage et avait dit si
+la valeur qu'on lui donnait appartenait bien au type donné. Le
+contrôle des sous-types s'assure qu'un sous-type n'est pas vide,
+c'est-à-dire qu'il contient au moins une valeur. Ces deux aspects sont
+intimement liés et le parti pris de cette thèse est de séparer le
+contrôle des types du contrôle des sous-types pour simplifier la
+présentation (en particulier, le codage de référence que nous avons
+formalisé (inspiré des BER) ne tenant pas compte des contraintes de
+sous-typage, les preuves figurant en annexe auraient été énormément
+compliquées si contrôle des types et des sous-types n'avaient fait
+qu'un), mais les deux sont nécessaires pour valider une
+spécification. Par exemple, la déclaration de la valeur~\texttt{y}
+dans la spécification
+\begin{sverb}
+x INTEGER ::= 0
+y INTEGER (0|1) ::= x
+\end{sverb}
+est analysée en deux temps:
+\begin{enumerate}
+
+  \item D'abord on vérifie que
+\begin{sverb}
+y INTEGER ::= x
+\end{sverb}
+
+    est valide. La particularité ici est que les contraintes de
+    sous-typage (éventuellement profondes dans un type structuré comme
+    \texttt{SET} par exemple) sont ignorées. C'est le contrôle des
+    types, présenté au chapitre~\vref{controle_des_types_informel}.
+
+  \item Ensuite on vérifie que le sous-type
+\begin{sverb}
+INTEGER (0|1|x)
+\end{sverb}
+    est valide. C'est le contrôle des sous-types, qui fait l'objet de
+    ce chapitre.
+
+\end{enumerate}
+L'intérêt d'un tel découpage est la simplicité, même s'il impose alors
+des vérifications en deux temps. En particulier n'oublions pas que le
+contrôle des sous-types doit être suivi d'une nouvelle analyse pour
+détecter les types non fondés. Reprenons l'exemple que nous donnions
+dans le chapitre~\vref{noyau_ASN.1}:
+\begin{sverb}
+T ::= CHOICE {a [0] T, b NULL} (WITH COMPONENTS {b ABSENT})
+\end{sverb}
+Ici intervient une contrainte de sous-typage définie
+\citep[\S~45.8]{ASN94} qui implique que cette déclaration est
+équivalente à
+\begin{sverb}
+T ::= CHOICE {a [0] T}
+\end{sverb}
+et nous avons déjà conclu que ce type n'était pas bien fondé. Pour
+formaliser cette équivalence nous procéderons à une réécriture des
+contraintes de sous-typage qui fait l'objet d'une phase à part
+entière, détaillée plus loin. Dans tous les cas elle intervient
+\emph{après} la réécriture des modules ASN.1 vers le noyau
+d'ASN.1. Nous avons ignoré donc la contrainte de sous-typage et conclu
+que le type \texttt{CHOICE \{a [0] T, b NULL\}} était bien fondé (ce
+qui est absolument vrai), \emph{mais}, après la réécriture des
+contraintes de sous-typage à venir, nous devrons à nouveau vérifier
+que les types réécrits sont bien fondés. Ainsi nous pourrons
+finalement rejeter cette déclaration du type~\texttt{T} (qui a passé
+le contrôle des types sans problèmes, car, nous l'avons dit, les
+contraintes y sont ignorées). Cette vérification des types bien fondés
+à double temps semble bien compliquée, mais la réécriture des
+contraintes de sous-typage est extrêmenent complexe et il est de loin
+préférable de procéder ainsi, plutôt que de chercher à définir une
+seule phase englobant tout. Pour résumer: nous avons accepté cette
+déclaration ci-dessus, en attendant la phase de réécriture des
+contraintes de sous-typage après laquelle nous réappliquons notre
+critère de bonne fondation.
+
+Dans ce chapitre encore nous allons procéder par réécritures
+successives. Cette présentation algorithmique définit le sens des
+constructions sur lesquelles elle s'applique. Pour rendre ces
+transformations intelligibles, nous resterons au niveau de la syntaxe
+du noyau d'ASN.1. (Les télécommunicants entendront ici
+\emph{abstraite} et les théoriciens de l'informatique
+\emph{concrète}.) L'idée qui nous guidera est la réduction des
+contraintes complexes vers des contraintes plus simples,
+élémentaires. Nous devrons néanmoins introduire, pour la présentation,
+de nouvelles constructions qui n'ont pas d'équivalents dans la syntaxe
+du noyau d'ASN.1.
+
+La \textbf{première étape} consiste à réduire les contraintes
+\texttt{INCLUDES}, partout où elles apparaissent: ce par quoi et à
+quelles conditions on les remplace définit la sémantique de ces
+contraintes (cette première étape correspond à la
+section~\vref{reduction_des_INCLUDES}.
+
+Lors de la deuxième étape de réécriture du
+chapitre~\vref{noyau_ASN.1}, nous avions accepté des déclarations
+telles que:
+\begin{sverb}
+T ::= INTEGER (INCLUDES T)
+\end{sverb}
+bien qu'elles ne définissaient pas un type unique (ici, tout sous-type
+de~\texttt{T} conviendrait). C'est ici que nous allons éliminer ces
+déclarations. En effet, lors de la quatrième étape de la réécriture du
+chapitre~\vref{noyau_ASN.1}, nous avions produit:
+\begin{sverb}
+T  ::= INTEGER (INCLUDES #1)
+#1 ::= T
+\end{sverb}
+Puis, à la sixième étape:
+\begin{sverb}
+T  ::= INTEGER (INCLUDES #1)
+#1 ::= INTEGER (INCLUDES #1)
+\end{sverb}
+Ici, nous commençons par nous assurer que l'abréviation de la clause
+\texttt{INCLUDES} \emph{ne désigne pas} le type analysé. Pour la
+première déclaration, il n'y a pas de problème: \texttt{\#1}~est
+différent de~\texttt{T}, mais, pour la seconde, il apparaît que
+\texttt{\#1}~égale~\texttt{\#1}, donc elle doit être rejetée.
+
+La deuxième et dernière vérification concernant les clause
+\texttt{INCLUDES} est qu'il faut s'assurer que le type inclus et celui
+qui l'inclut possèdent bien un sur-type en commun, c'est-à-dire qu'ils
+sont dérivés tous deux à partir d'un même type. Mais que signifie
+exactement «~même type~»? La norme \citep[\S~45.3.2]{ASN94} ne dit
+rien de plus précis, donc nous proposons ici une solution qui nous est
+propre: \emph{nous dirons que deux types sont les mêmes s'ils ont un
+  alias en commun}. Les alias nous servent à conserver une trace des
+abréviations de types modulo sous-typage, après les dépliages en
+cascade: ce sont les noms de ces abréviations. Prenons l'exemple:
+\begin{sverb}
+A ::= B (0|1)
+B ::= C
+C ::= INTEGER
+\end{sverb}
+La phase de canonisation des environnements de types déplia les
+abréviations de type ci-dessus:
+\begin{sverb}
+A ::= INTEGER (0|1)
+B ::= INTEGER
+C ::= INTEGER
+\end{sverb}
+Il nous fallait conserver trace de ces dépliages pour la phase
+présente, et cela grâce aux alias. Ainsi les alias de~\texttt{A} sont
+\texttt{B}~et~\texttt{C}, car nous avons déplié d'abord~\texttt{B},
+puis finalement~\texttt{C}, celui de~\texttt{B} est~\texttt{C}, car
+nous avons déplié~\texttt{C}, et \texttt{C}~n'en a pas, car ce n'était
+pas une abréviation, par définition.
+
+Comment utilise-t-on les alias dans le cas qui nous occupe?
+Considérons l'exemple:
+\begin{sverb}
+Day ::= ENUMERATED {monday (0), tuesday (1), wednesday (2),
+                    thursday (3), friday (4), saturday (5), 
+                    sunday (6)}
+
+Week-End ::= Day (saturday | sunday)
+
+Long-Week-End ::= Day (INCLUDES Week-End | monday)
+\end{sverb}
+Pour valider ici l'emploi de la clause \texttt{INCLUDES}, nous devons
+nous assurer que les types \texttt{Long-Week-End} et \texttt{Week-End}
+ont un sur-type commun. Pour en décider nous devons comparer leurs
+alias et vérifier qu'il y a au moins un alias en commun. Pour ne pas
+encombrer la présentation nous ne déplierons pas les types
+explicitement, mais il est clair que l'unique alias du type
+\texttt{Long-Week-End} est \texttt{Day} et \emph{idem} en ce qui
+concerne \texttt{Week-End}. Donc cette spécification est valide et la
+définition de \texttt{Long-Week-End} est enfin réécrite en
+\begin{sverb}
+Long-Week-End ::= Day ((saturday | sunday) | monday)
+\end{sverb}
+Nous avons pris les contraintes du type \texttt{Week-End} et les avons
+substituées (textuellement) à la clause \texttt{INCLUDES}, en prenant
+soin tout de même de placer des parenthèses autour du terme
+substitué. Ces parenthèses ne sont pas permises \emph{a priori} par la
+grammaire du noyau d'ASN.1, aussi nous les y ajoutons. Une réécriture
+simplificatrice supplémentaire produirait (en fait elle intervient à
+l'étape qui suit):
+\begin{sverb}
+Long-Week-End ::= Day (saturday | sunday | monday)
+\end{sverb}
+
+La \textbf{seconde étape} du contrôle des sous-types consiste à mettre
+les contraintes en \emph{forme disjonctive} (pour la description
+formelle, voir la section~\vref{forme_disjonctive}). Pour bien
+comprendre ce que cela signifie, nous devons voir les contraintes
+comme des expressions ensemblistes bien formées (leur syntaxe est
+correcte) et constituées de parenthèses, de contraintes et de deux
+types d'opérateurs: l'union de contraintes (\verb+|+), ainsi que
+l'intersection de contraintes (\verb+^+). Ce dernier opérateur est
+souvent implicite dans la grammaire d'ASN.1, où il est dénoté par la
+juxtaposition:
+\begin{sverb}
+T ::= INTEGER (0)(1)
+\end{sverb}
+est une simplification de
+\begin{sverb}
+T ::= INTEGER ((0) ^ (1))
+\end{sverb}
+et en aucun cas de
+\begin{sverb}
+T ::= (INTEGER (0))(1)  -- Incorrect
+\end{sverb}
+car un sous-type est une paire dont le premier composant est un type
+et le second une contrainte (notre dernier exemple signifierait qu'un
+sous-type est une paire constituée d'un sous-type et d'une
+contrainte).
+
+Toujours au sujet de l'opérateur d'intersection de contraintes
+(\verb+^+), il est important de noter qu'il est commutatif, malgré les
+bornes spéciales \texttt{MIN} et \texttt{MAX}. En effet:
+\begin{sverb}
+T ::= INTEGER (0..5)(MIN..3)
+\end{sverb}
+a le même sens que
+\begin{sverb}
+T ::= INTEGER (MIN..3)(0..5)
+\end{sverb}
+même si, dans le premier cas, \texttt{MIN} a pour sémantique l'entier
+mathématique~$0$ et dans le second~$-\infty$. Les bornes \texttt{MIN}
+et \texttt{MAX} seront remplacées respectivement par la valeur
+qu'elles dénotent (nous laisserons en place \texttt{MIN} et
+\texttt{MAX} lorsqu'elles dénoteront des infinis).
+
+Nous dirons qu'une contrainte de sous-typage est en \emph{forme
+  disjonctive} si elle s'exprime comme une union de contraintes qui ne
+contiennent pas d'unions (pour la description formelle se référer à la
+section~\vref{forme_disjonctive}). En arithmétique on parlerait plus
+couramment de \emph{forme complètement développée}, dans le cas d'une
+expression arithmétique simple (avec des entiers, des parenthèses et
+les opérateurs $+$~et~$-$). La grammaire d'ASN.1 permet parfois de
+spécifier des formes disjonctives. Par exemple, dans la spécification
+\begin{sverb}
+A ::= INTEGER
+B ::= INTEGER (0)
+C ::= VisibleString (SIZE (2 | 3))
+D ::= VisibleString (SIZE (2..3))
+\end{sverb}
+les contraintes des sous-types \texttt{A}~et~\texttt{B} sont
+trivialement en forme disjonctive. Celle du sous-type~\texttt{C} n'est
+pas en forme disjonctive car elle peut être réécrite en
+\begin{sverb}
+C ::= VisibleString (SIZE (2) | SIZE (3))
+\end{sverb}
+ou bien:
+\begin{sverb}
+C ::= VisibleString (SIZE (3) | SIZE (2))
+\end{sverb}
+car l'opérateur~\verb+|+ est commutatif, et donc il n'y a pas unicité
+des formes disjonctives.
+
+La contrainte du sous-type~\texttt{D}, elle, est en forme disjonctive,
+car nous ne cherchons pas à transformer les contraintes d'intervalles
+en unions de contraintes de valeurs (ce n'est pas possible en général,
+car un intervalle peut être infini). Considérons encore d'autres
+exemples:
+\begin{sverb}
+E ::= VisibleString (FROM ("0".."9") | SIZE (4)) (SIZE (2))
+\end{sverb}
+Ici, cette spécification serait réécrite avec une contrainte
+disjonctive de la façon suivante:
+\begin{sverb}
+E ::= VisibleString ((FROM ("0".."9")) ^ (SIZE (2))
+                     | (SIZE (4)) ^ (SIZE (2)))
+\end{sverb}
+La spécification
+\begin{sverb}
+Morse ::= VisibleString (FROM ("-" | "." | " "))
+\end{sverb}
+reste invariante car elle est déjà en forme disjonctive.
+
+Après avoir mis en forme disjonctive les contraintes du module
+analysé, nous distribuons les contraintes par rapport à leur type
+(formellement, à la
+section~\vref{distribution_des_contraintes_disjonctives}): ainsi les
+contraintes ne s'expriment plus à l'aide de l'opérateur~\verb+|+, et
+sont donc plus simples. En échange de cette simplicité des
+contraintes, nous devons introduire et faire usage d'un nouvel
+opérateur: l'union de sous-types (notée~$\cup$). Par exemple la
+définition
+\begin{sverb}
+T ::= INTEGER (0|1)
+\end{sverb}
+est réécrite en
+\begin{alltt}
+\small{T ::= (INTEGER (0)) \(\cup\) (INTEGER (1))}
+\end{alltt}
+ou, plus simplement:
+\begin{alltt}
+\small{T ::= INTEGER (0) \(\cup\) INTEGER (1)}
+\end{alltt}
+La sémantique de cet opérateur est l'union des ensembles de valeurs
+correspondant aux deux sous-types sur lesquels il s'applique. Cette
+distribution des formes disjonctives par rapport à leur type permet de
+faire apparaître des sous-types très simples, que l'on peut traiter
+séparément (ici: \texttt{INTEGER~(0)} et \texttt{INTEGER~(1)}).
+
+Donnons quelques exemples de distribution de formes disjonctives:
+\begin{sverb}
+T ::= SET (WITH COMPONENT (0) | WITH COMPONENT (1)) OF INTEGER
+\end{sverb}
+devient:
+\begin{alltt}
+\small{T ::= SET (WITH COMPONENT (0)) OF INTEGER
+    \(\cup\) SET (WITH COMPONENT (1)) OF INTEGER}
+\end{alltt}
+Et
+\begin{sverb}
+T ::= SET {a INTEGER, b BOOLEAN}
+      (  WITH COMPONENTS {a (0), b (TRUE)}
+       | WITH COMPONENTS {a (1), b (FALSE)}
+      )
+\end{sverb}
+devient:
+\begin{alltt}
+\small{T ::= SET \{a INTEGER, b BOOLEAN\}
+          (WITH COMPONENTS \{a (0), b (TRUE)\})
+    \(\cup\) SET \{a INTEGER, b BOOLEAN\}
+          (WITH COMPONENTS \{a (1), b (FALSE)\})}
+\end{alltt}
+Ce dernier exemple est particulièrement intéressant. En effet, il nous
+servira à montrer que les calculs simplificateurs sur les sous-types
+peuvent conduire à écrire des définitions qui ne peuvent être
+exprimées simplement à partir de la grammaire d'ASN.1. En anticipant
+un peu, nous réduirons cette précédente forme en:
+\begin{alltt}
+\small{T ::= SET \{a INTEGER (0), b BOOLEAN (TRUE)\}
+    \(\cup\) SET \{a INTEGER (1), b BOOLEAN (FALSE)\}}
+\end{alltt}
+et il est clair qu'il est impossible d'écrire sans contraintes un type
+(à l'aide de la grammaire d'ASN.1) qui ait exactement pour valeurs
+celle du type~\texttt{T} ainsi réécrit (ses valeurs sont: \texttt{\{a
+  0, b TRUE\}} et \texttt{\{a 1, b FALSE\}}). Insistons bien sur le
+fait que nos réécritures ne rajoutent pas des types précédemment
+impossibles, mais qu'il n'est pas toujours possible d'écrire un type
+sans contraintes qui contienne exactement les mêmes valeurs qu'un
+autre sous-type donné. Nos réécritures laissent invariants les
+ensembles de valeurs des sous-types auxquelles elles
+s'appliquent. Nous reviendrons plus tard sur ce point
+délicat. Retenons pour l'instant que le nouvel opérateur~$\cup$ est
+parfois nécessaire pour exprimer très simplement des sous-types
+initialement très complexes.
+
+Une remarque au sujet de l'emploi de l'opérateur d'union de sous-types
+($\cup$): nous ne formons pas et ne chercherons pas à former des
+unions de sous-types disjointes. Par exemple la contrainte de
+\texttt{VisibleString} dans
+\begin{sverb}
+T ::= VisibleString (SIZE (1..2 | 2..3))
+\end{sverb}
+fut d'abord mise en forme disjonctive:
+\begin{sverb}
+T ::= VisibleString (SIZE (1..2) | SIZE (2..3))
+\end{sverb}
+puis a été réécrite en
+\begin{alltt}
+\small{T ::= (VisibleString (SIZE (1..2)))
+    \(\cup\) (VisibleString (SIZE (2..3)))}
+\end{alltt}
+et il est clair que les chaînes de caractères de longueur égale
+à~\(2\) sont des valeurs pour les deux sous-types dont on forme ici
+l'union.
+
+Pour conclure cette seconde étape de réécriture pour le contrôle des
+sous-types, rappelons que depuis la cinquième étape de la mise en
+forme canonique (au chapitre~\vref{noyau_ASN.1}) les contraintes
+n'apparaissent plus dans les types structurés ---~donc cette présente
+étape de réécriture ne s'effectue pas récursivement sur les
+sous-types.
+
+La \textbf{troisième étape} consiste à recoupler les valeurs et les
+contraintes (la contrepartie formelle se trouve à la
+section~\vref{recouplage_valeurs_contraintes}). Lors de la phase
+liminaire de mise en forme canonique des modules ASN.1 (neuvième étape
+du chapitre~\vref{noyau_ASN.1}), c'est-à-dire la réécriture vers le
+noyau d'ASN.1, nous avions découplé (i.e. séparé) les valeurs et les
+contraintes. Cela revient à dire que les valeurs qui apparaissaient
+dans les contraintes étaient remplacées par une abréviation. Par
+exemple:
+\begin{sverb}
+T ::= INTEGER (0|1)
+\end{sverb}
+était réécrit en:
+\begin{sverb}
+T ::= INTEGER ($1 | $2)
+$1 T ::= 0
+$2 T ::= 1
+\end{sverb}
+
+Nous allons maintenant déplier les abréviations que nous avions
+créées:
+\begin{sverb}
+T ::= INTEGER (0|1)
+$1 T ::= 0
+$2 T ::= 1
+\end{sverb}
+De cette façon, le traitement des contraintes pourra ignorer
+l'ensemble des définitions de valeurs.
+
+La \textbf{quatrième étape} a pour but de réduire les contraintes
+\texttt{WITH COMPONENT} et \texttt{WITH COMPONENTS} (que nous
+appellerons \emph{contraintes internes}, car elle s'appliquent à des
+types qui se trouvent dans d'autres types ---~dits, pour cette raison,
+\emph{structurés}), ainsi que les contraintes par valeur qui peuvent
+s'y ramener (la contrepartie formelle de cette étape se trouve en
+annexe~\vref{normalisation_des_contraintes_internes}). Les contraintes
+internes sont expliquées dans \cite[\S~45.8]{ASN94}. Mais commençons
+par une remarque: la norme X.680 ne dit pas ce qu'il faut penser de
+\begin{sverb}
+A ::= SET {x INTEGER}
+B ::= SET {COMPONENTS OF A} (WITH COMPONENTS {x (0|1)})
+\end{sverb}
+Dans cette thèse nous avons décidé, lors de la septième étape de la
+mise sous forme canonique, de remplacer les clauses \texttt{COMPONENTS
+  OF} par les champs qu'elle désigne. Par conséquent nous réécrivons
+d'abord la spécification ci-dessus en:
+\begin{sverb}
+A ::= SET {x INTEGER}
+B ::= SET {x INTEGER} (WITH COMPONENTS {x (0|1)})
+\end{sverb}
+Comme nous le verrons plus loin, cette dernière spécification est
+valide, donc la première aussi. (Cette réécriture n'ayant pas
+d'équivalent au niveau du codage, nous ne pouvons parler de correction
+de celle-ci. Il est donc admis que cette réécriture laisse invariante
+la sémantique.) Avant d'entrer dans le vif de cette quatrième étape,
+commençons par énoncer quelles remarques qui serviront de fil
+d'Ariane.
+
+Tout d'abord, quel intérêt y a-t-il à éliminer les contraintes
+internes?  Le premier avantage est que nous faisons ainsi apparaître
+des contraintes plus élémentaires. Le second avantage est lié a la
+façon dont les contraintes internes s'appliquent aux types. Soit par
+exemple
+\begin{sverb}
+T ::= SET {a INTEGER (0|1)} (WITH COMPONENTS {a (16)})
+\end{sverb}
+Pour pouvoir rejeter cette déclaration il nous faut confronter les
+contraintes \verb+(0|1)+ et~\verb+(16)+, donc décomposer le type
+\texttt{SET} au fur et à mesure que nous décomposons la contrainte
+interne \texttt{WITH COMPONENTS}. Il nous semble plus judicieux de
+décomposer seulement la contrainte interne sans nous préoccuper de la
+validité sémantique des contraintes nouvelles que nous formons
+---~nous le ferons plus avant, en ne considérant que les contraintes
+simplifiées. Ainsi notre déclaration précédente se réécrit en:
+\begin{sverb}
+T ::= SET {a INTEGER (0|1)(16)}
+\end{sverb}
+
+La même difficulté d'analyse se pose avec les contraintes par valeur
+\citep[\S~45.2]{ASN94} de types structurés. Ce sera notre remarque
+suivante. Nous aurions ainsi pu avoir à analyser:
+\begin{sverb}
+T ::= SET {a INTEGER (0|1)} ({a 16})
+\end{sverb}
+Nous allons réécrire d'abord cette déclaration en:
+\begin{sverb}
+T ::= SET {
+        a INTEGER (0|1)
+      } ({a 16}) (WITH COMPONENTS {a (16)})
+\end{sverb}
+Il est clair que la contrainte interne produite ne change pas la
+sémantique. Ensuite nous appliquerons la réduction des contraintes
+internes que nous avons brièvement décrite précédemment:
+\begin{sverb}
+T ::= SET {a INTEGER (0|1)(16)} ({a 16})
+\end{sverb}
+Nous expliquerons plus loin pourquoi nous conservons la contrainte
+\verb+({a 16})+.
+
+Il y a un troisième aspect qui méritera notre attention dans cette
+quatrième étape: les types récursifs. Les types du noyau d'ASN.1 sont
+bien fondés (voir la deuxième étape du chapitre~\vref{noyau_ASN.1}),
+ce qui signifie que les types récursifs ont déjà été filtrés selon
+certains critères. Notre préoccupation ici est la terminaison de notre
+réécriture. Par exemple:
+\begin{sverb}
+T ::= CHOICE {
+        a [0] T (WITH COMPONENTS {..., b (0)}),
+        b [1] INTEGER
+      } (WITH COMPONENTS {..., b (0|1)})
+\end{sverb}
+Si l'on cherche, dans le but de réduire la contrainte \texttt{(WITH
+  COMPONENTS \{..., b (0)\})}, à déplier la référence~\texttt{T} à
+laquelle elle s'applique (champ~\texttt{a}), alors nous faisons
+augmenter la taille du type et faisons apparaître une nouvelle
+contrainte interne:
+\begin{sverb}
+T ::= CHOICE {
+        a [0] CHOICE {
+                a [0] T (WITH COMPONENTS {..., b (0)}),
+                b [1] INTEGER
+              } (WITH COMPONENTS {..., b (0|1)}) 
+                (WITH COMPONENTS {..., b (0)}),
+        b [1] INTEGER
+      } (WITH COMPONENTS {..., b (0|1)})
+\end{sverb}
+Il est intuitivement clair que cette stratégie de réduction ne termine
+pas. Nous verrons donc comment procéder en présence de types
+récursifs.
+
+Après cette courte introduction, nous allons donner le détail de cette
+quatrième étape, particulièrement complexe. Cette étape consiste en la
+répétition d'une suite de réécritures jusqu'à ce que la spécification
+soit invariante. (Pour les théoriciens des langages, cette étape est
+le point fixe d'une composition de réécritures.) L'idée est que
+lorsque l'invariance est atteinte, il n'y a plus de contraintes
+internes dans la spécification. Cette suite de réécritures est
+constituée de quatre étapes que nous détaillons maintenant.
+\begin{enumerate}
+
+  \item \emph{Réduction partielle des contraintes internes}
+    (formellement à la
+    section~\vref{reduction_partielle_des_contraintes_internes}). Nous
+    considérons chaque déclaration de sous-types, constituée à présent
+    (après la seconde étape) d'une union de sous-types. Nous traitons
+    séparément chaque terme (sous-type) de l'union, en leur appliquant
+    deux opérations successivement:
+    \begin{enumerate}
+
+      \item \emph{Produire les contraintes internes correspondant aux
+        contraintes par valeurs} (formellement à la
+        section~\vref{contraintes_internes_des_contraintes_par_valeurs}). Nous
+        avons abordé ce sujet en guise d'introduction de cette
+        quatrième étape. Nous avions donné l'exemple:
+\begin{sverb}
+T ::= SET {a INTEGER (0|1)} ({a 16})
+\end{sverb}
+        que nous réécrivons ici en 
+\begin{sverb}
+T ::= SET {
+        a INTEGER (0|1)
+      } ({a 16}) (WITH COMPONENTS {a (16)})
+\end{sverb}
+        Donnons les autres cas et les contraintes produites. Le cas du
+        type \texttt{SET OF} (le cas \texttt{SEQUENCE OF} est
+        identique):
+\begin{sverb}
+T ::= SET ({}) OF INTEGER
+\end{sverb}
+        est réécrit en:
+\begin{sverb}
+T ::= SET ({}) (SIZE (0)) OF INTEGER
+\end{sverb}
+        Nous pouvons remarquer que nous produisons une contrainte de
+        taille (\texttt{SIZE}), égale au nombre d'éléments que
+        contient la contrainte de valeur (ici~$0$). Dans un cas plus
+        général:
+\begin{sverb}
+T ::= SET ({4,7,2}) OF INTEGER
+\end{sverb}
+        est réécrit en:
+\begin{sverb}
+T ::= SET ({4,7,2}) (SIZE (3)) (WITH COMPONENT (4|7|2))
+      OF INTEGER
+\end{sverb}
+        Ici, en plus de la contrainte de taille \texttt{(SIZE (3))},
+        nous avons produit une contrainte interne \texttt{(WITH
+          COMPONENT (4|7|2))}. Nous comprenons pourquoi nous avons
+        conservé la contrainte de valeur initiale
+        \texttt{(\{4,7,2\})}. En effet, les deux contraintes
+        produites, en intersection entre elles et avec la première,
+        sont strictement moins fortes que la contrainte initiale. Cela
+        signifie que le type~\texttt{T'}:
+\begin{sverb}
+T' ::= SET (SIZE(3))(WITH COMPONENT (4|7|2)) OF INTEGER
+\end{sverb}
+        contient strictement plus de valeurs que~\texttt{T}: il suffit
+        de constater, par exemple, que \texttt{\{4,4,4\}} est de
+        type~\texttt{T'} mais pas du type~\texttt{T}. Donc il nous
+        faut conserver la contrainte de valeur initiale pour que
+        l'intersection de contraintes n'engendre pas un sous-type avec
+        des valeurs en plus ou en moins (la sémantique doit rester
+        invariante par nos réécritures). De façon très générale:
+\begin{alltt}
+\small{T ::= SET (\(\{v\sb{1}, \ldots, v\sb{n}\}\)) OF \(t\)}
+\end{alltt}
+        où les~$v_i$ dénotent des valeurs et~$t$ un type, devient:
+\begin{alltt}
+\small{T ::= SET (\(\{v\sb{1}, \ldots, v\sb{n}\}\))
+          (SIZE (\(n\)))
+          (WITH COMPONENT (\(v\sb{1}\) | \(\ldots\) | \(v\sb{n}\)))
+      OF \(t\)}
+\end{alltt}
+        Prenons un autre cas:
+\begin{sverb}
+T ::= CHOICE {
+        a INTEGER, 
+        b BOOLEAN
+      } (a : 7)
+\end{sverb}
+        est réécrit en:
+\begin{sverb}
+T ::= CHOICE {
+        a INTEGER, 
+        b BOOLEAN
+      } (a : 7) (WITH COMPONENTS {a (7) PRESENT})
+\end{sverb}
+        La contrainte interne produite ici est équivalente à la
+        contrainte par valeur, mais nous conservons tout de même cette
+        dernière par souci d'uniformité. Notons que la contrainte
+        interne produite est complète \citep[\S~45.8.6]{ASN94} et
+        spécifie que le champ référencé~\texttt{a} doit être
+        présent. Voyons le cas du type \texttt{SET}. La spécification
+\begin{sverb}
+T ::= SET {
+        a INTEGER,
+        b BOOLEAN OPTIONAL,
+        c REAL OPTIONAL
+      } ({a 7, b TRUE})
+\end{sverb}
+        est réécrite en:
+\begin{sverb}
+T ::= SET {
+        a INTEGER,
+        b BOOLEAN OPTIONAL,
+        c REAL OPTIONAL
+      } ({a 7, b TRUE}) 
+        (WITH COMPONENTS {a (7), 
+                          b (TRUE) PRESENT, 
+                          c ABSENT})
+\end{sverb}
+        La contrainte interne étant complète, tous les champs doivent
+        y apparaître, et, s'ils sont optionnels, nous indiquons leur
+        présence ou absence. Dans le sous-cas:
+\begin{sverb}
+T ::= SET {} ({})
+\end{sverb}
+        nous laissons invariante la spécification.
+
+        Le cas du type \texttt{SEQUENCE} est identique au type
+        \texttt{SET}, à une exception près: le type \texttt{REAL}. En
+        effet, lors de la première étape de la mise sous forme
+        canonique (au chapitre~\vref{noyau_ASN.1}), nous avions décidé
+        de définir le type \texttt{REAL} de la façon suivante:
+\begin{sverb}
+REAL ::= SEQUENCE {
+           mantissa INTEGER,
+           base     INTEGER (2|10),
+           exponent INTEGER
+         }
+\end{sverb}
+        Ainsi, nous pouvons traiter les contraintes du type
+        \texttt{REAL} comme des contraintes internes normales:
+\begin{sverb}
+T ::= REAL (WITH COMPONENTS {..., base (2)})
+\end{sverb}
+        Mais nous ne produirons pas de contraintes internes à partir
+        des contraintes par valeurs pour le type \texttt{REAL}. En
+        effet:
+\begin{sverb}
+T ::= REAL ({mantissa 1, base 2, exponent 2}) 
+           ({mantissa 2, base 2, exponent 1}) 
+\end{sverb}
+        est une spécification correcte, mais
+\begin{sverb}
+T ::= SEQUENCE {
+        mantissa INTEGER (1) (2),
+        base     INTEGER (2|10) (2) (2),
+        exponent INTEGER (2) (1)
+      } ({mantissa 1, base 2, exponent 2}) 
+        ({mantissa 2, base 2, exponent 1}) 
+\end{sverb}
+        ne l'est pas. Les valeurs dans les contraintes du type
+        \texttt{REAL} seront donc traitées à part.
+
+      \item \emph{Réduire les contraintes internes} (formellement à la
+        section~\vref{reduction_des_contraintes_internes}). Après
+        avoir produit des contraintes internes supplémentaires à
+        partir des contraintes par valeurs, nous réduisons
+        \emph{partiellement} les contraintes internes de la
+        spécification. Cela ne signifie pas qu'à la fin de cette
+        réécriture nous n'avons plus du tout de contraintes
+        internes. En effet, il est possible qu'une contrainte interne
+        contienne une autre contrainte interne, donc ce que nous
+        faisons ici est réduire toutes les contraintes internes (elles
+        apparaissent au niveau global, comme toutes les contraintes du
+        noyau d'ASN.1) \emph{une seule fois}, c'est-à-dire, en termes
+        de programmation: sans appels récursifs. Voyons cas par cas le
+        procédé. Tout d'abord le cas du type \texttt{SET OF} (le cas
+        du type \texttt{SEQUENCE OF} est identique):
+\begin{sverb}
+T ::= SET (WITH COMPONENT (0|1)) OF INTEGER
+\end{sverb}
+        est réécrit en:
+\begin{sverb}
+T ::= SET OF (INTEGER (0|1))
+\end{sverb}
+        Il est très important de noter que nous avons fait apparaître
+        une contrainte (ici, \verb+(0|1)+) \emph{dans} un type
+        structuré, ce qui fait que le sous-type résultant de cette
+        réécriture n'est pas dans le noyau d'ASN.1, où toutes les
+        contraintes sont au niveau global. Nous verrons plus tard
+        comment rendre ces sous-types conforme au noyau.
+
+        Toujours à l'aide du type \texttt{SET OF}, donnons maintenant
+        un exemple exotique de contrainte interne contenant une autre
+        contrainte interne:
+\begin{sverb}
+T  ::= SET (WITH COMPONENT (WITH COMPONENT (0|1))) OF #1
+#1 ::= SET OF #2
+#2 ::= INTEGER
+\end{sverb}
+        Cette spécification est tout à fait conforme au noyau
+        d'ASN.1. Ici nous réécrivons en:
+\begin{sverb}
+T  ::= SET OF (#1 (WITH COMPONENT (0|1)))
+#1 ::= SET OF #2
+#2 ::= INTEGER
+\end{sverb}
+        Nous avons utilisé les parenthèses supplémentaires que nous
+        autorise le noyau d'ASN.1 pour mieux séparer ou regrouper les
+        types et les contraintes. Nous constatons que nous avons
+        toujours une contrainte interne. C'est, avec la possibilité
+        des types récursifs, ce qui nous fait répéter la séquence de
+        réécritures dont nous décrivons ici une sous-étape.
+
+        Pour le cas du type \texttt{CHOICE} il y a plusieurs sous-cas.
+        \begin{enumerate}
+
+          \item \emph{Un champ du \texttt{CHOICE} est référencé dans
+            la contrainte, où sa présence n'est pas contrainte.} Par
+            exemple:
+\begin{sverb}
+T ::= CHOICE {
+        a INTEGER, 
+        b BOOLEAN
+      } (WITH COMPONENTS {..., a (0|1)})
+\end{sverb}
+            Alors nous réécrivons:
+\begin{sverb}
+T ::= CHOICE {
+        a INTEGER (0|1), 
+        b BOOLEAN
+      }
+\end{sverb}
+
+          \item \emph{Un champ du \texttt{CHOICE} est référencé dans
+            la contrainte, où sa présence est spécifiée
+            \texttt{PRESENT}}. Par exemple:
+\begin{sverb}
+T ::= CHOICE {
+        a INTEGER,
+        b BOOLEAN
+      } (WITH COMPONENTS {..., a (0|1) PRESENT})
+\end{sverb}
+            devient:
+\begin{sverb}
+T ::= CHOICE {a INTEGER (0|1)}
+\end{sverb}
+            Au passage nous nous sommes assuré qu'aucun autre champ
+            n'était spécifié \texttt{PRESENT}
+            \citep[\S~45.8.9.2]{ASN94}.
+
+          \item \emph{Un champ du \texttt{CHOICE} est référencé dans
+            la contrainte, où sa présence est spécifiée
+            \texttt{ABSENT}}. Par exemple:
+\begin{sverb}
+T ::= CHOICE {
+        a INTEGER,
+        b BOOLEAN
+      } (WITH COMPONENTS {..., a (0|1) ABSENT})
+\end{sverb}
+            est réécrit en
+\begin{sverb}
+T ::= CHOICE {b BOOLEAN}
+\end{sverb}
+            Remarquons deux choses:
+            \begin{itemize}
+
+              \item Nous nous sommes débarrassé de la contrainte
+                \verb+(0|1)+. La syntaxe d'ASN.1 nous permet de la
+                spécifier, mais elle n'est pas significative (ce qui
+                n'apparaît pas explicitement dans X.680
+                \citep{ASN94}).
+
+              \item Nous nous sommes assurés au passage qu'il y avait
+                au moins un autre champ dans le \texttt{CHOICE}:
+                ici~\texttt{b}. Nous comblons ainsi une lacune de la
+                norme X.680 \citep{ASN94}.
+
+            \end{itemize}
+
+          \item \emph{Un champ du \texttt{CHOICE} n'est pas référencé
+            dans la contrainte.} Dans ce cas on examine les autres
+            champs du type.
+
+          \item \emph{Si la contrainte interne est complète, alors les
+            champs non référencés dans la contrainte sont ôtés du
+            type.} Par exemple:
+\begin{sverb}
+T ::= CHOICE {
+        a INTEGER,
+        b BOOLEAN
+      } (WITH COMPONENTS {a (0|1)})
+\end{sverb}
+              est réécrit en:
+\begin{sverb}
+T ::= CHOICE {a INTEGER (0|1)}
+\end{sverb}
+            Nous satisfaisons ainsi \citep[\S~45.8.6]{ASN94}.
+
+        \end{enumerate}
+        Examinons maintenant le cas du type \texttt{SEQUENCE}.
+        \begin{enumerate}
+
+          \item \emph{Un champ \texttt{OPTIONAL} est contraint
+            \texttt{ABSENT}.} Par exemple:
+\begin{sverb}
+T ::= SEQUENCE {
+        a INTEGER OPTIONAL,
+        b BOOLEAN
+      } (WITH COMPONENTS {..., a (0|1) ABSENT})
+\end{sverb}
+            est réécrit en:
+\begin{sverb}
+T ::= SEQUENCE {b BOOLEAN}
+\end{sverb}
+            Nous nous sommes débarrassé de la contrainte
+            \verb+(0|1)+. La syntaxe d'ASN.1 nous permet de la
+            spécifier, mais elle n'est pas significative (ce qui
+            n'apparaît pas explicitement dans X.680 \citep{ASN94}).
+
+          \item \emph{Une contrainte partielle ne contraint pas la
+            présence d'un champ qu'elle référence.} Dans ce cas, on
+            réduit la contrainte interne sans se poser de
+            questions. Par exemple:
+\begin{sverb}
+T ::= SEQUENCE {
+        a INTEGER,
+        b BOOLEAN 
+      } (WITH COMPONENTS {..., a (0|1)})
+\end{sverb}
+            est réécrite en:
+\begin{sverb}
+T ::= SEQUENCE {
+        a INTEGER (0|1),
+        b BOOLEAN 
+      } 
+\end{sverb}
+            Rappelons que les champs des types du noyau d'ASN.1 ne
+            possèdent pas de contraintes.
+
+          \item \emph{Une contrainte complète ne contraint pas la
+            présence d'un champ \texttt{OPTIONAL} qu'elle référence.}
+            Dans ce cas nous réécrivons la contrainte en imposant
+            \texttt{PRESENT} (conformément
+            à~\cite[\S~45.8.9.3.a]{ASN94}). Par exemple:
+\begin{sverb}
+T ::= SEQUENCE {
+        a INTEGER OPTIONAL
+      } (WITH COMPONENTS  {a (0|1)})
+\end{sverb}
+            devient:
+\begin{sverb}
+T ::= SEQUENCE {
+        a INTEGER OPTIONAL
+      } (WITH COMPONENTS  {a (0|1) PRESENT})
+\end{sverb}
+
+          \item \emph{Une contrainte \texttt{OPTIONAL} contraint un
+            champ \texttt{OPTIONAL}.} Dans ce cas nous réduisons la
+            contrainte interne sans plus de questions. Par exemple:
+\begin{sverb}
+T ::= SEQUENCE {
+        a INTEGER OPTIONAL
+      } (WITH COMPONENTS {a (0|1) OPTIONAL})
+\end{sverb}
+            devient:
+\begin{sverb}
+T ::= SEQUENCE {a INTEGER (0|1) OPTIONAL}
+\end{sverb}
+
+          \item \emph{Une contrainte \texttt{PRESENT} s'applique à un
+            champ \texttt{OPTIONAL}.} Dans cas nous réduisons la
+            contrainte interne et nous ôtons l'attribut
+            \texttt{OPTIONAL} du champ sur lequel elle s'applique. Par
+            exemple:
+\begin{sverb}
+T ::= SEQUENCE {
+        a INTEGER OPTIONAL,
+        b BOOLEAN
+      } (WITH COMPONENTS {a (0|1) PRESENT})
+\end{sverb}
+            devient:
+\begin{sverb}
+T ::= SEQUENCE {
+        a INTEGER (0|1),
+        b BOOLEAN
+      }
+\end{sverb}
+
+          \item \emph{La contrainte interne est partielle et des
+            champs n'y sont pas contraints.} Dans ce cas ces champs
+            sont conservés tels quels, conformément
+            à~\cite[\S~45.8.6]{ASN94}.
+
+          \item \emph{La contrainte interne est complète et un champ
+            \texttt{OPTIONAL} n'est pas référencé.} Dans ce cas, nous
+            ajoutons une contrainte \texttt{ABSENT} sur ce champ,
+            conformément à~\cite[\S~45.8.6]{ASN94}. Par exemple:
+\begin{sverb}
+T ::= SEQUENCE {
+        a INTEGER OPTIONAL,
+        b BOOLEAN
+      } (WITH COMPONENTS {b (TRUE)})
+\end{sverb}
+            devient:
+\begin{sverb}
+T ::= SEQUENCE {
+        a INTEGER OPTIONAL,
+        b BOOLEAN
+      } (WITH COMPONENTS {a ABSENT, b (TRUE)})
+\end{sverb}
+            Remarquons qu'il faut ensuite chercher à appliquer un
+            autre cas pour traiter la contrainte que nous venons de
+            rajouter (en termes de programmation, cela revient à un
+            appel récursif).
+             
+          \item \emph{La contrainte interne est complète et un champ
+            non \texttt{OPTIONAL} n'y est pas référencé.} Dans ce cas
+            le champ est inchangé, conformément
+            à~\cite[\S~45.8.6]{ASN94}.
+
+        \end{enumerate}
+        Rappelons que les cas manquants ci-dessus, et, de façon
+        générale, dans toute énumération de cas, sont des cas
+        d'erreur. Par ailleurs, remarquons ici que la norme ne permet
+        pas les contraintes vides, alors que leur définition peut
+        s'appliquer uniformément au cas vide. Par exemple:
+\begin{sverb}
+T ::= SEQUENCE {
+        a INTEGER OPTIONAL,
+        b BOOLEAN
+      } (WITH COMPONENTS {})
+\end{sverb}
+        est syntaxiquement interdit, alors qu'on pourrait légitimement
+        et sans effort aucun lui donner le sens:
+\begin{sverb}
+T ::= SEQUENCE {
+        a INTEGER OPTIONAL,
+        b BOOLEAN
+      } (WITH COMPONENTS {a ABSENT})
+\end{sverb}
+        d'après~\cite[\S~45.8.6]{ASN94}. Dans le cas d'une contrainte
+        partielle, la spécification serait alors invariante (ce qui
+        n'est pas un problème du tout). Par exemple:
+\begin{sverb}
+T ::= SEQUENCE {
+        a INTEGER OPTIONAL,
+        b BOOLEAN
+      } (WITH COMPONENTS {...,})
+\end{sverb}
+        pourrait être interprété comme:
+\begin{sverb}
+T ::= SEQUENCE {
+        a INTEGER OPTIONAL,
+        b BOOLEAN
+      }
+\end{sverb}
+        en accord avec le même paragraphe
+        \citep[\S~45.8.6]{ASN94}. Insistons que ces cas, pour
+        exotiques qu'ils puissent paraître, n'en sont pas moins
+        pertinents du point de vue ensembliste (sous-jacent au
+        sous-typage d'ASN.1), pour lequel l'ensemble vide est un
+        ensemble à part entière.
+
+    \end{enumerate}
+    Le cas du type \texttt{SET} est identique à celui du type
+    \texttt{SEQUENCE}, excepté le fait ---~sur lequel nous n'avons pas
+    insisté~--- que l'ordre des contraintes n'est pas significatif. À
+    ce sujet, rappelons que \cite[\S~45.8.5]{ASN94} impose que les
+    contraintes dans la contrainte interne apparaissent dans le même
+    ordre que les champs sur lesquels elles s'appliquent. Dans cette
+    thèse nous avons respecté cette restriction, mais nous soutenons,
+    comme pour l'ordre des valeurs constituant une valeur de type
+    \texttt{SEQUENCE} \citep[\S~22.14]{ASN94}, qu'elle est
+    fondamentalement inutile (car contrairement à X.208 \citep{ASN90},
+    les contraintes dans une contrainte interne doivent référencer
+    explicitement le champ sur lequel elles s'appliquent, et ces
+    champs ont toujours un label) et, si elle n'alourdit pas vraiment
+    la norme, elle complique significativement sa formalisation.
+
+  \item \emph{Globalisation des types locaux sans leur étiquetage}
+    (formellement à la
+    section~\vref{globalisation_des_types_locaux_sans_leur_etiquetage}).
+    Après avoir réduit partiellement les contraintes internes les plus
+    externes, nous avons peut-être engendré des sous-types qui
+    n'appartiennent pas au noyau d'ASN.1. Par exemple:
+\begin{sverb}
+#0 ::= INTEGER
+T  ::= SET {
+         a #0
+       } (WITH COMPONENTS {a (0|1)})
+\end{sverb}
+    a été réécrit en:
+\begin{sverb}
+#0 ::= INTEGER
+T  ::= SET {a #0 (0|1)}
+\end{sverb}
+    Or ce dernier sous-type est un type stucturé dont un des champs au
+    moins possède des contraintes de sous-typage: il n'est donc pas
+    dans le noyau d'ASN.1 tel que nous l'avons présenté au
+    chapitre~\ref{noyau_ASN.1} page~\pageref{noyau_ASN.1}, et défini
+    au chapitre~\vref{environnements_canoniques}. Nous allons
+    simplement lui appliquer à nouveau la réécriture de la cinquième
+    étape du chapitre~\vref{noyau_ASN.1}. Ainsi, nous poursuivons:
+\begin{sverb}
+#0 ::= INTEGER
+T  ::= SET {a #1}
+#1 ::= #0 (0|1)
+\end{sverb}
+    Quel est l'intérêt de poursuivre ainsi? En plus de chercher à
+    revenir dans le noyau d'ASN.1, l'intérêt est que la contrainte
+    interne initiale contenait peut-être une contrainte interne, qu'il
+    faudra donc traiter lors d'une prochaine itération. Reprenons un
+    exemple donné plus haut:
+\begin{sverb}
+T  ::= SET (WITH COMPONENT (WITH COMPONENT (0|1))) OF #1
+#1 ::= SET OF #2
+#2 ::= INTEGER
+\end{sverb}
+    Nous avons réécrit cette spécification en
+\begin{sverb}
+T  ::= SET OF (#1 (WITH COMPONENT (0|1)))
+#1 ::= SET OF #2
+#2 ::= INTEGER
+\end{sverb}
+    Maintenant, lors de la présente sous-étape, nous réécrivons:
+\begin{sverb}
+T  ::= SET OF #3
+#1 ::= SET OF #2
+#2 ::= INTEGER
+#3 ::= #1 (WITH COMPONENT (0|1))
+\end{sverb}
+    De cette façon nous avons placé la contrainte interne qui restait
+    à la position qui convient pour reprendre un peu plus tard le
+    processus que nous présentons (récursivement).
+
+  \item \emph{Dépliage des abréviations globales} (formellement à la
+    section~\vref{depliage_des_abreviations_et_selections_globales}). Dans
+    le but de ramener les sous-types produits par la réduction
+    partielle des contraintes internes dans le noyau d'ASN.1, nous
+    poursuivons en dépliant les abréviations globales que nous avons
+    peut-être engendrées à la sous-étape précédente. En reprenant
+    notre dernier exemple, il vient alors:
+\begin{sverb}
+T  ::= SET OF #3
+#1 ::= SET OF #2
+#2 ::= INTEGER
+#3 ::= (SET OF #2) (WITH COMPONENT (0|1))
+\end{sverb}
+    Nous avons remplacé l'abréviation~\texttt{\#1} dans la définition
+    de~\texttt{\#3} par sa définition (\texttt{SET OF \#2}). Notez les
+    parenthèses supplémentaires, typiques du noyau d'ASN.1.
+
+  \item \emph{Distribution des contraintes (disjonctives)}
+    (formellement à la
+    section~\vref{distribution_des_contraintes_disjonctives}). Il est
+    possible que les nouvelles contraintes, bien qu'elles soient
+    obligatoirement en forme disjonctive, ne soient pas distribuées
+    sur les types sur lesquels elles s'appliquent: nous les
+    distribuons donc, exactement comme nous l'avions fait à la seconde
+    étape de ce présent chapitre. Par exemple:
+\begin{sverb}
+#1 ::= VisibleString
+T  ::= SET {a #1}
+           (WITH COMPONENTS {a (SIZE (5) | FROM ("A".."B"))})
+\end{sverb}
+    La première sous-étape réduit la contrainte interne:
+\begin{sverb}
+#1 ::= VisibleString
+T  ::= SET {a #1 (SIZE (5) | FROM ("A".."B"))} 
+\end{sverb}
+    La seconde sous-étape sort les contraintes nouvellement apparues
+    sur les champs:
+\begin{sverb}
+#1 ::= VisibleString
+T  ::= SET {a #2} 
+#2 ::= #1 (SIZE (5) | FROM ("A".."B"))
+\end{sverb}
+    La troisième sous-étape déplie l'abréviation~\texttt{\#1}:
+\begin{sverb}
+#1 ::= VisibleString
+T  ::= SET {a #2} 
+#2 ::= VisibleString (SIZE (5) | FROM ("A".."B"))
+\end{sverb}
+    La présente quatrième sous-étape distribue la contrainte
+    (forcément disjonctive car la contrainte interne (initiale) était
+    en forme disjonctive):
+\begin{alltt}
+\small{#1 ::= VisibleString
+T  ::= SET \{a #2\}
+#2 ::= VisibleString (SIZE (5))
+     \(\cup\) VisibleString (FROM ("A".."B"))}
+\end{alltt}
+    Nous nous arrêtons car la spécification est alors invariante par
+    la présente quatrième étape. (Nous avons atteint le point fixe.)
+
+\end{enumerate}
+Donnons deux exemples supplémentaires où les sous-étapes précédentes
+sont itérées. Commençons par:
+\begin{sverb}
+T ::= CHOICE {
+        a [0] T (WITH COMPONENTS {..., b (0)}),
+        b [1] INTEGER
+      } (WITH COMPONENTS {..., b (0|1)})
+\end{sverb}
+Au chapitre~\vref{noyau_ASN.1} cette déclaration est successivement
+réécrite en:
+\begin{sverb}
+T  ::= CHOICE {
+         a #1, 
+         b #2 
+       } (WITH COMPONENTS {..., b (0|1)})
+#1 ::= [0] T (WITH COMPONENTS {..., b (0)})
+#2 ::= [1] INTEGER
+\end{sverb}
+puis:
+\begin{sverb}
+T  ::= CHOICE {
+         a #1, 
+         b #2 
+       } (WITH COMPONENTS {..., b (0|1)})
+#1 ::= [0] CHOICE {
+         a #1, 
+         b #2 
+       } (WITH COMPONENTS {..., b (0|1)})
+         (WITH COMPONENTS {..., b (0)})
+#2 ::= [1] INTEGER
+\end{sverb}
+Maintenant, la première sous-étape consiste à réduire partiellement
+les contraintes internes (les plus externes). Nous réécrivons donc:
+\begin{sverb}
+T  ::= CHOICE {
+         a #1, 
+         b #2 (0|1) 
+       } 
+#1 ::= [0] CHOICE {
+         a #1, 
+         b #2 (0|1) (0) 
+       }
+#2 ::= [1] INTEGER
+\end{sverb}
+Il est utile de remarquer que l'ordre dans lequel nous réduisons les
+contraintes internes en intersection \emph{n'est pas} significatif,
+car l'opérateur d'intersection (\verb+^+) commute.
+
+Ensuite, la deuxième sous-étape sort les contraintes des champs:
+\begin{sverb}
+T  ::= CHOICE {
+         a #1, 
+         b #3 
+       } 
+#1 ::= [0] CHOICE {
+         a #1, 
+         b #4 
+       }
+#2 ::= [1] INTEGER
+#3 ::= #2 (0|1)
+#4 ::= #2 (0|1) (0)
+\end{sverb}
+Ensuite, la troisième sous-étape déplie les abréviations:
+\begin{sverb}
+T  ::= CHOICE {
+         a #1, 
+         b #3 
+       } 
+#1 ::= [0] CHOICE {
+         a #1, 
+         b #4 
+       }
+#2 ::= [1] INTEGER
+#3 ::= [1] INTEGER (0|1)
+#4 ::= [1] INTEGER (0|1)(0)
+\end{sverb}
+Envisageons maintenant un second exemple. Si en plus de la déclaration
+de~\texttt{T} précédente, nous avions eu en plus:
+\begin{sverb}
+U ::= T (WITH COMPONENTS {..., a (WITH COMPONENTS {..., b (0)})})
+\end{sverb}
+alors tout d'abord le type~\texttt{U} aurait été mis en forme
+canonique, en dépliant l'abréviation~\texttt{T}:
+\begin{sverb}
+U ::= CHOICE {
+        a #1, 
+        b #3
+      } (WITH COMPONENTS {..., a (WITH COMPONENTS {..., b (0)})})
+\end{sverb}
+Puis la première sous-étape aurait réduit partiellement les
+contraintes internes:
+\begin{sverb}
+U ::= CHOICE {
+        a #1 (WITH COMPONENTS {..., b (0)}), 
+        b #3
+      }
+\end{sverb}
+Ensuite la seconde sous-étape aurait sorti les sous-types des champs:
+\begin{sverb}
+U  ::= CHOICE {
+         a #5,
+         b #3
+       }
+#5 ::= #1 (WITH COMPONENTS {..., b (0)})
+\end{sverb}
+Puis la troisième sous-étape aurait déplié~\texttt{\#1}:
+\begin{sverb}
+U  ::= CHOICE {
+         a #5,
+         b #3
+       }
+#5 ::= [0] CHOICE {
+         a #1, 
+         b #4 
+       } (WITH COMPONENTS {..., b (0)})
+\end{sverb}
+La quatrième et dernière sous-étape n'aurait rien fait car les
+contraintes sont bien distribuées. Mais il reste encore une contrainte
+interne à réduire et nous aurions alors recommencé la présente
+quatrième étape. D'abord en réduisant la contrainte interne:
+\begin{sverb}
+U  ::= CHOICE {
+         a #5,
+         b #3
+       }
+#5 ::= [0] CHOICE {
+         a #1, 
+         b #4 (0)
+       }
+\end{sverb}
+Ensuite en sortant les champs contraints:
+\begin{sverb}
+U  ::= CHOICE {
+         a #5,
+         b #3
+       }
+#5 ::= [0] CHOICE {
+         a #1, 
+         b #6
+       }
+#6 ::= #4 (0)
+\end{sverb}
+Puis en dépliant les abréviations globales nouvellement apparues
+(ici~\texttt{\#4}):
+\begin{sverb}
+U  ::= CHOICE {
+         a #5,
+         b #3
+       }
+#5 ::= [0] CHOICE {
+         a #1, 
+         b #6
+       }
+#6 ::= [1] INTEGER (0|1)(0)(0)
+\end{sverb}
+Et nous aurions alors terminé car la spécification est maintenant
+invariante pour la quatrième et présente étape.
+
+Avant de refermer cette longue et quatrième étape, disons un mot sur
+la terminaison de ces réécritures. La différence essentielle entre les
+types (et sous-types) et les contraintes est que les premiers peuvent
+être nommés et pas les seconds. Or, comme le système de types d'ASN.1
+n'inclut pas d'opérateurs de point fixe, les types et les sous-types
+peuvent être récursifs mais pas les contraintes. Pour prouver la
+terminaison de notre algorithme nous utiliserions cette propriété.
+
+La \textbf{cinquième étape} consiste à vérifier que les sous-types
+engendrés par les précédentes étapes sont bien fondés. Lors de la
+deuxième étape de la mise en forme des modules ASN.1 (au
+chapitre~\vref{noyau_ASN.1}), nous avions déjà effectué cette
+vérification, qui consiste essentiellement à rejeter certaines
+catégories de types récursifs. Cette vérification ignore les
+contraintes de sous-typage, aussi nous avions dit que
+\begin{sverb}
+T ::= CHOICE {
+        a [0] T,
+        b NULL
+       } (WITH COMPONENTS {b ABSENT})
+\end{sverb}
+était un type bien fondé, alors que
+\begin{sverb}
+T ::= CHOICE {a [0] T}
+\end{sverb}
+ne l'était pas. Ici, après avoir réduit toutes les contraintes
+internes en contraintes élémentaires, nous allons appliquer à nouveau
+le critère des types bien fondés, et ainsi rejeter cette précédente
+déclaration qui jusqu'à présent était valide.
+
+La \textbf{sixième étape} (voir la contrepartie formelle à la
+section~\vref{contraintes_d_intervalle}) traite des intersections de
+contraintes de tailles (\texttt{SIZE}). Pourquoi traiter séparément
+ces contraintes? La raison réside dans l'interaction entre les
+contraintes \texttt{SIZE} et \texttt{FROM}. Par exemple:
+\begin{sverb}
+T ::= VisibleString (FROM ("A".."C")) (FROM ("D".."F"))
+\end{sverb}
+est un sous-type qui ne contient pas de valeurs, donc qui doit être
+rejeté. Mais
+\begin{sverb}
+T ::= VisibleString (SIZE(0)) (FROM ("A".."C")) (FROM ("D".."F"))
+\end{sverb}
+est un sous-type valide car il contient une unique valeur qui est la
+chaîne vide (\verb+""+). Il s'agit donc de calculer l'intersection des
+contraintes \verb+SIZE+ avant les autres, et ensuite, si la taille
+calculée se ramène à zéro (ce peut être \texttt{0..0} ou
+\texttt{-1<..0} etc.) d'éliminer les éventuelles contraintes
+\texttt{FROM} de l'intersection, avant de réduire toute
+l'intersection.
+
+La \textbf{première sous-étape} (voir la contrepartie formelle à la
+section~\vref{normalisation_des_intersections_de_contraintes_SIZE})
+consiste à réduire les contraintes \texttt{SIZE} en appliquant la
+règle de réécriture suivante à toute paire de contraintes
+\texttt{(SIZE ($\sigma_0$))} et \texttt{(SIZE ($\sigma_1$))} en
+intersection:
+\begin{center}
+\tt (SIZE ($\sigma_0$)) \^{} (SIZE ($\sigma_1$))
+$\longrightarrow$ (SIZE ($\sigma_0$ \^{} $\sigma_1$)),
+\end{center}
+où $\sigma_0$~et~$\sigma_1$ dénotent des contraintes et \verb+^+~est
+l'intersection de contraintes. Par exemple:
+\begin{sverb}
+T ::= VisibleString (SIZE (0..3)) (SIZE (2))
+\end{sverb}
+est réécrit en:
+\begin{sverb}
+T ::= VisibleString (SIZE ((0..3)(2)))
+\end{sverb}
+L'ordre des intersections nouvellement formées n'est pas
+significatif. Ainsi il aurait été correct de réécrire:
+\begin{sverb}
+T ::= VisibleString (SIZE ((2)(0..3)))
+\end{sverb}
+De même, il est correct de définir:
+\begin{sverb}
+T ::= VisibleString (SIZE (MIN..5)) (SIZE (2))
+\end{sverb}
+et de réécrire en:
+\begin{sverb}
+T ::= VisibleString (SIZE ((MIN..5)(2)))
+\end{sverb}
+ou en:
+\begin{sverb}
+T ::= VisibleString (SIZE ((2)(MIN..5)))
+\end{sverb}
+
+La \textbf{seconde sous-étape} (voir la contrepartie formelle à la
+section~\vref{normalisation_des_bornes_MAX_et_MIN}) va donc consister
+à rendre commutatives les intersections présentes dans les contraintes
+\texttt{SIZE}. Pour cela, nous allons remplacer, \emph{lorsque cela
+  est possible}, les éventuelles bornes \texttt{MIN} et \texttt{MAX}
+par leur valeur, en accord avec la clause
+\citep[\S~45.4.4]{ASN94}. (Les bornes \texttt{MINUS-INFINITY} ou
+\texttt{PLUS-INFINITY} ne sont pas possibles ici car les intervalles
+doivent être du type \texttt{INTEGER}. Nous parlerons plus loin de ces
+bornes réelles spéciales lorsque nous aborderons le cas général de la
+réduction des intersections d'intervalles.) Il n'est pas possible de
+remplacer les bornes \texttt{MIN} et \texttt{MAX} lorsqu'elles
+désignent respectivement l'infini négatif ($-\infty$) et l'infini
+positif ($+\infty$). Maintenant il y a au plus une contrainte
+\texttt{SIZE} par sous-type.
+
+La \textbf{troisième sous-étape} normalise les intervalles
+éventuellement présents dans les contraintes \texttt{SIZE}: nous les
+transformons en intervalles fermés, et s'ils sont réduits à un
+élément, alors nous les remplaçons par une contrainte par valeur. Par
+exemple:
+\begin{sverb}
+U ::= VisibleString (SIZE (-1<..3)) (SIZE (0<..1))
+\end{sverb}
+avait été réécrit à la première sous-étape en:
+\begin{sverb}
+U ::= VisibleString (SIZE ((-1<..3) (0<..1)))
+\end{sverb}
+Maintenant nous réécrivons:
+\begin{sverb}
+U ::= VisibleString (SIZE ((0..3) (1)))
+\end{sverb}
+
+La \textbf{quatrième sous-étape} (voir la contrepartie formelle à la
+section~\vref{intervalles_bien_formes}) consiste à vérifier que les
+intervalles fermés sont bien formés, c'est-à-dire que ce sont bien des
+intervalles au sens mathématique. Par exemple:
+\begin{sverb}
+A ::= INTEGER (5..4)
+B ::= INTEGER (MAX..MIN)
+\end{sverb}
+sont mal formés.
+
+La \textbf{cinquième sous-étape} (voir la contrepartie formelle à la
+section~\vref{reduction_des_intersections_de_contraintes_SIZE})
+calcule l'intersection des intervalles présents dans les
+\texttt{SIZE}. Ainsi
+\begin{sverb}
+T ::= VisibleString (SIZE ((MIN..5)(2)))
+\end{sverb}
+devient:
+\begin{sverb}
+T ::= VisibleString (SIZE (2))
+\end{sverb}
+Si nous avions eu:
+\begin{sverb}
+T ::= VisibleString (SIZE ((0..3)(4..7)))
+\end{sverb}
+alors nous n'aurions pas pu aboutir, ce qui équivaut à une erreur,
+donc à rejeter le sous-type car il est vide (nous dirons volontiers
+qu'il est mal formé). Notre exemple
+\begin{sverb}
+U ::= VisibleString (SIZE ((0..3)(1)))
+\end{sverb}
+devient quant à lui:
+\begin{sverb}
+U ::= VisibleString (SIZE (1))
+\end{sverb}
+Il est très important de noter que pour pouvoir effectuer cette étape
+il faut s'assurer que la clause \citep[\S~45.5.3]{ASN94} est
+satisfaite, ce qui fait appel au cas général que nous verrons plus
+avant (réduction générale des sous-types pour s'assurer de leur bonne
+formation). Étant donné \texttt{(SIZE ($\sigma$))}, où $\sigma$~est
+une contrainte, nous devons contrôler le sous-type \texttt{INTEGER
+  (0..MAX)($\sigma$)}.
+
+La \textbf{sixième sous-étape} (voir la contrepartie formelle à la
+section~\vref{elimination_des_contraintes_FROM_si_SIZE_0}) examine les
+valeurs des contraintes \texttt{SIZE} et si elles valent zéro alors
+les éventuelles contraintes \texttt{FROM} en intersection sont
+éliminées. Par exemple:
+\begin{sverb}
+T ::= VisibleString (SIZE(0)) (FROM ("A".."C")) (FROM ("D".."F"))
+\end{sverb}
+devient:
+\begin{sverb}
+T ::= VisibleString (SIZE (0))
+\end{sverb}
+
+La \textbf{septième étape} consiste à traiter tous les intervalles et
+les contraintes par valeurs comme nous l'avons fait précédemment dans
+le cas des intervalles apparaissant dans les contraintes de taille
+\texttt{SIZE}. Ajoutons ici le cas où les valeurs et les intervalles
+sont de type \texttt{REAL}. Deux sous-cas sont possibles.
+\begin{itemize}
+
+  \item \emph{La valeur, éventuellement en tant que borne
+    d'intervalle, n'est ni \texttt{PLUS-INFINITY} ni
+    \texttt{MINUS-INFINITY}.} Alors nous devons la normaliser pour
+    permettre une comparaison aisée de ces valeurs. Par exemple les
+    nombres \texttt{\{mantissa 1, base 2, exponent 2\}} et
+    \texttt{\{mantissa 2, base 2, exponent 1\}} représentent le même
+    nombre réel mathématique. Une fonction de normalisation sur les
+    réels ASN.1 est une fonction qui associe le même réel ASN.1 à tous
+    les réels ASN.1 qui dénotent le même réel mathématique. Les
+    nombres rééls normalisés doivent être exprimés en base 10, sinon
+    il risque d'y avoir une perte de précision en partant d'une
+    représentation en base~\(2\). Voir la contrepartie formelle à la
+    section~\vref{normalisation_des_bornes_finies_reelles}.
+
+  \item \emph{La borne d'intervalle est \texttt{MIN} ou \texttt{MAX}.}
+    Nous appliquons alors la même procédure que nous avons vu
+    précédemment pour les intervalles d'entiers dans les
+    \texttt{SIZE}. Si, après réécriture, la borne reste invariante,
+    alors si elle est \texttt{MIN} on lui substitue
+    \texttt{MINUS-INFINITY}, si elle est \texttt{MAX} alors on lui
+    substitue \texttt{PLUS-INFINITY}. Voir la contrepartie formelle à
+    la section~\vref{normalisation_des_bornes_MAX_et_MIN}.
+
+\end{itemize}
+Avant de passer à l'étape suivante, ajoutons un mot concernant les
+intersections de contraintes par valeurs. La règle que nous
+appliquerons pour calculer ces intersections est purement syntaxique
+et est simplement l'identité. Par exemple:
+\begin{sverb}
+T ::= INTEGER (7)(7)
+\end{sverb}
+Dans ce cas il est clair que \texttt{7}~et~\texttt{7} sont deux
+  portions de texte identiques, donc l'intersection
+  est~\texttt{7}. Mais que dire de:
+\begin{sverb}
+T ::= (SET OF INTEGER) ({7,5}) ({5,9})
+\end{sverb}
+Dans ce cas, l'intersection est vide, et donc le sous-type est mal
+formé.
+
+Une limitation de cette règle est qu'elle ne permet pas de conclure
+que
+\begin{sverb}
+T ::= (SET OF INTEGER) ({7,5}) ({5,7})
+\end{sverb}
+est correct, car elle ne tient pas compte d'une permutation possible
+des valeurs de l'ensemble. Une solution simple consiste, lors de mise
+sous forme canonique des spécifications (au
+chapitre~\vref{environnements_canoniques}), d'appliquer un ordre
+canonique sur les valeurs éléments des \texttt{SET OF}, ainsi que sur
+les champs des \texttt{SET} (l'ordre alphabétique croissant sur les
+labels est suffisant). La définition d'un ordre canonique sur les
+valeurs ASN.1 ne posant pas de problèmes particuliers, nous ne jugeons
+pas nécessaire de la donner ici.
+
+La \textbf{huitième étape} traite \emph{isolément} chaque contrainte
+\texttt{FROM}. Comme pour les contraintes \texttt{SIZE} pour
+lesquelles nous avions vérifié la propriété \citep[\S~45.5.3]{ASN94},
+nous devons vérifier la propriété \citep[\S~45.7.3]{ASN94} pour les
+\texttt{FROM}. Ainsi, étant donné dans le cas général \texttt{T (FROM
+  ($\sigma$))}, où $\sigma$~est une contrainte, cela signifie que nous
+devons contrôler le sous-type \texttt{T($\sigma$)}.
+
+La \textbf{neuvième étape} (voir la contrepartie formelle à la
+section~\vref{intersection_de_contraintes}) est la dernière étape du
+contrôle des sous-types. Elle consiste à calculer l'intersection des
+contraintes que nous avons réécrites et filtrées jusqu'à présent. Les
+intersections entre contraintes de nature différentes ne sont pas à
+calculer, sauf les contraintes par valeur qui sont de même nature que
+celles par intervalles ---~Une valeur est un cas dégénéré d'intervalle
+réduit à un élément. Les intersections de contraintes \texttt{SIZE}
+ont été calculées précédemment. Il nous reste alors à calculer les
+intersections d'intervalles et de valeurs, ce que nous avons déjà
+présenté lors des calculs sur les contraintes \texttt{SIZE}. Le seul
+cas restant est l'intersection de contraintes \texttt{FROM}: c'est
+exactement le même traitement que pour les intersections de
+contraintes \texttt{SIZE}. (La raison théorique est que
+si~$\mathcal{A}$ et~$\mathcal{B}$ sont des alphabets finis, alors nous
+avons: $\mathcal{A}^{*} \cap \mathcal{B}^{*} = (\mathcal{A} \cap
+\mathcal{B})^{*}$, où $\mathcal{X}^{*}$ est le sous-monoïde engendré
+par $\mathcal{X}$.) Par exemple,
+\begin{sverb}
+T ::= VisibleString (FROM ("A".."C")) (FROM ("B".."D"))
+\end{sverb}
+est réécrit en:
+\begin{sverb}
+T ::= VisibleString (FROM (("A".."C") ("B".."D")))
+\end{sverb}
+puis
+\begin{sverb}
+T ::= VisibleString (FROM ("B".."C"))
+\end{sverb}
+
+De façon générale les seules réécritures sur les contraintes
+\texttt{SIZE} et \texttt{FROM} qui laissent invariante la sémantique
+(intuitivement cela signifie que le sous-type contient alors les mêmes
+valeurs avant et après la réécriture) sont les suivantes (on tiendra
+compte en plus de la commutativité des opérateurs
+\verb+|+~et~\verb+^+):
+
+\begin{tabular}{@{}rcl@{}}
+\texttt{(FROM ($\sigma_0$)) \^{} (FROM ($\sigma_1$))}
+& $\longleftrightarrow$ & \texttt{(FROM ($\sigma_0$ \^{}
+$\sigma_1$))}\\
+\texttt{(SIZE ($\sigma_0$)) \^{} (SIZE ($\sigma_1$))} 
+& $\longleftrightarrow$ & \texttt{(SIZE ($\sigma_0$ \^{} 
+$\sigma_1$))}\\
+\texttt{(SIZE ($\sigma_0$) | SIZE ($\sigma_1$))}
+& $\longleftrightarrow$ & \texttt{(SIZE ($\sigma_0$ | $\sigma_1$))}\\
+\texttt{(FROM ($\sigma_0$) | FROM ($\sigma_1$))}
+& $\longleftrightarrow$ & \texttt{(FROM ($\sigma_1$))}, si $\sigma_0 \subseteq \sigma_1$.
+\end{tabular}
+
+Cette dernière réécriture s'illustre par l'exemple:
+\begin{sverb}
+T ::= VisibleString (FROM ("A") | FROM ("A".."B"))
+\end{sverb}
+qui se réécrit:
+\begin{sverb}
+T ::= VisibleString (FROM ("A".."B"))
+\end{sverb}
+(En théorie des langages formels on démontrerait le théorème:
+$\mathcal{A}^{*} + \mathcal{B}^{*} \subseteq (\mathcal{A} +
+\mathcal{B})^{*}$.)
+
+Les règles de codage PER \citep{X.691} sauraient tirer profit de cette
+dernière réécriture, mais dans cette thèse nous ne sommes pas allé
+jusque là, car notre souci principal était la vérification sémantique
+et non la compilation, même si pour parvenir à la vérification nous
+avons choisi de réécrire les spécifications, et donc à les
+précompiler.

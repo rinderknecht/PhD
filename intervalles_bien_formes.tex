@@ -1,0 +1,141 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+% INTEGER
+%
+\inferrule
+  {}
+  {\bouchon{42} \textsf{MIN} \,\wild\, \textsf{\textbf{..}} \,\wild\,
+    \textsf{MAX}}
+
+\inferrule
+  {}
+  {\bouchon{42} \textsf{MIN} \,\wild\, \textsf{\textbf{..}} \,\wild\,
+      (\textsf{Val} \, (\textsf{Int} \,\wild\!))}
+
+\inferrule
+  {}
+  {\bouchon{42} (\textsf{Val} \, (\textsf{Int} \,\wild\!)) \,\wild\,
+    \textsf{\textbf{..}} \,\wild\, \textsf{MAX}}
+
+\inferrule
+  {n \leqslant m}
+  %----
+  {\bouchon{42} (\textsf{Val} \, (\textsf{Int} \, n)) \leqslant
+    \textsf{\textbf{..}} \leqslant (\textsf{Val} \, (\textsf{Int} \,
+    m))}
+
+\inferrule
+  {n < m}
+  %-----
+  {\bouchon{42} (\textsf{Val} \, (\textsf{Int} \, n)) \leqslant
+    \textsf{\textbf{..}} < (\textsf{Val} \, (\textsf{Int} \, m))}
+
+\inferrule
+  {n < m}
+  %------
+  {\bouchon{42} (\textsf{Val} \, (\textsf{Int} \, n)) <
+    \textsf{\textbf{..}} \leqslant (\textsf{Val} \, (\textsf{Int} \,
+    m))}
+
+\inferrule
+  {n+1 < m}
+  %--------
+  {\bouchon{42} (\textsf{Val} \, (\textsf{Int} \, n)) <
+    \textsf{\textbf{..}} < (\textsf{Val} \, (\textsf{Int} \, m))}
+
+% REAL
+%
+\inferrule
+  {f_0 \lhd [(\textsf{Some} \, \, \textrm{"mantissa"},
+              \textsf{Int}\,m_0); 
+             (\textsf{Some} \, \, \textrm{"base"},
+              \textsf{Int} \, b_0);\\\\
+   (\textsf{Some} \, \, \textrm{"exponent"}, \textsf{Int} \, e_0)]\\
+   f_1 \lhd [(\textsf{Some} \, \, \textrm{"mantissa"}, \textsf{Int} \,
+     m_1); (\textsf{Some} \, \, \textrm{"base"}, \textsf{Int} \, b_1);\\\\
+     (\textsf{Some} \, \, \textrm{"exponent"}, \textsf{Int} \, e_1)]\\\\
+   m_0 \cdot b_0^{e_0} \leqslant m_1 \cdot b_1^{e_1}}
+  %------
+  {\bouchon{42} (\textsf{Val} \bob f_0 \bcb\!) \, \leqslant
+    \textsf{\textbf{..}} \leqslant \, (\textsf{Val} \bob f_1 \bcb\!)}
+
+\inferrule
+  {f_0 \lhd [(\textsf{Some} \, \, \textrm{"mantissa"}, \textsf{Int} \,
+      m_0); (\textsf{Some} \, \, \textrm{"base"}, \textsf{Int} \,
+      b_0);\\\\
+      (\textsf{Some} \, \, \textrm{"exponent"}, \textsf{Int} \,
+      e_0)]\\
+   f_1 \lhd [(\textsf{Some} \, \, \textrm{"mantissa"}, \textsf{Int} \,
+     m_1); (\textsf{Some} \, \, \textrm{"base"}, \textsf{Int} \,
+     b_1);\\\\
+     (\textsf{Some} \, \, \textrm{"exponent"}, \textsf{Int} \, e_1)]\\\\\
+   m_0 \cdot b_0^{e_0} < m_1 \cdot b_1^{e_1}}
+  %------
+  {\bouchon{42} (\textsf{Val} \bob f_0 \bcb\!) \,\wild\,
+    \textsf{\textbf{..}} \,\wild\, (\textsf{Val} \bob f_1 \bcb\!)}
+
+\inferrule
+  {f_1 \lhd [(\textsf{Some} \, \, \textrm{"mantissa"}, \textsf{Int} \,
+      m_1); (\textsf{Some} \, \, \textrm{"base"}, \textsf{Int} \,
+      \wild\!);\\\\
+      (\textsf{Some} \, \, \textrm{"exponent"}, \textsf{Int}
+      \, \wild\!)]\\\\
+   0 < m_1}
+  %-----
+  {\bouchon{42} (\textsf{Val 0.0}) \,\wild\, \textsf{\textbf{..}}
+    \,\wild\, (\textsf{Val} \bob f_1 \bcb\!)}
+
+\inferrule
+  {f_0 \lhd [(\textsf{Some} \, \, \textrm{"mantissa"}, \textsf{Int} \,
+      m_0); (\textsf{Some} \, \, \textrm{"base"}, \textsf{Int} \,
+      \wild\!);\\\\
+      (\textsf{Some} \, \, \textrm{"exponent"}, \textsf{Int}
+      \, \wild\!)]\\\\
+   m_0 < 0}
+  %-------
+  {\bouchon{42} (\textsf{Val} \bob f_0 \bcb\!) \,\wild\,
+    \textsf{\textbf{..}} \,\wild\, (\textsf{Val 0.0})}
+
+\inferrule
+  {f_1 \lhd [(\textsf{Some} \, \, \textrm{"mantissa"}, \textsf{Int} \,
+      \wild\!); (\textsf{Some} \, \, \textrm{"base"}, \textsf{Int} \,
+      \wild\!);\\\\
+      (\textsf{Some} \, \, \textrm{"exponent"}, \textsf{Int}
+      \, \wild\!)]}
+  %-----
+  {\bouchon{42} (\textsf{Val MINUS-INFINITY}) \,\wild\,
+    \textsf{\textbf{..}} \,\wild\, (\textsf{Val} \bob f_1 \bcb\!)}
+
+\inferrule
+  {f_0 \lhd [(\textsf{Some} \, \, \textrm{"mantissa"}, \textsf{Int} \,
+      \wild\!); (\textsf{Some} \, \, \textrm{"base"}, \textsf{Int} \,
+      \wild\!);\\\\
+      (\textsf{Some} \, \, \textrm{"exponent"}, \textsf{Int}
+      \, \wild\!)]}
+  %------
+  {\bouchon{42} (\textsf{Val} \bob f_0 \bcb\!) \,\wild\,
+    \textsf{\textbf{..}} \,\wild\, (\textsf{Val PLUS-INFINITY})}
+
+\inferrule
+  {}
+  {\bouchon{42} (\textsf{Val MINUS-INFINITY}) \,\wild\,
+    \textsf{\textbf{..}} \,\wild\, (\textsf{Val PLUS-INFINITY})}
+
+\inferrule
+  {\textrm{String.length} \, s_0 = 1 \qquad \textrm{String.length} \, s_1 = 1\\
+   \bouchon{42} \textsf{Val} \, (\textsf{Int} \, (\textrm{Char.code}
+   \, (s_0.[0]))) \leqslant \textsf{\textbf{..}} \leqslant
+   \textsf{Val} \, (\textsf{Int} \, (\textrm{Char.code} \, (s_1.[0])))}
+  %-----
+  {\bouchon{42} \textsf{Val} \, (\textsf{CharString} \, (s_0))
+    \leqslant \textsf{\textbf{..}} \leqslant \textsf{Val} \,
+    (\textsf{CharString} \, (s_1))}
+
+% Identity of lower bound and upper bound
+%
+\inferrule
+  {}
+  {\bouchon{42} e \leqslant \textsf{\textbf{..}} \leqslant e}
+
+\end{mathparpagebreakable}

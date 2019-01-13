@@ -1,0 +1,272 @@
+%%-*-latex-*-
+
+\section{Nouvelle grammaire d'ASN.1}
+\label{NEWGRAM}
+
+Nous donnons ici la nouvelle grammaire ASN.1 obtenue par les
+transformations données en annexe
+(cf. \vref{transformations_grammaticales}). Elle décrit exactement le
+même langage que la grammaire normalisée par l'ISO.
+
+\begin{tabular}{@{}lrl@{}} \\ \hline \\
+\multicolumn{3}{c}{\begin{tabular}{l} \textbf{MODULES}  \\ \end{tabular}} \\
+
+\\ \hline \\
+
+\textbf{ModuleDefinition} & $\rightarrow$ & ModuleIdentifier \\
+                 &               & DEFINITIONS \\
+                 &               & [TagDefault TAGS] \\
+                 &               & ``\textsf{::=}'' \\
+                 &               & BEGIN \\
+                 &               & [ModuleBody] \\
+                 &               & END \\
+
+\\ \hline \\
+
+\emph{ModuleIdentifier} & $\rightarrow$ & \texttt{upper$_{mod}$}
+                                          [``\textsf{\{}''
+                                          ObjIdComponent$^+$
+                                          ``\textsf{\}}''] \\
+\underline{ObjIdComponent} & $\rightarrow$ & \texttt{number} \\
+                   & $\mid$        & \texttt{upper$_{mod}$} ``.''
+                                     \texttt{lower$_{val}$} \\
+                   & $\mid$        & \texttt{lower} [``\textsf{(}''
+                                     ClassNumber ``\textsf{)}''] \\
+
+\\ \hline \\
+
+\emph{\underline{TagDefault}} & $\rightarrow$ & EXPLICIT \\
+                 & $\mid$        & IMPLICIT \\
+\\ \hline \\
+
+\emph{ModuleBody} & $\rightarrow$ & [Exports] [Imports] Assignment$^+$ \\
+Exports           & $\rightarrow$ & EXPORTS \{Symbol ``\textsf{,}''
+                                    \ldots \}$^*$ ``\textsf{;}'' \\
+Imports           & $\rightarrow$ & IMPORTS SymbolsFromModule$^*$ ``\textsf{;}'' \\
+SymbolsFromModule & $\rightarrow$ & \{Symbol ``\textsf{,}'' \ldots \}$^+$\\
+                  &               & FROM ModuleIdentifier \\
+Symbol     & $\rightarrow$ & \texttt{upper$_{typ}$} \\
+           & $\mid$        & \texttt{lower$_{val}$} \\
+
+\\ \hline \\
+
+\emph{Assignment} & $\rightarrow$ & \texttt{upper$_{typ}$} ``\textsf{::=}'' Type \\
+                  & $\mid$        & \texttt{lower$_{val}$} Type ``\textsf{::=}'' Value \\
+
+\\ \hline
+\end{tabular}
+
+\begin{tabular}{@{}lrl@{}} \\ \hline \\
+\multicolumn{3}{c}{\begin{tabular}{l} \textbf{TYPES}  \\ \end{tabular}} \\
+
+\\ \hline \\
+
+\emph{\underline{Type}} & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{$<$}'' Type \\
+                        & $\mid$        & \texttt{upper}
+                                          [``\textsf{.}'' \texttt{upper$_{typ}$}]
+                                          SubtypeSpec$^*$ \\
+                        & $\mid$        & NULL SubtypeSpec$^*$ \\
+                        & $\mid$        & AuxType \\
+\underline{AuxType}     & $\rightarrow$ & ``\textsf{[}'' [Class]
+                                          ClassNumber ``\textsf{]}'' [TagDefault] Type \\
+                        & $\mid$        & BuiltInType SubtypeSpec$^*$ \\
+                        & $\mid$        & SetSeq [TypeSuf] \\
+SetSeq                  & $\rightarrow$ & SET \\
+                        & $\mid$        & SEQUENCE \\
+TypeSuf                 & $\rightarrow$ & SubtypeSpec$^+$ \\
+                        & $\mid$        & ``\textsf{\{}'' \{ElementType
+                                          ``\textsf{,}'' \ldots\}$^*$ ``\textsf{\}}''
+                                          SubtypeSpec$^*$ \\ 
+                        & $\mid$        & [SIZE SubtypeSpec] OF Type \\ 
+
+\\ \hline \\
+
+\emph{BuiltInType}     & $\rightarrow$ & BOOLEAN \\
+                       & $\mid$        & INTEGER [``\textsf{\{}'' \{NamedNumber ``\textsf{,}'' \ldots \}$^+$ ``\textsf{\}}''] \\
+                       & $\mid$        & BIT STRING [``\textsf{\{}'' \{NamedBit ``\textsf{,}'' \ldots \}$^+$ ``\textsf{\}}''] \\
+                       & $\mid$        & OCTET STRING \\
+                       & $\mid$        & CHOICE ``\textsf{\{}'' \{NamedType ``\textsf{,}'' \ldots\}$^+$ ``\textsf{\}}'' \\
+                       & $\mid$        & ANY [DEFINED BY \texttt{lower$_{id}$}] \\
+                       & $\mid$        & OBJECT IDENTIFIER \\
+                       & $\mid$        & ENUMERATED ``\textsf{\{}'' \\
+                       &               & \{NamedNumber ``\textsf{,}''
+                                         \ldots\}$^+$ ``\textsf{\}}'' \\
+                       & $\mid$        & REAL \\
+                       & $\mid$        & ``\textsf{NumericString}'' \\
+                       & $\mid$        & ``\textsf{PrintableString}'' \\
+                       & $\mid$        & ``\textsf{TeletexString}'' \\
+                       & $\mid$        & ``\textsf{T61String}'' \\
+                       & $\mid$        & ``\textsf{VideotexString}'' \\
+                       & $\mid$        & ``\textsf{VisibleString}'' \\
+                       & $\mid$        & ``\textsf{ISO646String}'' \\
+                       & $\mid$        & ``\textsf{IA5String}'' \\
+                       & $\mid$        & ``\textsf{GraphicString}'' \\
+                       & $\mid$        & ``\textsf{GeneralString}'' \\
+                       & $\mid$        & EXTERNAL \\
+                       & $\mid$        & ``\textsf{UTCTime}'' \\
+                       & $\mid$        & ``\textsf{GeneralizedTime}'' \\
+                       & $\mid$        & ``\textsf{ObjectDescriptor}'' \\
+
+\\ \hline
+\end{tabular}
+
+\begin{tabular}{lrl} \\ \hline \\
+\emph{NamedType}       & $\rightarrow$ & \texttt{lower$_{id}$} [``\textsf{$<$}''] Type \\
+                       & $\mid$        & \texttt{upper} [``\textsf{.}'' \texttt{upper$_{typ}$}] SubtypeSpec$^*$ \\
+                       & $\mid$        & NULL SubtypeSpec$^*$ \\
+                       & $\mid$        & AuxType \\ 
+
+\\ \hline \\
+
+\emph{NamedNumber} & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{(}'' AuxNamedNum ``\textsf{)}'' \\
+AuxNamedNum & $\rightarrow$ & [``\textsf{-}''] \texttt{number} \\
+            & $\mid$        & [\texttt{upper$_{mod}$} ``\textsf{.}''] \texttt{lower$_{val}$} \\
+\\ \hline \\
+
+\emph{NamedBit} & $\rightarrow$ & \texttt{lower$_{id}$} ``\textsf{(}'' ClassNumber ``\textsf{)}'' \\
+
+\\ \hline \\
+
+\emph{ElementType}      & $\rightarrow$ & NamedType [ElementTypeSuf] \\
+                       & $\mid$        & COMPONENTS OF Type \\
+ElementTypeSuf         & $\rightarrow$ & OPTIONAL \\
+                       & $\mid$        & DEFAULT Value \\
+
+\\ \hline \\
+
+\emph{Class}            & $\rightarrow$ & UNIVERSAL \\   
+                       & $\mid$        & APPLICATION \\
+                       & $\mid$        & PRIVATE \\
+
+\emph{\underline{ClassNumber}} & $\rightarrow$ & \texttt{number} \\
+  & $\mid$        & [\texttt{upper$_{mod}$} ``\textsf{.}''] \texttt{lower$_{val}$} \\ 
+
+\\ \hline \\
+\multicolumn{3}{c}{\begin{tabular}{l} \textbf{VALEURS}  \\ \end{tabular}} \\
+
+\\ \hline \\
+
+\emph{\underline{Value}} & $\rightarrow$ & AuxVal0 \\
+                        & $\mid$        & \texttt{upper} AuxVal1 \\
+                        & $\mid$        & \texttt{lower} [AuxVal2] \\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} \\
+\emph{AuxVal0}           & $\rightarrow$ & BuiltInValue \\
+                        & $\mid$        & AuxType ``\textsf{:}'' Value \\
+                        & $\mid$        & NULL [SpecVal] \\
+AuxVal1                 & $\rightarrow$ & SpecVal \\
+                        & $\mid$        & ``.'' AuxVal11 \\
+
+\emph{AuxVal2}           & $\rightarrow$ & [``\textsf{$<$}'' Type] ``\textsf{:}'' Value \\ 
+AuxVal11          & $\rightarrow$ & \texttt{upper$_{typ}$} SpecVal \\
+                        & $\mid$        & \texttt{lower$_{val}$} \\
+SpecVal                 & $\rightarrow$ & SubtypeSpec$^*$ ``\textsf{:}'' Value \\
+
+
+\\ \hline
+\end{tabular}
+
+\begin{tabular}{lrl} \\ \hline \\
+\emph{\underline{BuiltInValue}} & $\rightarrow$ & TRUE \\
+                          & $\mid$        & FALSE \\
+                          & $\mid$        & PLUS-INFINITY \\
+                          & $\mid$        & MINUS-INFINITY \\
+                          & $\mid$        & \texttt{basednum} \\
+                          & $\mid$        & \texttt{string} \\
+                          & $\mid$        & ``\textsf{\{}'' [BetBraces] ``\textsf{\}}'' \\
+
+\\ \hline \\
+
+\emph{BetBraces}          & $\rightarrow$ & AuxVal0 [AuxNamed] \\
+                          & $\mid$        & ``\textsf{-}'' \texttt{number} [AuxNamed] \\
+                          & $\mid$        & \texttt{lower} [AuxBet1] \\
+                          & $\mid$        & \texttt{upper} AuxBet2 \\
+                          & $\mid$        & \texttt{number} [AuxBet3] \\
+AuxBet1                   & $\rightarrow$ & ``\textsf{(}'' ClassNumber ``\textsf{)}'' ObjIdComponent$^*$ \\
+                          & $\mid$        & AuxNamed \\
+                          & $\mid$        & AuxVal2 [AuxNamed] \\
+                          & $\mid$        & ``\textsf{-}'' \texttt{number} [AuxNamed] \\
+                          & $\mid$        & AuxVal0 [AuxNamed] \\
+                          & $\mid$        & \texttt{lower} [AuxBet11] \\
+                          & $\mid$        & \texttt{number} [AuxBet3] \\
+                          & $\mid$        & \texttt{upper} AuxBet2 \\ 
+AuxBet2                   & $\rightarrow$ & SpecVal [AuxNamed] \\
+                          & $\mid$        & ``.'' AuxBet21 \\ 
+AuxBet3                   & $\rightarrow$ & ObjIdComponent$^+$ \\
+                          & $\mid$        & AuxNamed \\ 
+AuxBet11                  & $\rightarrow$ & ``\textsf{(}'' ClassNumber ``\textsf{)}'' ObjIdComponent$^*$ \\
+                          & $\mid$        & ObjIdComponent$^+$ \\
+                          & $\mid$        & AuxVal2 [AuxNamed] \\
+                          & $\mid$        & AuxNamed \\ 
+AuxBet21                  & $\rightarrow$ & \texttt{upper$_{typ}$} SpecVal [AuxNamed] \\
+                          & $\mid$        & \texttt{lower$_{val}$} [AuxBet3] \\ 
+AuxNamed                  & $\rightarrow$ & ``\textsf{,}''
+                                            \{NamedValue ``\textsf{,}'' \ldots\}$^+$ \\
+NamedValue                & $\rightarrow$ & \texttt{lower} [NamedValSuf] \\
+                          & $\mid$        & \texttt{upper} AuxVal1 \\
+                          & $\mid$        & [``\textsf{-}''] \texttt{number} \\
+                          & $\mid$        & AuxVal0 \\
+NamedValSuf               & $\rightarrow$ & Value \\
+                          & $\mid$        & AuxVal2 \\
+
+\\ \hline
+\end{tabular}
+
+
+\begin{tabular}{@{}lrl@{}} \\ \hline \\
+\multicolumn{3}{c}{\begin{tabular}{l} \textbf{SOUS-TYPES}  \\ \end{tabular}} \\
+
+\\ \hline \\
+
+\emph{\underline{SubtypeSpec}} & $\rightarrow$ & ``\textsf{(}'' \{SubtypeValueSet ``\textsf{$\mid$}'' \ldots\}$^+$ ``\textsf{)}'' \\
+SubtypeValueSet           & $\rightarrow$ & INCLUDES Type \\
+                          & $\mid$        & MIN SubValSetSuf \\ 
+                          & $\mid$        & FROM SubtypeSpec \\
+                          & $\mid$        & SIZE SubtypeSpec \\
+                          & $\mid$        & WITH InnerTypeSuf \\
+                          & $\mid$        & SVSAux \\ 
+
+\\ \hline \\
+
+\emph{SubValSetSuf}        & $\rightarrow$ & [``\textsf{$<$}''] ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\
+UpperEndValue             & $\rightarrow$ & Value \\
+                          & $\mid$        & MAX \\ 
+\\ \hline \\
+
+\emph{InnerTypeSuf}       & $\rightarrow$ & COMPONENT SubtypeSpec \\ 
+                          & $\mid$        & COMPONENTS \\
+                          &               & MultipleTypeConstraints \\
+MultipleTypeConstraints   & $\rightarrow$ & ``\textsf{\{}'' [``\textsf{\ldots}'' ``\textsf{,}''] \\
+                          &               & \{[NamedConstraint] ``\textsf{,}'' \ldots\} ``\textsf{\}}'' \\
+NamedConstraint           & $\rightarrow$ & \texttt{lower$_{id}$}
+                                            [SubtypeSpec]\\
+                          &               & [PresenceConstraint] \\
+                          & $\mid$        & SubtypeSpec [PresenceConstraint] \\
+                          & $\mid$        & PresenceConstraint \\
+PresenceConstraint        & $\rightarrow$ & PRESENT \\
+                          & $\mid$        & ABSENT \\
+                          & $\mid$        & OPTIONAL \\ 
+
+\\ \hline \\
+
+\emph{SVSAux}            & $\rightarrow$ & BuiltInValue [SubValSetSuf] \\
+                        & $\mid$        & AuxType ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & NULL [SVSAux3] \\
+                        & $\mid$        & \texttt{upper} SVSAux1 \\
+                        & $\mid$        & \texttt{lower} [SVSAux2] \\
+                        & $\mid$        & [``\textsf{-}''] \texttt{number} [SubValSetSuf] \\
+SVSAux1                 & $\rightarrow$ & SubtypeSpec$^*$ ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & ``.'' SVSAux11 \\
+SVSAux2                 & $\rightarrow$ & ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\
+                        & $\mid$        & ``\textsf{$<$}'' SVSAux21 \\
+SVSAux3                 & $\rightarrow$ & SubtypeSpec$^*$ ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & SubValSetSuf \\ 
+SVSAux11                & $\rightarrow$ & \texttt{upper$_{typ}$}
+                                          SubtypeSpec$^*$ \\
+                        &               & ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & \texttt{lower$_{val}$} [SubValSetSuf] \\
+SVSAux21                & $\rightarrow$ & Type ``\textsf{:}'' SVSAux \\
+                        & $\mid$        & ``\textsf{..}'' [``\textsf{$<$}''] UpperEndValue \\ 
+
+\\ \hline
+\end{tabular}

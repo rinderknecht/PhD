@@ -1,0 +1,144 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+% Intersection
+%
+\inferrule
+  {x, \textrm{T} \bouchon{86} \nu' \rightarrow \overline\nu'_0\\
+   x, \textrm{T} \bouchon{86} \textsf{Inter} \, \Sigma' \rightarrow
+   \overline\nu'_1\\
+   \overline\nu \triangleq \textsf{Inter} \, (\textrm{merge} \,
+   (\overline\nu'_0, \overline\nu'_1))}
+  %-----
+  {x, \textrm{T} \bouchon{86} \textsf{Inter} \, (\{\nu'\}\Cons\Sigma')
+    \rightarrow \overline\nu}
+
+% SET OF / SEQUENCE OF values
+
+% .... non-empty
+%
+\inferrule
+  {\textrm{T} \lhd (\textsf{SEQUENCE OF} \mid \textsf{SET OF}) \,\,
+    \wild \, \wild \, \wild\\
+   \overline\nu_0 \triangleq \textsf{SIZE} \, \{\textsf{Value} \,
+   (\textsf{Int} \, n)\}\\
+   \overline\nu_1 \triangleq \textsf{WITH COMPONENT} \,
+   \SList{$\textsf{Value} \, (v_i)$}{i}{n}\\
+   \overline\nu \triangleq \textsf{Inter} \, [\{\nu\};
+     \{\overline\nu_0\}; \{\overline\nu_1\}]}
+%-----
+  {x, \textrm{T} \bouchon{86} \textsf{Value} \, \bob
+    \OList{$(\textsf{None}, v_i)$}{i}{n} \bcb \AS \nu \rightarrow
+    \overline\nu}
+
+% .... empty
+%
+\inferrule
+  {\textrm{T} \lhd (\textsf{SEQUENCE OF} \mid \textsf{SET OF}) \,\,
+    \wild \, \wild \, \wild\\
+   \overline\nu_0 \triangleq \textsf{SIZE} \, \{\textsf{Value} \,
+   (\textsf{Int} \, 0)\}\\
+   \overline\nu \triangleq \textsf{Inter} \, [\{\nu\};
+     \{\overline\nu_0\}]}
+  %-----
+  {x, \textrm{T} \bouchon{86} \textsf{Value} \, \bob \emptyL\! \bcb
+    \AS \nu \rightarrow \overline\nu}
+
+% CHOICE value
+%
+\inferrule
+  {\textrm{T} \lhd \wildCHOICE\\
+   \mathcal{K} \triangleq [(x', \{\textsf{Value} \, (v')\},
+    \textsf{Some} \, \textsf{PRESENT})]\\
+   \overline\nu_0 \triangleq \textsf{WITH COMPONENTS} \, \bob
+   \textsf{Full} \,\, \mathcal{K} \bcb\\
+   \overline\nu \triangleq \textsf{Inter} \, [\{\nu\};
+     \{\overline\nu_0\}]}
+  %-----
+  {x, \textrm{T} \bouchon{86} \textsf{Value} \, (x' \colon v') \AS \nu
+    \rightarrow \overline\nu}
+
+% SET values
+%
+\inferrule
+  {x, \textsf{SEQUENCE} \, \Phi \bouchon{86} \nu \rightarrow
+    \overline\nu}
+  %-----
+  {x, \textsf{SET} \, \Phi \bouchon{86} \nu \rightarrow \overline\nu}
+
+% SEQUENCE values
+
+% .... Matched field
+%
+\inferrule
+  {x \neq \REAL\\
+  \textrm{T} \lhd \textsf{SEQUENCE} \, (\varphi' \Cons \Phi')\\
+  \varphi' \lhd \textsf{Field} \, (l', \emptyL\!, \textsf{TRef} \, x,
+  \{\}, s')\\
+  V \lhd [(\textsf{Some} \, l', v')] \sqcup V'\\
+  x, \textsf{SEQUENCE} \, \Phi' \bouchon{86} \textsf{Value} \, \bob V'
+  \bcb \rightarrow \overline\nu'\\
+  \overline\nu' \lhd \textsf{Inter} \, [\{\overline\nu'_0\};
+    \{\overline\nu'_1\}]\\
+  \overline\nu'_1 \lhd \textsf{WITH COMPONENTS} \, \bob \textsf{Full}
+  \,\, \mathcal{K}' \bcb\\
+  \mathcal{K} \triangleq (l', \{\textsf{Value} \, (v')\},
+  \textsf{Some} \, \textsf{PRESENT}) \Cons \mathcal{K}'\\
+  \overline\nu_1 \triangleq \textsf{WITH COMPONENTS} \, \bob
+  \textsf{Full} \,\, \mathcal{K} \bcb\\
+  \overline\nu \triangleq \textsf{Inter} \, [\{\nu\};
+    \{\overline\nu_1\}]}
+  %-------
+  {x, \textrm{T} \bouchon{86} \textsf{Value} \, \bob V \bcb \AS \nu
+    \rightarrow \overline\nu}
+
+% .... Unmatched field
+%
+\inferrule
+  {x \neq \REAL\\
+   \textrm{T} \lhd \textsf{SEQUENCE} \, (\varphi' \Cons \Phi')\
+   \varphi' \lhd \textsf{Field} \, (l', \emptyL\!, \textsf{TRef} \, x,
+   \{\}, s')\\
+   \forall (\textsf{Some} \, x', v') \listin V.x' \neq l'\\
+   x, \textsf{SEQUENCE} \, \Phi' \bouchon{86} \nu \rightarrow
+   \overline\nu'\\
+   \overline\nu' \lhd \textsf{Inter} \, [\{\overline\nu'_0\};
+     \{\overline\nu'_1\}]\\
+   \overline\nu'_1 \lhd \textsf{WITH COMPONENTS} \, \bob \textsf{Full}
+   \,\, \mathcal{K}' \bcb \\
+   \mathcal{K} \triangleq (l', \{\}, \textsf{Some} \, \textsf{ABSENT})
+   \Cons \mathcal{K}' \\
+   \overline\nu_1 \triangleq \textsf{WITH COMPONENTS} \, \bob
+   \textsf{Full} \,\, \mathcal{K} \bcb \\
+   \overline\nu \triangleq \textsf{Inter} \, [\{\nu\}; \{\overline\nu_1\}]}
+  %-----
+  {x, \textrm{T} \bouchon{86} \textsf{Value} \, \bob V \bcb \AS \nu
+    \rightarrow \overline\nu}
+
+% ... Empty SEQUENCE value of empty SEQUENCE type
+%
+\inferrule
+  {\textrm{T} \lhd \emptySEQUENCE\\
+   \overline\nu_1 \triangleq \textsf{WITH COMPONENTS} \, \bob
+   \textsf{Full} \,\, \emptyL\! \bcb\\
+   \overline\nu \triangleq \textsf{Inter} \, [\{\nu\}; \{\overline\nu_1\}]}
+  %-----
+  {x, \textrm{T} \bouchon{86} \textsf{Value} \, \bob \emptyL\! \bcb
+    \AS \nu \rightarrow \overline\nu}
+
+% REAL
+%
+\inferrule
+  {}
+  {\REAL, \textrm{T} \bouchon{86} \nu \rightarrow \nu}
+
+% Others
+%
+\inferrule
+  {\textrm{T} \nlhd \wildSEQUENCEOF \mid \wildSETOF \mid
+    \wildCHOICE\\\\
+   \textrm{T} \nlhd \wildSET \mid \wildSEQUENCE}
+  %-----
+  {x, \textrm{T} \bouchon{86} \nu \rightarrow \nu}
+
+\end{mathparpagebreakable}

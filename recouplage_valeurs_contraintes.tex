@@ -1,0 +1,154 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \{(\textrm{T}, \{\})\})\\
+   \domain{\mathcal{B}} \Delta \bouchon{43} \domain{\mathcal{A}}
+   \Gamma \rightarrow \domain{\overline{\mathcal{A}}} \overline\Gamma}
+  %-----
+  {\domain{\mathcal{B}} \Delta \bouchon{43} \domain{\{x\} \uplus
+      \mathcal{A}} \Gamma \rightarrow \domain{\overline{\mathcal{A}}}
+    \overline\Gamma \oplus x \mapsto \Gamma(x)}
+
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \SList{$(\textrm{T},
+      \{\nu_i\})$}{i}{n})\\
+   \forall i \in [1..n].\domain{\mathcal{B}} \Delta \bouchon{56} \nu_i
+   \rightarrow \overline\nu_i\\
+   \domain{\mathcal{B}} \Delta \bouchon{43} \domain{\mathcal{A}}
+   \Gamma \rightarrow \domain{\overline{\mathcal{A}}}
+   \overline\Gamma\\
+   \overline\gamma \triangleq x \mapsto (\alpha, \tau,
+   \SList{$(\textrm{T}, \{\overline\nu_i\})$}{i}{n})}
+  %-----
+  {\domain{\mathcal{B}} \Delta \bouchon{43} \domain{\{x\} \uplus
+      \mathcal{A}} \Gamma \rightarrow \domain{\overline{\mathcal{A}}}
+    \overline\Gamma \oplus \overline\gamma}
+
+\inferrule
+  {}
+  {\domain{\mathcal{B}} \Delta \bouchon{43} \domain{\varnothing}
+    \Gamma \rightarrow \domain{\varnothing} \Gamma}
+
+% Intersection
+
+% .....non-empty
+%
+\inferrule
+  {\domain{\mathcal{B}} \Delta \bouchon{56} \nu' \rightarrow
+    \overline\nu'\\
+   \domain{\mathcal{B}} \Delta \bouchon{56} \textsf{Inter} \, \Sigma'
+   \rightarrow \textsf{Inter} \, \overline\Sigma'}
+  %-----
+  {\domain{\mathcal{B}} \Delta \bouchon{56} \textsf{Inter} \,
+    (\{\nu'\}\Cons\Sigma') \rightarrow \textsf{Inter} \,
+    (\{\overline\nu'\}\Cons\overline\Sigma')}
+
+% .....empty
+%
+\inferrule
+  {}
+  {\domain{\mathcal{B}} \Delta \bouchon{56} \textsf{Inter} \, \emptyL
+    \rightarrow \textsf{Inter} \, \emptyL}
+
+% Value constraint
+%
+\inferrule
+  {y \in \mathcal{B}\\
+   \Delta(y) \lhd (\emptyL\!, \wildTRef\!, \{\}, v)}
+  %-----
+  {\domain{\mathcal{B}} \Delta \bouchon{56} \textsf{Value} \,
+    (\textsf{VRef} \, y) \rightarrow \textsf{Value} \, (v)}
+
+% Intervalle (1/3)
+%
+\inferrule
+  {y_0 \in \mathcal{B} \AND \Delta(y_0) \lhd (\emptyL\!, \wildTRef\!,
+    \{\}, v_0)\\
+   y_1 \in \mathcal{B} \AND \Delta(y_1) \lhd (\emptyL\!, \wildTRef\!,
+   \{\}, v_1)\\
+   \overline\nu \triangleq (\textsf{Val} \, v_0) \, b_0 \textbf{..} b_1
+   \, (\textsf{Val} \, v_1)}
+  %-----
+  {\domain{\mathcal{B}} \Delta \bouchon{56} (\textsf{Val} \,
+    (\textsf{VRef} \, y_0)) \, b_0 \textbf{..} b_1 \, (\textsf{Val} \,
+    (\textsf{VRef} \, y_1)) \rightarrow \overline\nu}
+
+% Intervalle (2/3)
+%
+\inferrule
+  {y_0 \in \mathcal{B}\\
+   \Delta(y_0) \lhd (\emptyL\!, \wildTRef\!, \{\}, v_0)\\
+   \overline\nu \triangleq (\textsf{Val} \, v_0) \, b_0 \textbf{..}
+   b_1 \, e_1}
+  %-----
+  {\domain{\mathcal{B}} \Delta \bouchon{56} (\textsf{Val} \,
+    (\textsf{VRef} \, y_0)) \, b_0 \textbf{..} b_1 \, e_1}
+
+% Intervalle (3/3)
+%
+\inferrule
+  {y_1 \in \Delta\\
+   \Delta(y_1) \lhd (\emptyL\!, \wildTRef\!, \{\}, v_1)\\
+   \overline\nu \triangleq e_0 \, b_0 \textbf{..} b_1 \, (\textsf{Val}
+   \, v_1)}
+  %-----
+  {\domain{\mathcal{B}} \Delta \bouchon{56} e_0 \, b_0 \textbf{..} b_1
+    \, (\textsf{Val} \, (\textsf{VRef} \, y_1)) \rightarrow
+    \overline\nu}
+
+% SIZE
+% 
+\inferrule
+  {\domain{\mathcal{B}} \Delta \bouchon{56} \nu \rightarrow
+    \overline\nu}
+  %-----
+  {\domain{\mathcal{B}} \Delta \bouchon{56} \textsf{SIZE} \, \{\nu\}
+    \rightarrow \textsf{SIZE} \, \{\overline\nu\}}
+
+% FROM
+%
+\inferrule
+  {\domain{\mathcal{B}} \Delta \bouchon{57} \sigma \rightarrow
+    \overline\sigma}
+  %-----
+  {\domain{\mathcal{B}} \Delta \bouchon{56} \textsf{FROM} \, \sigma
+    \rightarrow \textsf{FROM} \, \overline\sigma}
+
+% WITH COMPONENT
+%
+\inferrule
+  {\domain{\mathcal{B}} \Delta \bouchon{57} \sigma \rightarrow
+    \overline\sigma\\
+   \overline\nu \triangleq \textsf{WITH COMPONENT} \,\,
+   \overline\sigma}
+  %-----
+  {\domain{\mathcal{B}} \Delta \bouchon{56} \textsf{WITH COMPONENT}
+    \,\, \sigma \rightarrow \overline\nu}
+
+% WITH COMPONENTS
+%
+\inferrule
+  {\forall j \in [1..p].\domain{\mathcal{B}} \Delta \bouchon{57}
+    \sigma_j \rightarrow \overline\sigma_j\\
+   \overline\nu \triangleq \textsf{WITH COMPONENTS} \,\, (m,
+   \OList{$(l_j, \overline\sigma_j, \hat\pi_j)$}{j}{p})}
+  %-----
+  {\domain{\mathcal{B}} \Delta \bouchon{56} \textsf{WITH COMPONENTS}
+    \,\, (m, \OList{$(l_j, \sigma_j, \hat\pi_j)$}{j}{p}) \rightarrow
+    \overline\nu}
+
+\inferrule
+  {\domain{\mathcal{B}} \Delta \bouchon{56} \nu \rightarrow
+    \overline\nu\\
+   \domain{\mathcal{B}} \Delta \bouchon{57} \sigma \rightarrow
+   \overline\sigma}
+  %-----
+  {\domain{\mathcal{B}} \Delta \bouchon{57} \{\nu\} \uplus \sigma
+    \rightarrow \{\overline\nu\} \cup \overline\sigma}
+
+\inferrule
+  {}
+  {\domain{\mathcal{B}} \Delta \bouchon{57} \{\} \rightarrow \{\}}
+
+\end{mathparpagebreakable}

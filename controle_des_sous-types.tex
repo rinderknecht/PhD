@@ -1,0 +1,58 @@
+%%-*-latex-*-
+
+\section{Réduction des \textsf{INCLUDES}}
+\label{reduction_des_INCLUDES}
+\input{reduction_des_INCLUDES}
+
+\section{Forme disjonctive}
+\label{forme_disjonctive}
+\input{forme_disjonctive}
+
+\section{Distribution des contraintes disjonctives}
+\label{distribution_des_contraintes_disjonctives}
+\input{distribution_des_contraintes_disjonctives}
+
+\section{Recouplage valeurs/contraintes}
+\label{recouplage_valeurs_contraintes}
+\input{recouplage_valeurs_contraintes}
+
+\section{Contraintes internes}
+\label{normalisation_des_contraintes_internes}
+\input{normalisation_des_contraintes_internes}
+
+\section{Contraintes d'intervalle}
+\label{contraintes_d_intervalle}
+\input{contraintes_d_intervalle}
+
+\section{Réduction des contraintes}
+\input{reduction_des_contraintes}
+
+\section{Sous-types bien formés}
+
+\begin{mathpar}
+  \inferrule
+% Réduction des INCLUDES
+  {\bouchon{89} \domain{\mathcal{A}} \Gamma \rightarrow
+    \domain{\mathcal{A}_0} \Gamma_0\\
+% Forme normale conjontive
+   \bouchon{62} \domain{\mathcal{A}_0} \Gamma_0 \rightarrow
+   \domain{\mathcal{A}_1} \Gamma_1\\
+% Dépliage des valeurs dans les contraintes
+   \domain{\mathcal{B}} \Delta \bouchon{43} \domain{\mathcal{A}_1}
+   \Gamma_1 \rightarrow \domain{\mathcal{A}_2} \Gamma_2\\
+% Réduction complète des contraintes internes
+   \bouchon{20} \domain{\mathcal{A}_2} \Gamma_2 \rightarrow
+   \domain{\mathcal{A}_3} \Gamma_3\\
+% Types bien formés? 
+% Eg T ::= CHOICE {a REAL, b NULL} 
+%                 (WITH COMPONENTS {b ABSENT})
+   \Vdash \domain{\mathcal{A}_3} \Gamma_3\\
+% Réduction des intersections de contraintes SIZE
+   \bouchon{90} \domain{\mathcal{A}_3} \Gamma_3 \rightarrow
+   \domain{\mathcal{A}_4} \Gamma_4\\
+% Réduction des intersections de contraintes
+   \bouchon{94} \domain{\mathcal{A}_4} \Gamma_4 \rightarrow \wild}
+  %-----
+  {\domain{\mathcal{B}} \Delta \bouchon{93} \domain{\mathcal{A}}
+    \Gamma}
+\end{mathpar}

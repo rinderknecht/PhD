@@ -1,0 +1,272 @@
+%%-*-latex-*-
+
+\noindent \textbf{type} primitive\_val = \\
+\hspace*{1.2mm} \textsf{P\_int} \textbf{of} int \\
+$\mid$ \textsf{P\_string} \textbf{of} string \\
+$\mid$ \textsf{P\_num\_str} \textbf{of} string \\
+% $\mid$ \textsf{P\_OID} \textbf{of} int \textsf{list} \\
+$\mid$ \textsf{P\_false} \\
+$\mid$ \textsf{P\_true} \\
+$\mid$ \textsf{P\_null} \\
+$\mid$ \textsf{P\_plus\_inf} \\
+$\mid$ \textsf{P\_min\_inf} \\
+$\mid$ \textsf{P\_zero\_real} \\
+
+\noindent \textbf{type} code = tag\_id $\times$ contents \\
+
+\noindent \textbf{and} contents = \\
+\hspace*{1.2mm} \textsf{Primitive} \textbf{of} primitive\_val \\
+$\mid$ \textsf{Const} \textbf{of} code \textsf{list}
+
+\bigskip
+
+\begin{mathparpagebreakable}
+% EXPLICIT tags
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma \vdash v : \tau' \, \textrm{T}
+    \Rightarrow \tilde{v}'}
+  %----
+  {\domain{\mathcal{A}} \Gamma \vdash v : ((\textsf{Tag} \,\, \psi
+    \,\, \textsf{EXPLICIT})\Cons\tau') \, \textrm{T} \Rightarrow
+    (\psi, \textsf{Const} \, [\tilde{v}'])}
+\;\TirName{[1]}
+\label{codage_1}
+
+% Type unfolding
+%
+\inferrule
+  {x' \in \mathcal{A}\\
+  \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+  \domain{\mathcal{A}} \Gamma \vdash v : \tau' \, \textrm{T}'
+  \Rightarrow \tilde{v}}
+  %----
+  {\domain{\mathcal{A}} \Gamma \vdash v : \emptyL \, (\textsf{TRef} \,
+  x') \Rightarrow \tilde{v}}
+\;\TirName{[2]}
+\label{codage_2}
+
+% INTEGER values
+%
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma \vdash \textsf{Int} \, (n) :
+    [(\textsf{Tag} \,\, \psi \,\, \wild\!)] \, \textrm{T} \Rightarrow
+    (\psi, \textsf{Primitive} \, (\textsf{P\_int} \, n))}
+\;\TirName{[3]}
+\label{codage_3}
+
+% Strings
+%
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma \vdash \textsf{Str} \, (s) :
+    [(\textsf{Tag} \,\, \psi \,\, \wild\!)] \, \textrm{T} \Rightarrow
+    (\psi, \textsf{Primitive} \, (\textsf{P\_string} \, s))}
+\;\TirName{[4]}
+\label{codage_4}
+
+% BIT STRING
+%
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma \vdash \textsf{BitStr} \, (s) :
+    [(\textsf{Tag} \,\, \psi \,\, \wild\!)]  \, \textrm{T} \Rightarrow
+    (\psi, \textsf{Primitive} \, (\textsf{P\_num\_str} \, s))}
+\;\TirName{[5]}
+\label{codage_5}
+
+% TRUE & FALSE
+%
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma \vdash \textsf{TRUE} : [(\textsf{Tag}
+    \,\, \psi \,\, \wild\!)] \, \textrm{T} \Rightarrow (\psi,
+    \textsf{Primitive} \, \textsf{P\_true})}
+\;\TirName{[6]}
+\label{codage_6}
+
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma \vdash \textsf{FALSE} : [(\textsf{Tag}
+    \,\, \psi \,\, \wild\!)] \, \textrm{T} \Rightarrow (\psi,
+    \textsf{Primitive} \, \textsf{P\_false})}
+\;\TirName{[7]}
+\label{codage_7}
+
+% NULL
+%
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma \vdash \textsf{NULL} : [(\textsf{Tag}
+    \,\, \psi \,\, \wild\!)] \, \textrm{T} \Rightarrow (\psi,
+    \textsf{Primitive} \, \textsf{P\_null})}
+\;\TirName{[8]}
+\label{codage_8}
+
+% PLUS-INFINITY
+%
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma \vdash \textsf{PLUS-INFINITY} :
+    [(\textsf{Tag} \,\, \psi \,\, \wild\!)] \, \textrm{T} \Rightarrow
+    (\psi, \textsf{Primitive} \, \textsf{P\_plus\_inf})}
+\;\TirName{[9]}
+\label{codage_9}
+
+% MINUS-INFINITY
+%
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma \vdash \textsf{MINUS-INFINITY} :
+    [(\textsf{Tag} \,\, \psi \,\, \wild\!)] \, \textrm{T} \Rightarrow
+    (\psi, \textsf{Primitive} \, \textsf{P\_min\_inf})}
+\;\TirName{[10]}
+\label{codage_10}
+
+% 0.0
+%
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma \vdash \textsf{0.0} : [(\textsf{Tag}
+    \,\, \psi \,\, \wild\!)] \, \textrm{T} \Rightarrow (\psi,
+    \textsf{Primitive} \, \textsf{P\_zero\_real})}
+\;\TirName{[11]}
+\label{codage_11}
+
+% ENUMERATED
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{ENUMERATED} \, ([(y, \textsf{Int} \, n)]
+    \sqcup \mathcal{C}')}
+%-----
+  {\domain{\mathcal{A}} \Gamma \vdash \textsf{Enum} \, (y) :
+    [(\textsf{Tag} \,\, \psi \,\, \wild\!)] \, \textrm{T} \Rightarrow
+    (\psi, \textsf{Primitive} \, (\textsf{P\_int} \, n))}
+\;\TirName{[12]}
+\label{codage_12}
+
+% SEQUENCE OF
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{SEQUENCE OF} \, \tau' \, \textrm{T}' \, \sigma'\\
+  \domain{\mathcal{A}} \Gamma \vdash v' : \tau' \, \textrm{T}'
+  \Rightarrow \tilde{v}'\\
+  \domain{\mathcal{A}} \Gamma \vdash \bob V' \bcb : \tau \, \textrm{T}
+  \Rightarrow (\psi, \textsf{Const} \, \tilde{V}')\\
+  \tilde{v} \triangleq (\psi, \textsf{Const} \,
+  (\tilde{v}'\Cons\tilde{V}'))}
+%-----
+  {\domain{\mathcal{A}} \Gamma \vdash \bob (\textsf{None}, v') \Cons
+    V' \bcb : \tau \, \textrm{T} \Rightarrow \tilde{v}}
+\;\TirName{[13]}
+\label{codage_13}
+
+% SET OF
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{SET OF} \, \tau' \, \textrm{T}' \, \sigma'\\
+  \domain{\mathcal{A}} \Gamma \vdash v' : \tau' \, \textrm{T}'
+  \Rightarrow \tilde{v}'\\
+  \domain{\mathcal{A}} \Gamma \vdash \bob V' \bcb : \tau \, \textrm{T}
+  \Rightarrow (\psi, \textsf{Const} \, \tilde{V}')\\
+  \tilde{v} \triangleq (\psi, \textsf{Const} \, ([\tilde{v}']
+  \sqcup \tilde{V}'))}
+%-----
+  {\domain{\mathcal{A}} \Gamma \vdash \bob [(\textsf{None}, v')]
+    \sqcup V' \bcb : \tau \, \textrm{T} \Rightarrow \tilde{v}}
+\;\TirName{[14]}
+\label{codage_14}
+
+% Empty SET OF/SEQUENCE OF
+%
+\inferrule
+  {\textrm{T} \lhd (\textsf{SET OF} \mid \textsf{SEQUENCE OF}) \,
+    \tau' \, \textrm{T}' \, \sigma'}
+%-----
+  {\domain{\mathcal{A}} \Gamma \vdash \bob\emptyL\!\bcb :
+    [(\textsf{Tag} \,\, \psi \,\, \wild\!)] \, \textrm{T} \Rightarrow
+    (\psi, \textsf{Const} \, \emptyL\!)}
+\;\TirName{[15]}
+\label{codage_15}
+
+% CHOICE value
+%
+\inferrule
+  {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+  \domain{\mathcal{A}} \Gamma \vdash v' : \tau' \, \textrm{T}'
+  \Rightarrow \tilde{v}}
+%-----
+  {\domain{\mathcal{A}} \Gamma \vdash (l' \colon v') : \tau \,
+    (\textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}')) \Rightarrow \tilde{v}}
+\;\TirName{[16]}
+\label{codage_16}
+
+\inferrule
+  {\domain{\mathcal{A}} \Gamma \vdash v : \tau \, (\textsf{CHOICE} \,
+    \mathcal{F}') \Rightarrow \tilde{v}}
+%-----
+  {\domain{\mathcal{A}} \Gamma \vdash v : \tau \, (\textsf{CHOICE} \,
+    ([f'] \sqcup \mathcal{F}')) \Rightarrow \tilde{v}}
+\;\TirName{[17]}
+\label{codage_17}
+
+% SEQUENCE value
+
+% Value must be sent
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+   V \lhd [(\textsf{Some} \, l', v')] \sqcup V'\\
+  \domain{\mathcal{A}} \Gamma \vdash v' : \tau' \, \textrm{T}'
+  \Rightarrow \tilde{v}'\\
+  \domain{\mathcal{A}} \Gamma \vdash \bob V' \bcb : \tau \,
+  (\textsf{SEQUENCE} \, \Phi') \Rightarrow (\psi, \textsf{Const} \,
+  \tilde{V}')\\
+  \tilde{v} \triangleq (\psi, \textsf{Const} \,
+  (\tilde{v}'\Cons\tilde{V}'))}
+%-----
+  {\domain{\mathcal{A}} \Gamma \vdash \bob V \bcb : \tau \,
+    (\textsf{SEQUENCE} \, (\varphi' \Cons \Phi')) \Rightarrow
+    \tilde{v}}
+\;\TirName{[18]}
+\label{codage_18}
+
+% Non matched (OPTIONAL) SEQUENCE field
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+  s'\lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+  \domain{\mathcal{A}} \Gamma \vdash v : \tau \, (\textsf{SEQUENCE} \,
+  \Phi') \Rightarrow \tilde{v}}
+%-----
+  {\domain{\mathcal{A}} \Gamma \vdash v : \tau \, (\textsf{SEQUENCE}
+    \, ([\varphi'] \sqcup \Phi')) \Rightarrow \tilde{v}}
+\;\TirName{[19]}
+\label{codage_19}
+
+% Empty SEQUENCE 
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{SEQUENCE} \, \emptyL}
+%-----
+  {\domain{\mathcal{A}} \Gamma \vdash \bob\emptyL\!\bcb :
+    [(\textsf{Tag} \,\, \psi \,\, \wild\!)] \, \textrm{T} \Rightarrow
+    (\psi, \textsf{Const} \, \emptyL\!)}
+\;\TirName{[20]}
+\label{codage_20}
+
+% SET value
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma \vdash v : \tau \, (\textsf{SEQUENCE}
+    \, \Phi) \Rightarrow (\psi, \textsf{Const} \, \tilde{V})\\
+  \permutation{\pi}{\tilde{V}}}
+%-----
+  {\domain{\mathcal{A}} \Gamma \vdash v : \tau \, (\textsf{SET} \,
+    \Phi) \Rightarrow (\psi, \textsf{Const} \,  ( \pi \,\,
+    (\tilde{V})))}
+\;\TirName{[21]}
+\label{codage_21}
+
+\end{mathparpagebreakable}

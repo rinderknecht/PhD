@@ -1,0 +1,451 @@
+%%-*-latex-*-
+
+\newcommand{\vdashObj}{\vdash\hspace*{-2.5mm}_{\scriptscriptstyle {\rm Obj}} \,}
+\newcommand{\vdashZ}{\vdash\hspace*{-2.5mm}_{\scriptscriptstyle \Bbb Z} \,}
+
+
+Ce fichier contient tous les extraits de la thèse concernant les OIDs.
+
+
+Contrôle des types
+------------------
+
+
+\begin{mathtab}
+\begin{array}{|c|}
+\hline \\
+%%=====
+%% OIDs
+%%=====
+\mathrule{
+   {\bf when} \,\, {\rm T} = \mbox{\sf OBJECT IDENTIFIER}
+   \andcr
+   \Gamma, \Delta, x \vdash {\sf Obj} [{\sf IdForm} ({\sf None}, x_0); {\sf NumForm} ({\sf None}, n)]: \tau \, {\rm T}
+   \nl
+   \Gamma, \Delta, x \vdash \bob[({\sf Some} \, x_0, {\sf Int} \, n)]\bcb : \tau \, {\rm T}
+}{[30]} \\ \\
+%%
+\mathrule{
+   {\bf when} \,\, {\rm T} = \mbox{\sf OBJECT IDENTIFIER}
+   \andcr
+   \Gamma, \Delta, x \vdash {\sf Obj} [{\sf IdForm} ({\sf None}, x_0); {\sf IdForm} ({\sf None}, x_1)] : \tau \, {\rm T}
+   \nl
+   \Gamma, \Delta, x \vdash \bob[({\sf Some} \, x_0, {\sf Id} \, x_1)]\bcb : \tau \, {\rm T}
+}{[32]} \\ \\ \hline \\
+\mathrule{
+   {\bf when} \,\, {\rm T} = \mbox{\sf OBJECT IDENTIFIER}
+   \andcr
+   (x_0, \tau_0, {\rm T}_0, \sigma_0, {\sf Int} \, n_0) \in \Delta
+   \andcr
+   \Gamma, \Delta, x \vdash {\sf Obj} \, ({\sf NumForm} ({\sf Some} \, i_0, n_0)\Cons N) : \tau \, {\rm T}
+   \nl
+   \Gamma, \Delta, x \vdash {\sf Obj} \, ({\sf IdForm} ({\sf Some} \, i_0, x_0)\Cons N) : \tau \, {\rm T}
+}{[33]} \\ \\
+%%
+\mathrule{
+   {\bf when} \,\, {\rm T} = \mbox{\sf OBJECT IDENTIFIER}
+   \andcr
+   (x_1, \tau_1, {\rm T}_1, \sigma_1, {\sf Int} \, n_1) \in \Delta
+   \andcr
+   \Gamma, \Delta, x \vdash {\sf Obj} (a\Cons{\sf NumForm} ({\sf Some} \, i_1, n_1)\Cons N) : \tau \, {\rm T}
+   \nl
+   \Gamma, \Delta, x \vdash {\sf Obj} (a\Cons{\sf IdForm} ({\sf Some} \, i_1, x_1)\Cons N) : \tau \, {\rm T}
+}{[34]} \\ \\ \hline \\
+\mathrule{
+   {\bf when} \,\, v = {\sf Obj} ({\sf NumForm} ({\sf None}, n_0)\Cons{\sf NumForm} ({\sf None}, n_1)\Cons N)
+   \andcr
+   (\!\wild, n_0) \in {\cal R}
+   \and
+   (\!\wild, n_1) \in {\cal S}
+   \andcr
+   \Gamma, \Delta \vdashObj N
+   \nl
+   \Gamma, \Delta, x \vdash v : \tau \, \mbox{\sf OBJECT IDENTIFIER}
+}{[35]} \\ \\
+%%
+\mathrule{
+   {\bf when} \,\, v = {\sf Obj} ({\sf NumForm} ({\sf None}, n_0)\Cons{\sf NumForm} ({\sf Some} \, i_1, n_1)\Cons N)
+   \andcr
+   (\!\wild, n_0) \in {\cal R}
+   \and
+   (i_1, n_1) \in {\cal S}
+   \andcr
+   \Gamma, \Delta \vdashObj N
+   \nl
+   \Gamma, \Delta, x \vdash v : \tau \, \mbox{\sf OBJECT IDENTIFIER}
+}{[36]} \\ \\
+%%
+\mathrule{
+   {\bf when} \,\, v = {\sf Obj} ({\sf NumForm} ({\sf None}, n_0)\Cons{\sf IdForm} ({\sf None}, x_1)\Cons N)
+   \andcr
+   (\!\wild, n_0) \in {\cal R}
+   \andcr
+   (x_1, \wild\!) \in {\cal S} 
+   \, \oplus \, 
+   (x_1, \tau_1, {\rm T}_1, \sigma_1, {\sf Int} \, n_1) \in \Delta \AND (\!\wild, n_1) \in {\cal S} 
+   \andcr
+   \Gamma, \Delta \vdashObj N
+   \nl
+   \Gamma, \Delta, x \vdash v : \tau \, \mbox{\sf OBJECT IDENTIFIER}
+}{[37]} \\ \\ 
+\hline
+\end{array}
+\end{mathtab}
+
+\newpage
+
+\begin{mathtab}
+\begin{array}{|c|}
+\hline \\
+%%
+\mathrule{
+   {\bf when} \,\, v = {\sf Obj} ({\sf NumForm} ({\sf Some} \, i_0, n_0)\Cons{\sf NumForm} ({\sf None}, n_1)\Cons N)
+   \andcr
+   (i_0, n_0) \in {\cal R}
+   \and
+   (\!\wild, n_1) \in {\cal S}
+   \andcr
+   \Gamma, \Delta \vdashObj N
+   \nl
+   \Gamma, \Delta, x \vdash v : \tau \, \mbox{\sf OBJECT IDENTIFIER}
+}{[38]} \\ \\
+%%
+\mathrule{
+   {\bf when} \,\, v = {\sf Obj} ({\sf NumForm} ({\sf Some} \, i_0, n_0)\Cons{\sf NumForm} ({\sf Some} \, i_1, n_1)\Cons N)
+   \andcr
+   (i_0, n_0) \in {\cal R}
+   \and
+   (i_1, n_1) \in {\cal S}
+   \andcr
+   \Gamma, \Delta \vdashObj N
+   \nl
+   \Gamma, \Delta, x \vdash v : \tau \, \mbox{\sf OBJECT IDENTIFIER}
+}{[39]} \\ \\
+%%
+\mathrule{
+   {\bf when} \,\, v = {\sf Obj} ({\sf NumForm} ({\sf Some} \, i_0, n_0)\Cons{\sf IdForm} ({\sf None}, x_1)\Cons N)
+   \andcr
+   (i_0, n_0) \in {\cal R}
+   \andcr
+   (x_1, \wild\!) \in {\cal S} 
+   \, \oplus \, 
+   (x_1, \tau_1, {\rm T}_1, \sigma_1, {\sf Int} \, n_1) \in \Delta \AND (\!\wild, n_1) \in {\cal S} 
+   \andcr
+   \Gamma, \Delta \vdashObj N
+   \nl
+   \Gamma, \Delta, x \vdash v : \tau \, \mbox{\sf OBJECT IDENTIFIER}
+}{[40]} \\ \\ \hline \\
+%%
+\mathrule{
+   {\bf when} \,\, v = {\sf Obj} ({\sf IdForm} ({\sf None}, x_0)\Cons{\sf NumForm} ({\sf None}, n_1)\Cons N)
+   \andcr
+   (x_0, \wild\!) \in {\cal R} \AND (\!\wild, n_1) \in {\cal S} 
+   \andcr
+   \oplus
+   \andcr 
+   \Gamma, \Delta, x \vdash {\sf VRef} \, (x_0) : \tau \, \mbox{\sf OBJECT IDENTIFIER} \AND n_1 \geqslant 0
+   \andcr
+   \Gamma, \Delta \vdashObj N
+   \nl
+   \Gamma, \Delta, x \vdash v : \tau \, \mbox{\sf OBJECT IDENTIFIER}
+}{[41]} \\ \\
+%%
+\mathrule{
+   {\bf when} \,\, v = {\sf Obj} ({\sf IdForm} ({\sf None}, x_0)\Cons{\sf NumForm} ({\sf Some} \, i_1, n_1)\Cons N)
+   \andcr
+   (x_0, \wild\!) \in {\cal R} \AND (i_1, n_1) \in {\cal S} 
+   \andcr
+   \oplus
+   \andcr 
+   \Gamma, \Delta, x \vdash {\sf VRef} \, (x_0) : \tau \, \mbox{\sf OBJECT IDENTIFIER} \AND n_1 \geqslant 0
+   \andcr
+   \Gamma, \Delta \vdashObj N
+   \nl
+   \Gamma, \Delta, x \vdash v : \tau \, \mbox{\sf OBJECT IDENTIFIER}
+}{[42]} \\ \\
+%%
+\mathrule{
+   {\bf when} \,\, v = {\sf Obj} ({\sf IdForm} ({\sf None}, x_0)\Cons{\sf IdForm} ({\sf None}, x_1)\Cons N)
+   \andcr
+   (x_0, \wild\!) \in {\cal R} \AND (x_1, \wild\!) \in {\cal S} \AND \Gamma, \Delta \vdashObj N
+   \andcr 
+   \oplus
+   \andcr
+   (x_1, \tau_1, {\rm T}_1, \sigma_1, {\sf Int} \, n_1) \in \Delta
+   \andcr
+   \AND
+   \andcr
+   \Gamma, \Delta, x \vdash v' : \tau \, \mbox{\sf OBJECT IDENTIFIER}
+   \andcr
+   {\bf where} \,\, v' = {\sf Obj} ({\sf IdForm} ({\sf None}, x_0)\Cons{\sf NumForm} ({\sf None}, n_1)\Cons N)
+   \nl
+   \Gamma, \Delta, x \vdash v  : \tau \, \mbox{\sf OBJECT IDENTIFIER}
+}{[43]} \\ \\
+\hline
+\end{array}
+\end{mathtab}
+
+
+\begin{mathtab}
+\begin{array}{|c|}
+\hline \\
+\mathrule{
+  n \geqslant 0
+  \and
+  \Gamma, \Delta \vdashObj N
+  \nl
+  \Gamma, \Delta \vdashObj {\sf NumForm} (\wild, n) \Cons N
+}{[1]} \\ \\ 
+%%
+\mathrule{
+  (x, \tau, {\rm T}, \sigma, {\sf Int} \, n) \in \Delta
+  \andcr
+  \Gamma, \Delta \vdashObj {\sf NumForm} (m, n) \Cons N
+  \nl
+  \Gamma, \Delta \vdashObj {\sf IdForm} (m, x) \Cons N
+}{[2]} \\ \\
+%%
+\mathrule{
+  \nl
+  \Gamma, \Delta \vdashObj \emptyL
+}{[3]} \\ \\ 
+\hline
+\end{array}
+\end{mathtab}
+
+
+Contrôle de type sémantique
+---------------------------
+
+\begin{mathtab}
+\begin{array}{|c|}
+\hline \\
+%%==================
+%% OBJECT IDENTIFIER
+%%==================
+\mathrule{
+  (\wild\!, n_0) \in {\cal R}
+  \and
+  (\wild\!, n_1) \in {\cal S}
+  \and
+  \forall n \in l.n \geqslant 0
+  \andcr
+  \psi = ({\sf UNIVERSAL}, {\sf Imm} \, 6)
+  \nl
+  \Gamma, \Delta \models (\psi, {\sf Primitive} \, ({\sf P\_OID} \, (n_0 \Cons n_1 \Cons l))) : [{\sf Tag} \,\, \psi \,\, {\sf IMPLICIT}] \,\, {\rm T}
+}{[22]} \\ \\
+\hline
+\end{array}
+\end{mathtab}
+
+
+
+Codage
+------
+
+
+\begin{mathtab}
+\begin{array}{|c|}
+\hline \\
+%%====
+%% Obj
+%%====
+%%
+\mathrule{
+   {\bf when} \,\, {\rm T} = \mbox{\sf OBJECT IDENTIFIER}
+   \andcr
+   \Gamma, \Delta, x \vdash {\sf Obj} [{\sf IdForm} ({\sf None}, x_0); {\sf NumForm} ({\sf None}, n)]: \tau \, {\rm T} \Rightarrow \overline{v}
+   \nl
+   \Gamma, \Delta, x \vdash \bob[({\sf Some} \, x_0, {\sf Int} \, n)]\bcb : \tau \, {\rm T} \Rightarrow \overline{v}
+}{[30]} \\ \\
+%%
+\mathrule{
+   {\bf when} \,\, {\rm T} = \mbox{\sf OBJECT IDENTIFIER}
+   \andcr
+   \Gamma, \Delta, x \vdash {\sf Obj} [{\sf IdForm} ({\sf None}, x_0); {\sf NumForm} ({\sf None}, 0)] : \tau \, {\rm T} \Rightarrow \overline{v}
+   \nl
+   \Gamma, \Delta, x \vdash \bob[({\sf Some} \, x_0, {\sf Zero})]\bcb : \tau \, {\rm T} \Rightarrow \overline{v}
+}{[31]} \\ \\
+%%
+\mathrule{
+   {\bf when} \,\, {\rm T} = \mbox{\sf OBJECT IDENTIFIER}
+   \andcr
+   \Gamma, \Delta, x \vdash {\sf Obj} [{\sf IdForm} ({\sf None}, x_0); {\sf IdForm} ({\sf None}, x_1)] : \tau \, {\rm T} \Rightarrow \overline{v}
+   \nl
+   \Gamma, \Delta, x \vdash \bob[({\sf Some} \, x_0, {\sf Id} \, x_1)]\bcb : \tau \, {\rm T} \Rightarrow \overline{v}
+}{[32]} \\ \\ \hline \\
+\mathrule{
+   {\bf when} \,\, {\rm T} = \mbox{\sf OBJECT IDENTIFIER}
+   \andcr
+   \Gamma, \Delta, \emptyStr \vdashZ ({\sf Id\,} x_0, \emptyINTEGER\!) \rightarrow n_0 
+   \andcr
+   \Gamma, \Delta, x \vdash {\sf Obj} ({\sf NumForm} ({\sf Some} \, i_0, n_0)\Cons N) : \tau \, {\rm T} \Rightarrow \overline{v}
+   \nl
+   \Gamma, \Delta, x \vdash {\sf Obj} ({\sf IdForm} ({\sf Some} \, i_0, x_0)\Cons N) : \tau \, {\rm T} \Rightarrow \overline{v}
+}{[33]} \\ \\
+%%
+\mathrule{
+   {\bf when} \,\, {\rm T} = \mbox{\sf OBJECT IDENTIFIER}
+   \andcr
+   \Gamma, \Delta, \emptyStr \vdashZ ({\sf Id\,} x_1, \emptyINTEGER\!) \rightarrow n_1 
+   \andcr
+   \Gamma, \Delta, x \vdash {\sf Obj} (a\Cons{\sf NumForm} ({\sf Some} \, i_1, n_1)\Cons N) : \tau \, {\rm T} \Rightarrow \overline{v}
+   \nl
+   \Gamma, \Delta, x \vdash {\sf Obj} (a\Cons{\sf IdForm} ({\sf Some} \, i_1, x_1)\Cons N) : \tau \, {\rm T} \Rightarrow \overline{v}
+}{[34]} \\ \\ \hline \\
+%%
+\mathrule{
+   {\bf when} \,\, v = {\sf Obj} ({\sf NumForm} (\wild\!, n_0)\Cons{\sf NumForm} (\wild\!, n_1)\Cons N)
+   \andcr
+   \Gamma, \Delta \vdashObj N \rightarrow l
+   \andcr
+   {\bf where} \,\, \overline{v} = (\psi, {\sf Primitive} \, ({\sf P\_OID} \, (n_0 \Cons n_1 \Cons l)))
+   \nl
+   \Gamma, \Delta, x \vdash v : [({\sf Tag} \,\, \psi \,\, \wild\!)] \, \mbox{\sf OBJECT IDENTIFIER} \Rightarrow \overline{v}
+}{[35]} \\ \\
+%%
+\mathrule{
+   {\bf when} \,\, v = {\sf Obj} ({\sf NumForm} (\wild\!, n_0)\Cons{\sf IdForm} ({\sf None}, x_1)\Cons N)
+   \andcr
+   {\bf when} \,\, (x_1, n_1) \in {\cal S} 
+   \andcr
+   \Gamma, \Delta \vdashObj N \rightarrow l
+   \andcr
+   {\bf where} \,\, \overline{v} = (\psi, {\sf Primitive} \, ({\sf P\_OID} \, (n_0 \Cons n_1 \Cons l)))
+   \nl
+   \Gamma, \Delta, x \vdash v : \tau \, \mbox{\sf OBJECT IDENTIFIER} \Rightarrow \overline{v}
+}{[36]} \\ \\ 
+%%
+\mathrule{
+   {\bf when} \,\, v = {\sf Obj} ({\sf NumForm} (\wild\!, n_0)\Cons{\sf IdForm} ({\sf None}, x_1)\Cons N)
+%   \andcr
+%   {\bf when} \,\, (x_1, \wild\!) \not\in {\cal S}
+   \andcr
+   \Gamma, \Delta, \emptyStr \vdashZ ({\sf Id\,} x_1, \emptyINTEGER\!) \rightarrow n_1
+   \andcr
+   \Gamma, \Delta \vdashObj N \rightarrow l
+   \andcr
+   {\bf where} \,\, \overline{v} = (\psi, {\sf Primitive} \, ({\sf P\_OID} \, (n_0 \Cons n_1 \Cons l)))
+   \nl
+   \Gamma, \Delta, x \vdash v : \tau \, \mbox{\sf OBJECT IDENTIFIER} \Rightarrow \overline{v}
+}{[37]} \\ \\ 
+\hline
+\end{array}
+\end{mathtab}
+
+\newpage
+
+\begin{mathtab}
+\begin{array}{|c|}
+\hline \\
+%%
+\mathrule{
+   {\bf when} \,\, v = {\sf Obj} ({\sf IdForm} ({\sf None}, x_0)\Cons{\sf NumForm} (\wild\!, n_1)\Cons N)
+   \andcr
+   {\bf when} \,\, (x_0, n_0) \in {\cal R} \AND (\!\wild, n_1) \in {\cal S}
+   \andcr
+   \Gamma, \Delta \vdashObj N \rightarrow l
+   \andcr
+   {\bf where} \,\, \overline{v} = (\psi, {\sf Primitive} \, ({\sf P\_OID} \, (n_0 \Cons n_1 \Cons l)))
+   \nl
+   \Gamma, \Delta, x \vdash v : \tau \, \mbox{\sf OBJECT IDENTIFIER} \Rightarrow \overline{v}
+}{[39]} \\ \\
+%%
+\mathrule{
+   {\bf when} \,\, v = {\sf Obj} ({\sf IdForm} ({\sf None}, x_0)\Cons{\sf NumForm} (\wild\!, n_1)\Cons N)
+%   \andcr
+%   {\bf when} \,\, (x_0, \wild\!) \not\in {\cal R} \OR (\!\wild, n_1) \not\in {\cal S} 
+   \andcr
+   \Gamma, \Delta, x \vdash {\sf Id\,} x_0 : \tau \, \mbox{\sf OBJECT IDENTIFIER} \Rightarrow \overline{v}'
+   \andcr
+   n_1 \geqslant 0
+   \and
+   \Gamma, \Delta \vdashObj N \rightarrow l_1
+   \andcr
+   {\bf where} \,\, \overline{v}' = (\psi, {\sf Primitive} \, ({\sf P\_OID} \, l_0))
+   \andcr
+   {\bf where} \,\, \overline{v} = (\psi, {\sf Primitive} \, ({\sf P\_OID} \, (l_0 \Append n_1 \Cons l_1)))
+   \nl
+   \Gamma, \Delta, x \vdash v : \tau \, \mbox{\sf OBJECT IDENTIFIER}  \Rightarrow \overline{v}
+}{[40]} \\ \\
+%%
+\mathrule{
+   {\bf when} \,\, v = {\sf Obj} ({\sf IdForm} ({\sf None}, x_0)\Cons{\sf IdForm} ({\sf None}, x_1)\Cons N)
+   \andcr
+   {\bf when} \,\, (x_0, n_0) \in {\cal R} \AND (x_1, n_0) \in {\cal S} 
+   \andcr
+   \Gamma, \Delta \vdashObj N \rightarrow l
+   \andcr 
+   {\bf where} \,\, \overline{v} = (\psi, {\sf Primitive} \, ({\sf P\_OID} \, (n_0 \Cons n_1 \Cons l)))
+   \nl
+   \Gamma, \Delta, x \vdash v  : \tau \, \mbox{\sf OBJECT IDENTIFIER} \Rightarrow \overline{v}
+}{[41]} \\ \\
+%%
+\mathrule{
+   {\bf when} \,\, v = {\sf Obj} ({\sf IdForm} ({\sf None}, x_0)\Cons{\sf IdForm} ({\sf None}, x_1)\Cons N)
+   \andcr
+   \Gamma, \Delta, \emptyStr \vdashZ ({\sf Id\,} x_1, \emptyINTEGER\!) \rightarrow n_1
+   \andcr
+   \Gamma, \Delta, x \vdash v' : \tau \, \mbox{\sf OBJECT IDENTIFIER} \Rightarrow \overline{v}
+   \andcr
+   {\bf where} \,\, v' = {\sf Obj} ({\sf IdForm} ({\sf None}, x_0)\Cons{\sf NumForm} ({\sf None}, n_1)\Cons N)
+   \nl
+   \Gamma, \Delta, x \vdash v  : \tau \, \mbox{\sf OBJECT IDENTIFIER} \Rightarrow \overline{v}
+}{[42]} \\ \\
+\hline
+\end{array}
+\end{mathtab}
+
+
+\begin{mathtab}
+\begin{array}{|c|}
+\hline \\
+\mathrule{
+  \Gamma, \Delta \vdashObj N \rightarrow l
+  \nl
+  \Gamma, \Delta \vdashObj {\sf NumForm} (\wild, n) \Cons N \rightarrow n\Cons l
+}{[1]} \\ \\ 
+%%
+\mathrule{
+  \Gamma, \Delta, \emptyStr \vdashZ ({\sf Id\,} x, \emptyINTEGER\!) \rightarrow n 
+  \andcr
+  \Gamma, \Delta \vdashObj {\sf NumForm} (m, n) \Cons N \rightarrow l
+  \nl
+  \Gamma, \Delta \vdashObj {\sf IdForm} (m, x) \Cons N \rightarrow l
+}{[2]} \\ \\
+%%
+\mathrule{
+  \nl
+  \Gamma, \Delta \vdashObj \emptyL \rightarrow \emptyL
+}{[3]} \\ \\ 
+\hline
+\end{array}
+\end{mathtab}
+
+
+
+
+
+Types canoniques
+----------------
+
+\mathrule{
+  {\bf when} \,\, \tau = [{\sf Tag} \,\, ({\sf UNIVERSAL}, {\sf Imm} \, 6) \,\, {\sf IMPLICIT}]
+  \nl
+  \Gamma \vdashC \tau \, \mbox{\sf OBJECT IDENTIFIER}
+}{[8]} \\ \\
+
+
+
+Valeurs en forme normale
+------------------------
+
+
+%%
+%% OBJECT IDENTIFIER
+%%
+\mathrule{
+  ???
+  \nl
+  \Gamma, \Delta, {\rm H} \bouchon{85} v : \mbox{\sf OBJECT IDENTIFIER} \rightarrow ???
+} \\ \\ \hline \\

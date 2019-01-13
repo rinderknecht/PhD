@@ -1,0 +1,311 @@
+%-*-latex-*-
+
+\subsection{Inclusion d'étiquetages}
+\label{inclusion_d_etiquetages}
+\input{inclusion_d_etiquetages}
+
+\subsection{Étiquetages de types non disjoints}
+\label{etiquetages_de_types_non_disjoints}
+\input{etiquetages_de_types_non_disjoints}
+
+\subsection{Contrôle sémantique des types}
+
+\noindent
+\textbf{let} is\_built\_in\_tag = \textbf{function} \\
+\hspace*{1.2mm} (\textsf{UNIVERSAL}, \\
+\hspace*{2.5mm} \textsf{Imm} (1 $\mid$ 2 $\mid$ 3 $\mid$ 4 $\mid$ 5
+$\mid$ 6 $\mid$ 10 $\mid$ 16 $\mid$ 17 $\mid$ 18 $\mid$ 19 $\mid$ 20
+$\mid$ 21 $\mid$ 22 $\mid$ 25 $\mid$ 26 $\mid$ 27)) $\rightarrow$
+\textbf{true} \\
+$\mid$ \wild \, $\rightarrow$ \textbf{false} \\
+
+\noindent On définit une fonction~$\mathcal{D}$ comme étant la plus
+petite relation définie par le système suivant:
+\begin{mathparpagebreakable}
+\inferrule
+  {\textrm{T} \neq \wildTRef \mid \wildSelect \mid \wildCHOICE}
+%-----
+  {\vdashD (\psi, \textsf{Primitive} \wild\!) \rightarrow
+    ([\textsf{Tag} \,\, \psi \,\, \textsf{IMPLICIT}], \textrm{T})}
+\;\TirName{[1]}
+\label{decodage_1}
+
+\inferrule
+  {\textrm{is\_built\_in\_tag} \, (\psi)\\
+   \textrm{T} \neq \wildTRef \mid \wildSelect \mid \wildCHOICE}
+%-----
+  {\vdashD (\psi, \textsf{Const} \wild\!) \rightarrow
+    ([\textsf{Tag} \,\, \psi \,\, \textsf{IMPLICIT}], \textrm{T})}
+\;\TirName{[2]}
+\label{decodage_2}
+
+\inferrule
+  {\vdashD \overline{v}' \rightarrow (\tau', \textrm{T})}
+%------
+  {\vdashD (\psi, \textsf{Const} \, [\overline{v}']) \rightarrow
+    ((\textsf{Tag} \,\, \psi \,\, \textsf{EXPLICIT}) \Cons \tau', \textrm{T})}
+\;\TirName{[3]}
+\label{decodage_3}
+
+% Tag unfolding
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma \models \tilde{v}' : \tau' \, \textrm{T}}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Const} \,
+    [\tilde{v}']) : ((\textsf{Tag} \,\, \psi \,\,
+    \textsf{EXPLICIT})\Cons\tau') \, \textrm{T}}
+\;\TirName{[1]} 
+\label{controle_semantique_des_types_1}
+
+% Type unfolding
+%
+\inferrule
+  {x'\in \mathcal{A}\\
+  \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+  \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau' \, \textrm{T}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \emptyL \,
+    (\textsf{TRef} \, x')}
+\;\TirName{[2]}
+\label{controle_semantique_des_types_2}
+
+% BOOLEAN
+%
+\inferrule
+  {\psi \lhd (\textsf{UNIVERSAL}, \textsf{Imm} \, 1)}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Primitive} \,
+    (\textsf{P\_true} \mid \textsf{P\_false})) : [\textsf{Tag} \,\, \psi
+    \,\, \textsf{IMPLICIT}] \, \textrm{T}}
+\;\TirName{[3]}
+\label{controle_semantique_des_types_3}
+
+% INTEGER
+%
+\inferrule
+  {\psi \lhd (\textsf{UNIVERSAL}, \textsf{Imm} \,  2)}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Primitive} \,
+    (\textsf{P\_int} \, \wild\!)) : [\textsf{Tag} \,\, \psi \,\,
+    \textsf{IMPLICIT}] \, \textrm{T}}
+\;\TirName{[4]}
+\label{controle_semantique_des_types_4}
+
+% BIT STRING & OCTET STRING
+%
+\inferrule
+  {\psi \lhd (\textsf{UNIVERSAL}, \textsf{Imm} \, (3 \mid 4))}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Primitive} \,
+    (\textsf{P\_num\_str} \, \wild\!)) : [\textsf{Tag} \,\, \psi \,\,
+    \textsf{IMPLICIT}] \,\, \textrm{T}}
+\;\TirName{[5]}
+\label{controle_semantique_des_types_5}
+
+% NULL
+%
+\inferrule
+  {\psi \lhd (\textsf{UNIVERSAL}, \textsf{Imm} \, 5)}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Primitive} \,
+    \textsf{P\_null}) : [\textsf{Tag} \,\, \psi \,\,
+    \textsf{IMPLICIT}] \,\, \textrm{T}}
+\;\TirName{[6]}
+\label{controle_semantique_des_types_6}
+
+% CharString
+%
+\inferrule
+  {\psi \lhd (\textsf{UNIVERSAL}, \textsf{Imm} \, (18 \mid 19 \mid 20
+    \mid 21 \mid 22 \mid 25 \mid 26 \mid 27))}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Primitive} \,
+    (\textsf{P\_string} \, \wild\!)) : [\textsf{Tag} \,\, \psi \,\,
+    \textsf{IMPLICIT}] \,\, \textrm{T}}
+\;\TirName{[7]}
+\label{controle_semantique_des_types_7}
+
+% ENUMERATED
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{ENUMERATED} \,\, ([(\wild\!, \textsf{Int}
+    \, n)] \sqcup \mathcal{C}')\\
+  \psi \lhd (\textsf{UNIVERSAL}, \textsf{Imm} \, 10)}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Primitive} \,
+    (\textsf{P\_int} \, n)) : [\textsf{Tag} \,\, \psi \,\,
+    \textsf{IMPLICIT}] \,\, \textrm{T}}
+\;\TirName{[8]}
+\label{controle_semantique_des_types_8}
+
+% PLUS-INFINITY
+%
+\inferrule
+  {\psi \lhd (\textsf{UNIVERSAL}, \textsf{Imm} \, 9)}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Primitive} \,
+    \textsf{P\_plus\_inf}) : [\textsf{Tag} \,\, \psi \,\,
+    \textsf{IMPLICIT}] \,\, \textrm{T}}
+\;\TirName{[9]}
+\label{controle_semantique_des_types_9}
+
+% MINUS-INFINITY
+%
+\inferrule
+  {\psi \lhd (\textsf{UNIVERSAL}, \textsf{Imm} \, 9)}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Primitive} \,
+    \textsf{P\_min\_inf}) : [\textsf{Tag} \,\, \psi \,\,
+    \textsf{IMPLICIT}] \,\, \textrm{T}}
+\;\TirName{[10]}
+\label{controle_semantique_des_types_10}
+
+% REAL zero
+%
+\inferrule
+  {\psi \lhd (\textsf{UNIVERSAL}, \textsf{Imm} \, 9)}
+%-------
+  {\domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Primitive} \,
+    \textsf{P\_zero\_real}) : [\textsf{Tag} \,\, \psi \,\,
+    \textsf{IMPLICIT}] \,\, \textrm{T}}
+\;\TirName{[11]}
+\label{controle_semantique_des_types_11}
+
+% SEQUENCE OF/SET OF
+%
+\inferrule
+  {\textrm{T} \lhd (\textsf{SET OF} \mid \textsf{SEQUENCE OF}) \,
+    \tau' \, \textrm{T}' \, \sigma'\\
+  \domain{\mathcal{A}} \Gamma \models \tilde{v}' : \tau' \, \textrm{T}'\\
+  \domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Const} \,
+  \tilde{V}') : \tau \, \textrm{T}}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Const} \,
+    ([\tilde{v}'] \sqcup \tilde{V}')) : \tau \, \textrm{T}}
+\;\TirName{[12]}
+\label{controle_semantique_des_types_12}
+
+% Empty
+%
+\inferrule
+  {\psi \lhd (\textsf{UNIVERSAL}, \textsf{Imm} \, (16 \mid 17))}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Const} \,
+    \emptyL\!) : [\textsf{Tag} \,\, \psi \,\, \textsf{IMPLICIT}] \,\,
+    \textrm{T}}
+\;\TirName{[13]}
+\label{controle_semantique_des_types_13}
+
+% CHOICE
+%
+\inferrule
+  {f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+  \domain{\mathcal{A}} \Gamma \vdash \mathcal{D}(\tilde{v}) \Wide
+  (\tau', \textrm{T}')\\
+  \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau' \,
+  \textrm{T}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \emptyL \,\,
+    (\textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}'))}
+\;\TirName{[14]}
+\label{controle_semantique_des_types_14}
+
+\inferrule
+  {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+    (\textsf{CHOICE} \, \mathcal{F}')}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+  (\textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}'))}
+\;\TirName{[15]}
+\label{controle_semantique_des_types_15}
+
+% SEQUENCE
+
+% Matched field
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{SEQUENCE} \, (\varphi' \Cons \Phi')\\
+  \varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+  \tilde{V} \lhd \tilde{v}' \Cons \tilde{V}'\\
+  \domain{\mathcal{A}} \Gamma \vdash \mathcal{D}(\tilde{v}') \Wide
+  (\tau', \textrm{T}')\\
+  \domain{\mathcal{A}} \Gamma \models \tilde{v}' : \tau' \, \textrm{T}'\\
+  \domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Const} \,
+  \tilde{V}') : \tau \,\, (\textsf{SEQUENCE} \, \Phi')}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Const} \,
+    \tilde{V}) : \tau \, \textrm{T}}
+\;\TirName{[16]}
+\label{controle_semantique_des_types_16}
+
+% Non matched field
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}, \sigma', s')\\
+  s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+  \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+  (\textsf{SEQUENCE} \, \Phi')}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+    (\textsf{SEQUENCE} \, ([\varphi'] \sqcup \Phi'))}
+\;\TirName{[17]}
+\label{controle_semantique_des_types_17}
+
+% Empty SEQUENCE
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{SEQUENCE} \, \emptyL\\
+  \psi \lhd (\textsf{UNIVERSAL}, \textsf{Imm} \, 16)}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Const} \,
+  \emptyL\!) : [\textsf{Tag} \,\, \psi \,\, \textsf{IMPLICIT}] \,\,
+  \textrm{T}}
+\;\TirName{[18]}
+\label{controle_semantique_des_types_18}
+
+% SET
+
+% Matched field
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{SET} \, ([\varphi'] \sqcup \Phi')\\
+  \varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+  \tilde{V} \lhd [\tilde{v}'] \sqcup \tilde{V}'\\
+  \domain{\mathcal{A}} \Gamma \vdash \mathcal{D}(\tilde{v}') \Wide
+  (\tau', \textrm{T}')\\
+  \domain{\mathcal{A}} \Gamma \models \tilde{v}' : \tau' \, \textrm{T}'\\
+  \domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Const} \,
+  \tilde{V}') : \tau \,\, (\textsf{SET} \, \Phi')}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Const} \,
+    \tilde{V}) : \tau \, \textrm{T}}
+\;\TirName{[19]}
+\label{controle_semantique_des_types_19}
+
+% Non matched field
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}, \sigma', s')\\
+  s' \lhd \textsf{Some} \, \textsf{OPTIONAL}\\
+  \domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+  (\textsf{SET} \, \Phi')}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models \tilde{v} : \tau \,\,
+    (\textsf{SET} \, ([\varphi'] \sqcup \Phi'))}
+\;\TirName{[20]}
+\label{controle_semantique_des_types_20}
+
+% Empty SET
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{SET} \, \emptyL\\
+  \psi \lhd (\textsf{UNIVERSAL}, \textsf{Imm} \, 17)}
+%-----
+  {\domain{\mathcal{A}} \Gamma \models (\psi, \textsf{Const} \,
+    \emptyL\!) : [\textsf{Tag} \,\, \psi \,\, \textsf{IMPLICIT}] \,\,
+    \textrm{T}}
+\;\TirName{[21]}
+\label{controle_semantique_des_types_21}
+
+\end{mathparpagebreakable}

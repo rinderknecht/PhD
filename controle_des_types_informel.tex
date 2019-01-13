@@ -1,0 +1,384 @@
+%%%-*-latex-*-
+
+\lettrine{N}{ous présentons} ici, en termes informels, comment
+déterminer si une valeur canonique est d'un type canonique. La
+question qui résume le chapitre est: «~La valeur~$v$ est-elle du
+  type~T?~». Pour répondre à cette question, nous aurons parfois à
+répondre à plusieurs autres questions, parfois nous pourrons répondre
+immédiatement. La présentation sera faite cas par cas, selon les types
+dont on veut vérifier la validité pour une valeur donnée. Le principe
+est que si on ne peut répondre «~oui~» à une question à l'aide des cas
+suivants, alors cela implique que la réponse est négative.
+
+\section{Définition}
+\label{definition_du_controle_des_types_informel}
+
+Le chapitre précédent présentait comment réécrire une spécification
+ASN.1 de façon à la simplifier et à en vérifier un certain nombre de
+propriétés prévues par la norme, ou souhaitables. Cet ASN.1 simplifié
+était appelé noyau d'ASN.1. Nous considérons donc ici que le contrôle
+de type s'applique au noyau d'ASN.1, ce qui suppose que le lecteur
+lise le chapitre précédent.
+
+Tout d'abord, envisageons le cas des abréviations de types. Leur
+traitement est simple: on remplace l'abréviation par le type qu'elle
+abrège et on se repose la même question. Par exemple, soit:
+\begin{sverb}
+A ::= INTEGER
+B ::= A
+b B ::= 7
+\end{sverb}
+À la question: «~La valeur~\text\tt{7} est-elle du type~\texttt{B}?~»,
+il faut substituer la question: «~La valeur~\texttt{7} est-elle du
+  type~\texttt{A}?~», puis: «~La valeur~\texttt{7} est-elle du type
+  \texttt{INTEGER}?~» ---~question à la quelle on répondra
+positivement.
+
+Le lecteur attentif se souviendra que l'exemple que nous venons de
+donner, même s'il donne la bonne intuition, n'est pas possible dans le
+noyau d'ASN.1. En effet, une des étapes de réécriture du chapitre
+précédent éliminait les abréviations globales, pour n'en conserver que
+dans les champs des types structurés, ou dans les \texttt{SET OF} et
+\texttt{SEQUENCE OF}. Ainsi, un exemple plus réaliste aurait été:
+\begin{sverb}
+A ::= INTEGER
+B ::= SET {a A}
+b B ::= {a 7}
+\end{sverb}
+La question aurait été: «~La valeur~\texttt{7} est-elle du
+  type~\texttt{A}?~».
+
+Remarquons de plus qu'il n'est pas nécessaire de vérifier si les
+abréviations de types sont réellement des abréviations, c'est-à-dire
+si elles dénotent bien un type déclaré. En effet, au cours du chapitre
+précédent, les abréviations résultantes ont été produites de façon
+unique et les abréviations globales, c'est-à-dire au niveau des
+déclarations, ont été dépliées: toutes les abréviations du noyau
+d'ASN.1 sont donc valides de ce point de vue.
+
+La cas suivant est celui du type \texttt{BOOLEAN}. Les deux seules
+questions dont les réponses sont affirmatives sont: «~La valeur
+  \texttt{TRUE} est-elle du type \texttt{BOOLEAN}?~» et «~La valeur
+  \texttt{FALSE} est-elle du type \texttt{BOOLEAN}?~».
+
+Pour le type \texttt{NULL}, la seule question dont la réponse est
+positive est: «~La valeur \texttt{NULL} est-elle du type
+  \texttt{NULL}?~».
+
+Pour le type \texttt{REAL}, plusieurs cas sont possibles. Traitons
+d'abord le cas des valeurs spéciales~\texttt{0.0},
+\texttt{MINUS-INFINITY} et \texttt{PLUS-INFINITY}. Toutes ces valeurs
+sont du type \texttt{REAL}. Remarquons que nous n'examinons pas la
+structure du type \texttt{REAL}, qui est une \texttt{SEQUENCE}, pour
+répondre à ces questions, car ces valeurs sont spéciales précisément
+parce qu'elles ne s'expriment pas comme valeurs de ce type
+\texttt{SEQUENCE}. Voilà la raison de les traiter ici à part.
+
+Lors du précédent chapitre, les chaînes numériques ont toutes été
+réécrites sous forme de chaînes de bits. Ainsi, confrontées au type
+\texttt{OCTET STRING}, il suffit de s'assurer que leur longueur est un
+multiple de~\(8\) pour qu'elles soient de ce type.
+
+Pour le type \texttt{INTEGER}, tous les lexèmes représentants des
+entiers sont de ce type. Rappelons à ce sujet que, lors du chapitre
+précédent, la valeur~\texttt{0} a été réservée au type
+\texttt{INTEGER} et que son usage pour dénoter le zéro du type
+\texttt{REAL} a été remplacé par celui du nouveau
+lexème~\texttt{0.0}. D'autre part, les constantes entières, comme par
+exemple \texttt{zero} dans la spécification suivante:
+\begin{sverb}
+A ::= INTEGER {zero(0)}
+a A ::= zero
+\end{sverb}
+ont disparu car elles furent réécrites en:
+\begin{sverb}
+A ::= INTEGER
+a A ::= 0
+\end{sverb}
+Le cas des chaînes de caractères non numériques ne pose aucun
+problème, si ce n'est la vérification de l'appartenance des caractères
+aux différents alphabets associés. Nous n'entrerons pas dans ces
+détails dans cette thèse.
+
+Pour le type \texttt{BIT STRING}, toutes les chaînes de bits sont
+valides.
+
+Pour le type \texttt{ENUMERATED}, il faut s'assurer que le nom de la
+constante est bien présent dans la déclaration du type. Par exemple:
+\begin{sverb}
+A ::= ENUMERATED {x(1)}
+a A ::= x
+\end{sverb}
+À la question: «~La valeur~\texttt{x} est-elle du type \texttt{A}?~»,
+il faut d'abord déplier l'abréviation~\texttt{A} (premier cas de ce
+chapitre) et redemander: «~La valeur~\texttt{x} est-elle du type
+  \texttt{ENUMERATED \{x(1)\}}?~». Ensuite, il faut demander: «~La
+  constante~\texttt{x} est-elle déclarée par le type
+  \texttt{ENUMERATED \{x(1)\}}?~». La réponse est «~oui~».
+
+Passons au cas des types structurés, c'est-à-dire construits à l'aide
+d'autres types. Tout d'abord le cas des types \texttt{SET OF} et
+\texttt{SEQUENCE OF}. La valeur~\(v\) est une liste de valeurs. La
+réponse à la question de départ «~La valeur~$v$ est-elle du type
+  \texttt{SET OF}~T?~» dépend de: «~Chacune des valeurs contenues
+  dans~$v$ est-elle du type~T?~». Par exemple:
+\begin{sverb}
+a SET OF INTEGER ::= {0,1}
+\end{sverb}
+La question que nous nous posons d'abord est: «~La valeur
+  \texttt{\{0,1\}} est-elle du type \texttt{SET OF INTEGER}?~». Nous
+répondrons «~oui~» si, et seulement si, les deux questions suivantes
+appellent une réponse affirmative: «~La valeur~\texttt{0} est-elle du
+  type \texttt{INTEGER}?~» et «~La valeur~\texttt{1} est-elle du type
+  \texttt{INTEGER}?~». La réponse à ces deux questions est «~oui~»,
+d'après le cas du type \texttt{INTEGER} vu précédemment. Il est
+important de noter que l'ordre dans lequel on répond à ces questions
+n'est pas significatif.
+
+Envisageons maintenant le cas du type \texttt{CHOICE}. Ce cas se
+subdivise en deux.
+\begin{enumerate}
+
+  \item Le premier sous-cas du cas \texttt{CHOICE} est celui où la
+    valeur est syntaxiquement une valeur de type \texttt{CHOICE} et
+    que le label qu'elle contient existe dans la définition du
+    type. Par exemple:
+\begin{sverb}
+v CHOICE {
+    a INTEGER,
+    b BOOLEAN
+  } ::= a : 7
+\end{sverb}
+    Ici, la valeur est \texttt{a : 7}, donc elle possède la syntaxe
+    correcte pour être une valeur de type \texttt{CHOICE}. De plus, le
+    label qu'elle contient, \texttt{a}, existe dans une des variantes
+    du type: «~\texttt{a INTEGER}~». Dans ce cas, la question initiale
+    qui était: «~La valeur \texttt{a : 7} est-elle du type
+      \texttt{CHOICE \{a INTEGER, b BOOLEAN\}}?~» devient: «~La
+      valeur~\texttt{7} est-elle du type \texttt{INTEGER}?~»
+
+  \item Le second sous-cas dit qu'il est possible d'ignorer une
+    variante, soit un champ de \texttt{CHOICE}, et donc de reposer la
+    question initiale avec le même \texttt{CHOICE} mais avec un champ
+    en moins. Par exemple:
+\begin{sverb}
+v CHOICE {
+    a INTEGER,
+    a INTEGER,
+    b BOOLEAN
+  } ::= a : 7
+\end{sverb}
+    La question «~La valeur \texttt{a : 7} est-elle du type
+      \texttt{CHOICE \{a INTEGER, a INTEGER, b BOOLEAN\}}?~» peut être
+    équivalente à: «~La valeur \texttt{a : 7} est-elle du type
+      \texttt{CHOICE \{a INTEGER, b BOOLEAN\}}?~» Ce sous-cas nous
+    permet donc d'ignorer la première variante du \texttt{CHOICE}, par
+    exemple.
+\end{enumerate}
+
+Mais pourquoi autoriser un tel type \texttt{CHOICE} qui possède deux
+labels identiques~\texttt{a}, alors que cela est explicitement
+interdit par \cite[\S~26.6]{ASN94}? Tout d'abord parce que cette
+restriction n'est pas du tout gênante pour le contrôle des types,
+comme nous venons de le voir. De plus, cette propriété d'unicité des
+labels sera définie ci-après et mise en parallèle avec celle d'unicité
+des étiquetages dans le chapitre consacré à la sémantique, ce qui
+donnera une nouvelle perspective à la raison d'être de cette
+restriction.
+
+Remarquons que nous aurions pu alors conclure que la déclaration
+précédente:
+\begin{sverb}
+v CHOICE {
+    a INTEGER,
+    a INTEGER,
+    b BOOLEAN
+  } ::= a : 7
+\end{sverb}
+était correcte pour le contrôle des types, et ce \emph{de plusieurs
+  façons différentes}. La première façon consite à commencer comme
+ci-dessus, en éliminant la première variante:
+\begin{sverb}
+v CHOICE {
+    a INTEGER,
+    b BOOLEAN
+  } ::= a : 7
+\end{sverb}
+puis à mettre en correspondance le type de la variante~\texttt{a}
+restante avec la valeur incluse dans \texttt{a : 7},
+c'est-à-dire~\texttt{7}. Ensuite la question devient: «~La
+  valeur~\texttt{7} est-elle du type \texttt{INTEGER}?~», et la
+réponse est «~oui~».
+
+Une autre façon consiste à mettre directement en correspondance la
+première variante et la valeur. Lorsque nous imposerons l'unicité des
+labels dans les types \texttt{CHOICE}, alors nous obtiendrons
+l'unicité du processus de contrôle des types, c'est-à-dire que nous
+n'aurons alors qu'une seule façon de conclure «~oui~».
+
+Avant d'en terminer avec le cas du type \texttt{CHOICE}, notons que le
+contrôle des types répond «~non~» face à un type \texttt{CHOICE~\{\}}
+qui pourait apparaître dans une question dérivée (la syntaxe
+l'interdit pour les types initiaux).
+
+Traitons maintenant le cas du type \texttt{SEQUENCE}, qui se subdivise
+en trois.
+\begin{enumerate}
+
+  \item Le premier sous-cas dit que la réponse à la question: «~La
+    valeur~\texttt{\{\}} est-elle du type \texttt{SEQUENCE~\{\}}?~»
+    est «~oui~».
+
+  \item Le second sous-cas dit que s'il existe un champ du type
+    \texttt{SEQUENCE} dont le label apparaît dans la valeur, alors on
+    doit répondre à deux questions: d'une part la même question mais
+    avec ce champ et cette valeur en moins, et d'autre part la
+    question qui met en vis-à-vis cette valeur et le type du champ de
+    même label. Par exemple:
+\begin{sverb}
+v SEQUENCE {
+    a INTEGER,
+    b BOOLEAN
+  } ::= {a 7, b TRUE}
+\end{sverb}
+    La question initiale est: «~La valeur \texttt{\{a 7, b TRUE\}}
+      est-elle du type \texttt{SEQUENCE \{a INTEGER, b BOOLEAN\}}?~»
+    devient double:
+    \begin{itemize}
+  
+      \item «~La valeur \texttt{b TRUE} est-elle du type
+        \texttt{SEQUENCE \{b BOOLEAN\}}?~»;
+
+      \item «~La valeur~\texttt{7} est-elle du type
+        \texttt{INTEGER}?~».
+
+    \end{itemize}
+    Seule la conjonction de deux «~oui~» permet de répondre «~oui~» à
+    la question initiale.
+
+  \item Le troisième et dernier sous-cas dit que si un champ du type
+    \texttt{SEQUENCE} est annoté \texttt{OPTIONAL}, alors la question
+    peut être reposée avec le même type \texttt{SEQUENCE}, mais sans
+    ce champ. Par exemple:
+\begin{sverb}
+v SEQUENCE {
+    a INTEGER,
+    b BOOLEAN OPTIONAL
+  } ::= {a 7}
+\end{sverb}
+    On peut alors se poser la question: «~La valeur \texttt{a 7}
+      est-elle du type \texttt{SEQUENCE \{a INTEGER\}}?~», puis, en
+    appliquant le second sous-cas: «~La valeur~\texttt{7} est-elle du
+      type \texttt{INTEGER}?~». La réponse à cette dernière question,
+    et donc à la question initiale, est «~oui~».
+
+\end{enumerate}
+Il est important de noter que nous n'avons pas imposé que les valeurs
+de la séquence soient dans l'ordre des champs du type
+\texttt{SEQUENCE}, comme cela est pourtant exigé par la norme
+\cite[\S~22.14]{ASN94}. Nous considérons en effet que cela n'est pas
+du ressort du contrôle des types, aussi la vérification de cette
+exigence a été faite lors de la canonisation des types. Nous soutenons
+par ailleurs que cette contrainte est inutile à ce niveau, car la
+seule différence entre \texttt{SEQUENCE} et \texttt{SET} réside dans
+le codage de leurs valeurs et le contrôle sémantique des types ---~que
+l'on peut assimiler à un décodage. Par conséquent, nous traiton le cas
+du type \texttt{SET} comme si c'était le type \texttt{SEQUENCE}.
+
+
+\section{Unicité du contrôle des types}
+\label{unicite_du_controle_des_types_informel}
+
+Comme nous l'avons dit à la section précédente, nous avons autorisé
+jusqu'ici les types \texttt{SET}, \texttt{SEQUENCE} et \texttt{CHOICE}
+dont les labels, c'est-à-dire les noms de champs, ne sont pas
+nécessairement distincts entre eux. Par exemple:
+\begin{sverb}
+T ::= CHOICE {
+        a INTEGER,
+        a INTEGER,
+        b BOOLEAN
+      }
+\end{sverb}
+était accepté car cela ne posait aucun problème au contrôle de type:
+une conséquence étant que ce dernier peut éventuellement s'effectuer
+de plusieurs façons possibles: nous dirons que le contrôle des types
+est \emph{non déterministe}. Par exemple, pour contrôler la
+déclaration de valeur
+\begin{sverb} 
+v T ::= a : 7
+\end{sverb}
+il y a deux façons: soit on met en correspondance~\texttt{7} avec le
+premier champ de~\texttt{T}, soit le second. Si nous avions eu:
+\begin{sverb}
+T ::= CHOICE {
+        a INTEGER,
+        a NULL,
+        b BOOLEAN
+      }
+\end{sverb}
+alors il n'y aurait pas eu de problème non plus, car nous aurions mis
+en correspondance~\texttt{7} et le premier champ de~\texttt{T} ---~le
+second conduisant à un échec suivit alors d'un rebroussement pour
+envisager le premier champ. En termes opérationnels, cela implique que
+l'algorithme de contrôle de types doit pouvoir effectuer des
+rebroussements, c'est-à-dire que s'il aboutit à une impasse (une
+réponse négative) alors il doit rebrousser chemin et essayer d'aboutir
+en empruntant une autre série de questions. S'il n'y parvient pas,
+alors il répond définitivement par la négative.
+
+Si nous avions eu:
+\begin{sverb}
+T ::= CHOICE {
+        a BIT STRING
+        a NULL,
+        b BOOLEAN
+      }
+\end{sverb}
+alors le contrôle de type aurait échoué car aucun des
+champs~\texttt{a} ne convenait pour typer la valeur~\texttt{7}. Ce
+comportement est tout à fait correct.
+
+Mais si l'algorithme de contrôle des types est non déterministe il est
+en revanche cohérent, c'est-à-dire qu'il ne répond pas tantôt «~oui~»,
+tantôt «~non~» à une même question: un échec (un non) est toujours un
+échec, pour toutes le exécutions possibles sur la même question en
+entrée, et idem pour une réussite (un oui), même s'il peut aboutir à
+la réponse en empruntant différents chemins.
+
+À quoi sert donc la restriction qui consiste à interdire les
+répétitions de labels~\cite[\S~22.10]{ASN94}? Nous affirmons que la
+raison profonde est reliée à l'unicité des exécutions des algorithmes
+qui peuvent être dérivés de notre travail formel. En particulier, ici,
+l'unicité des labels au sein d'un même type \texttt{SET},
+\texttt{SEQUENCE} ou \texttt{CHOICE} a pour conséquence que le
+contrôle des types ne peut s'effectuer que de façon unique. Autrement
+dit, s'il répond «~oui~», alors il n'y avait qu'une seule façon de
+répondre.
+
+Nous définissons formellement à la section~\ref{types_bien_labellises}
+la propriété pour les types d'être \emph{bien labellisés}: par
+définition, un type est bien labellisé si ce n'est pas un type
+\texttt{SET}, ni \texttt{SEQUENCE} ni \texttt{CHOICE}, ou alors
+(exclusivement) si ses labels sont tous distincts entre eux. Nous
+prouvons alors formellement à la
+section~\ref{unicite_du_controle_des_types} le théorème suivant:
+\begin{quote}
+\em Soit une valeur~$v$ et un type~\emph{T} bien labellisé. Il
+n'existe qu'une seule façon de vérifier que $v$~est de type~\emph{T}.
+\end{quote}
+Le but fondamental de la restriction sur les doublons de labels n'est
+pas du tout formulé dans X.680. Nous affirmons que le but est
+d'assurer l'unicité des exécutions de l'algorithme de contrôle des
+types, et nous le prouvons formellement. Nous démontrerons
+formellement aussi dans le chapitre consacré à la sémantique
+(\vref{semantique}), que cette même restriction a pour conséquence
+d'assurer l'unicité du codage des valeurs ASN.1. De même, la
+restriction des doublons des étiquetages des champs aura pour
+conséquence de garantir l'unicité du décodage.
+
+Une façon pratique d'évaluer intérêt d'avoir l'unicité du contrôle des
+types, comme celle du codage et du contrôle sémantique, est que
+l'implémentation est alors nettement plus efficace, car il n'y a plus
+besoin dans ce cas de conserver une trace des questions
+intermédiaires, dans l'hypothèse où il faudrait rebrousser chemin.

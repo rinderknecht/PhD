@@ -1,0 +1,29 @@
+%%-*-latex-*-
+
+\subsection{Désambigüation du zéro}
+\label{desambiguation_du_zero}
+\input{desambiguation_du_zero}
+
+\subsection{Forme normale}
+\label{valeurs_en_forme_normale}
+\input{valeurs_en_forme_normale}
+
+\subsection{Normalisation des valeurs}
+
+\begin{mathpar}
+\inferrule
+  {\domain{\mathcal{A}} \bouchon{84} \domain{\mathcal{B}} \Delta
+    \rightarrow \domain{\mathcal{B}_0} \Delta_0\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}_0} \Delta_0
+  \bouchon{17} \domain{\mathcal{B}_0} \Delta_0 \rightarrow
+  \domain{\overline{\mathcal{B}}} \overline\Delta}
+%-----
+  {\domain{\mathcal{A}} \Gamma \bouchon{18} \domain{\mathcal{B}} \Delta
+    \rightarrow \domain{\overline{\mathcal{B}}} \overline\Delta}
+
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma \bouchon{18} \domain{\varnothing}
+    \Delta \rightarrow \domain{\varnothing} \Delta}
+
+\end{mathpar}

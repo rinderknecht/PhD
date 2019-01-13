@@ -1,0 +1,33 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \{(\textrm{T}, \{\})\})\\
+  \bouchon{62} \domain{\mathcal{A}} \Gamma \rightarrow
+  \domain{\overline{\mathcal{A}}} \overline\Gamma}
+  %-----
+  {\bouchon{62} \domain{\{x\} \uplus \mathcal{A}} \Gamma \rightarrow
+    \domain{\overline{\mathcal{A}}} \overline\Gamma \oplus x \mapsto
+    \Gamma(x)}
+
+\inferrule
+  {\Gamma(x) \lhd (\alpha, \tau, \{(\textrm{T}, \sigma)\})\\
+   \sigma \neq \{\}\\
+   \bouchon{62} \domain{\mathcal{A}} \Gamma \rightarrow
+   \domain{\overline{\mathcal{A}}} \overline\Gamma\\
+   \SList{$\overline\nu_i$}{i}{n} \triangleq  
+   \textrm{disjonctive\_constraint} \, (\sigma)\\
+   \overline\gamma \triangleq x \mapsto (\alpha, \tau,
+   \SList{$(\textrm{T}, \{\overline\nu_i\})$}{i}{n})}
+  %-----
+  {\bouchon{62} \domain{\{x\} \uplus \mathcal{A}} \Gamma \rightarrow
+    \domain{\overline{\mathcal{A}}} \overline\Gamma \oplus
+    \overline\gamma}
+
+\inferrule
+  {}
+  {\bouchon{62} \domain{\mathcal{A}} \Gamma \rightarrow
+    \domain{\mathcal{A}} \Gamma}
+
+\end{mathparpagebreakable}
+

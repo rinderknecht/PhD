@@ -1,0 +1,35 @@
+%%-*-latex-*-
+
+Nous avons défini jusqu'à présent trois algorithmes:
+\begin{itemize}
+
+  \item Le contrôle (syntaxique) des types, au
+    chapitre~\vref{definition_du_controle_des_types_informel};
+
+  \item Le codage de référence, à la section~\vref{codage_informel});
+
+  \item Le contrôle sémantique des types, à la
+    section~\vref{controle_semantique_des_types_informel}.
+
+\end{itemize}
+Comme nous l'avons esquissé à la
+section~\vref{definition_semantique_informelle}, nous avons démontré
+formellement au chapitre~\vref{correction_du_codage} le théorème dit
+de correction (sémantique) du codage:
+\begin{quote}
+\em Soit une valeur~$v$ et un type~\emph{T} du noyau d'ASN.1. Soit
+$\semb{$v$}{T}$ le code de~$v$ en supposant que~$v$ est de
+type~\emph{T}. Si~$v$ est de type~\emph{T}, alors $\semb{$v$}{T}$ est
+de type~\emph{T}.
+\end{quote}
+Lorsque nous disons que «~$v$~est de type~T~», il s'agit implicitement
+du succès du contrôle (syntaxique) des types, et lorsque nous disons
+«~$\semb{$v$}{T}$~» est de type~T, il s'agit implicitement du succès
+du contrôle sémantique des types.
+
+On peut comprendre ce théorème comme la conservation du type des
+valeurs du noyau ASN.1 par le codage de référence. Autrement dit, si
+nous codons une valeur~$v$ de type~T, et si nous tentons de la décoder
+en la supposant de type T, alors nous réussirons (n'oublions pas que,
+par construction, le succès du contrôle sémantique des types implique
+celui du décodage).

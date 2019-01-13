@@ -1,0 +1,187 @@
+%%-*-latex-*-
+
+\documentclass[a4paper,11pt,twoside]{article}
+
+% Page geometry for College Publications
+%
+\usepackage[bindingoffset=0cm,a4paper,centering,textheight=200mm,textwidth=120mm,includefoot,includehead,dvips]{geometry}
+
+% Language and fonts
+%
+\usepackage[british]{babel}    % British English
+\usepackage[T1]{fontenc}       % Required for hyphenation and \DJ
+\usepackage[utf8]{inputenc}    % UTF-8 encoding
+\usepackage{hyphenat}          % \hyp{} is a breakable dash
+%\usepackage{url}               % To typeset URLs
+\usepackage{mdwlist}           % Tight vertical spacing of list items
+\usepackage{microtype}         % Microtypographic enhancements
+
+\hfuzz 2pt % Do not report overhang less than 2pt
+
+% Title and author
+%
+\title{\Huge Report on the thesis of\\ Christian Rinderknecht}
+\author{\Large Paul Yves Gloess}
+\date{9 November 1998}
+
+%--------------------------------------------------------------------
+%
+\begin{document}
+
+\maketitle
+
+Mr~Christian Rinderknecht develops a thesis in a dissertation
+consisting of 375~pages entitled \emph{Une formalisation d'ASN.1
+  (Application d'une m\'ethode formelle \`a un langage de
+  sp\'ecification t\'el\'ecom)}. This work is presented in two parts:
+a main volume of 84~pages, with the table of contents, and an annex of
+290~pages.
+
+This work was carried out in the context of Project Cristal at INRIA:
+it deals with the language ASN.1, \emph{Abstract Syntax Notation One},
+in use in telecommunications to define the format of the data
+exchanged over a network, independently of the language utilised by
+the applications which produce or consume these data. ASN.1 is
+standardised by ISO and ITU-T. The standard X.680 is presented
+informally, in natural language: ASN.1 compilers, therefore the
+applications which depend on them, suffer from the lack of rigour of
+the standard, which is a serious practical issue because two
+applications using different compilers may not rely on the same
+semantics. Because the outline of the language is not clearly defined,
+the compilers cannot deliver clear diagnostics to the users.
+
+The thesis defended is that a formal approach, based on the structured
+operational semantics (natural semantics) and mathematical proofs,
+enables the complete clarification of X.680, and the derivation of a
+specification analyser for ASN.1 which conforms to the formal
+semantics. The goal was ambitious, given the complexity of the
+language and its industrial ecosystem: a computer scientist would have
+been tempted to reduce this complexity, which stems sometimes from
+design errors, and modify the language; but this would have been
+unacceptable for the industrial users of existing applications.
+
+The decomposition of the dissertation in two volumes, chosen by the
+author, is justified by the ambivalence of the audiences it addresses:
+on the one hand, the telecommunication engineers and their own
+culture; on the other hand, the computer scientists who study
+languages, interested in the theoretical aspects of syntax and
+semantics, also in the soundness and completeness of the compilation
+algorithms. The first volume introduces the problems, the solutions
+and the results in an informal manner, by means of examples, while
+constantly referring exactly to their formal counterparts developed in
+the annex.
+
+A first general remark is that the transition between the first volume
+and the annex is rather abrupt: the first volume is pleasant and
+provides insights into the approach undertaken; the annex is frankly
+forbidding, with hundreds of inference rules, often lain out without
+comments --~210~rules only for chapter~6 (normalisation of types,
+values and tags). But how could it be any different, given the extent
+of the language? As a reader (suffering from an onset of
+farsightedness), I feel uncomfortable to not being able to check
+everything by hand, and to content myself with incursions to comfort
+the intuition acquired by reading the first volume.
+
+The approach expanded in the first volume is as follows.
+
+Chapter~1 introduces first the essential aspects of ASN.1: the
+recursivity of ASN.1 types and values; the mutual dependency between
+these two concepts and the concept of constraint (which enables the
+definition of subtypes). Some restrictions on the use of recursivity
+are proposed, giving meaning to specifications; recursive values are
+invalid. Then, by a series of normalisation steps, it is shown how to
+limit the scope to a ``core ASN.1'', as expressive as ASN.1 in its
+entirety.
+
+Chapter~2 is concerned with type-checking values, leaving aside the
+subtyping constraints. The reason for ignoring these constraints in a
+first phase is justified by the complexity which would ensue
+otherwise. A theorem (7.3.1) establishes the uniqueness of the proof
+that a value is correctly typed, assuming that the types in the
+specification are ``well tagged'', that is, the names of the fields
+are unique in the constructs \textsc{set}, \textsc{sequence} and
+\textsc{choice}.
+
+Chapter~3 deals with the encoding of values, which involves the
+implicit and explicit tags enabling to keep the information of the
+field names. The theorem of ``encoding correctness'' (8.4.1) states
+that the encoding preserves the type. Another theorem (8.7.1)
+establishes the determinism of the ``semantic type-checking'', to wit,
+the uniqueness of the proof that a code is well typed, assuming that
+the types are ``well tagged'' --~this last notion is about the
+implicit or implicit tags found in the types \textsc{set},
+\textsc{sequence} and \textsc{choice}. Although this does not seem to
+be fully proved (because that would obscure the presentation of the
+semantic type-checking), it seems reasonable to deduce, under the
+assumption that the encodings are unique (which is the case of the
+Canonical Encoding Rules), the reversibility of the encoding: the same
+value can be recovered from its encoding.
+
+Chapter~4 completes the construction started in chapter~2, by taking
+into account the subtyping constraints. A series of phases aim at
+moving the constraints so they apply to the fields of the structured
+types, which is made possible by extending the strict core of ASN.1
+with a union operator, which acts in the end on primitive types with
+simple constraints, \emph{e.g.}, \texttt{INTEGER (1|2)}. This process
+supposes that the values of the specification are well typed, in the
+sense of chapter~2.
+
+It seems to us that these four chapters put forth a pertinent
+approach, yielding theoretical results of practical interest, and
+whose difficulty resides more in the magnitude of the language rather
+than in the depth of the proofs, although the choices made by the
+author for splitting the task into different stages may not have been
+easy. In our opinion, the presentation would gain in clarity if the
+properties expected at the start of each phase (and at the end) would
+be more explicitly stated.
+
+Here follow two observations of a more fundamental nature.
+
+The author justly remarks (section~3.9) that the theoretical results
+which he proves apply a priori to core ASN.1, not ASN.1 as a whole,
+and that they extend (informally) to the complete language. In order
+to formalise the proof, it should be necessary to show that all the
+rewrites of Chapter~1 ``keep invariant the codes''; but this is a
+drivel, because the encoding function is only defined on the core of
+ASN.1.
+
+Would it not have been useful and relatively easier to explicitly
+define a set\hyp{}based semantics, with least fixed\hyp{}point, for
+all ASN.1, since all the type and subtype constructors are monotone
+(except the \textsc{except} recently introduced, but not taken into
+account in the dissertation), and whose encoding would be like a
+partial operational implementation? In that case, a definition and an
+actual proof of the semantic compatibility of Chapter~1 would have
+been possible. Beside, Chapter~1 does refer to such a semantics, when
+discussing the issues brought by the recursive types, which seems in
+tune with the intentions of the authors of ASN.1.
+
+The formalisation of ASN.1, together with the results and proofs
+mentioned above, is in itself an important contribution, even if
+handwritten, thus susceptible to contain errors. Was it (or is it)
+nevertheless possible to use a tool like Coq or PVS for the
+formalisation and the proofs?
+
+These few observations, or questions, do not diminish the merits of
+the author, which consists in having completely designed with great
+rigour an formal operational model of an industrial language, while
+respecting in the smallest details the intentions of the
+designers. One of the proposals of the author, the invalidation of
+recursive values, is on track to being adopted by ISO. The author has
+implemented his model into the analyser called \emph{Asno} (It is a
+pity that it is only mentioned in the conclusion), using OCaml (15,000
+lines of source code), and licensing it as free software and open
+source over the internet. This efficient tool provides very clear
+diagnostics, and its qualities are confirmed by industrial users, like
+CNET [now Orange Labs] in France and South\hyp{}Western Bell Tech. in
+the USA.
+
+As a conclusion, I give a very favourable notice to authorise the
+defence by Mr~Christian Rinderknecht of his work, in view to obtain
+the title of doctor in informatics.
+
+\bigskip\bigskip
+
+Paul Y Gloess, Professor.
+
+\end{document}

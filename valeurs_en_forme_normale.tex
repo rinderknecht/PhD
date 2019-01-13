@@ -1,0 +1,321 @@
+%%-*-latex-*-
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% TEMPORARY
+%% Il manque la production des constantes des ENUMERATED
+%% qui ne sont pas spécifiées (sémantique à la C)
+%% IL FAUT CORRIGER
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\Delta'(y) \lhd (\emptyL\!, \textsf{TRef} \, x, \{\}, v)\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, \emptyL
+  \bouchon{85} v : \textsf{TRef} \, (x) \rightarrow \overline{v}\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta
+  \bouchon{17} \domain{\mathcal{B}'} \Delta' \rightarrow
+  \domain{\overline{\mathcal{B}}'} \overline\Delta'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta
+    \bouchon{17} \domain{\{y\} \uplus \mathcal{B}'} \Delta'
+    \rightarrow \domain{\overline{\mathcal{B}}'} \overline\Delta'
+    \oplus y \mapsto (\emptyL\!, \textsf{TRef}\, x, \{\},
+    \overline{v})}
+
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta
+    \bouchon{17} \domain{\varnothing} \Delta \rightarrow
+    \domain{\varnothing} \Delta}
+
+% Value unfolding (2/4)
+%
+% .....ENUMERATED
+%
+\inferrule
+  {x \in \mathcal{A}\\
+  \Gamma(x) \lhd (\alpha, \tau, \{(\textrm{T}, \sigma)\})\\
+  \textrm{T} \lhd \textsf{ENUMERATED} \,\, \OList{$(c_j, v_j)$}{j}{p}\\
+  \forall j \in [1..p].y' \neq c_j\\
+  y' \in \mathcal{B}\\
+  \Delta(y') \lhd (\emptyL\!, \textsf{TRef} \, x', \{\}, v')\\
+  x' \in \mathcal{A}\\
+  \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+  x = x' \OR \alpha \listinter \alpha' \neq \{\}\\
+  v \not\in \textrm{H}\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, v \Cons
+  \textrm{H} \bouchon{85} v' : \textsf{TRef} \, (x') \rightarrow
+  \overline{v}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+    \textrm{H} \bouchon{85} (\textsf{Id} \, (y') \AS v) :
+    \textsf{TRef} \, (x) \rightarrow \overline{v}'}
+
+% Type unfolding
+%
+\inferrule
+  {x' \in \mathcal{A}\\
+  \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, \textrm{H}
+  \bouchon{85} v : \textrm{T}' \rightarrow \overline{v}}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+    \textrm{H} \bouchon{85} v : \textsf{TRef} \, (x') \rightarrow
+    \overline{v}}
+
+% Value unfolding (3/4)
+%
+% .....INTEGER
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{INTEGER} \,\, \OList{$(c_j, v_j)$}{j}{p}\\
+  \forall j \in [1..p].y' \neq c_j\\
+  y' \in \mathcal{B}\\
+  \Delta(y') \lhd (\emptyL\!, \textsf{TRef} \, x', \{\}, v')\\
+  v \not\in \textrm{H}\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, v \Cons
+  \textrm{H} \bouchon{85} v' : \textsf{TRef} \, (x') \rightarrow \overline{v}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+    \textrm{H} \bouchon{85} (\textsf{Id} \, (y') \AS v) : \textrm{T} \rightarrow \overline{v}'}
+
+% INTEGER constants
+%
+\inferrule
+  {\exists j \in [1..p].(y' = c_j
+  \AND
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, \textrm{H}
+  \bouchon{85} v_j : \emptyINTEGER \rightarrow \overline{v})}
+%------
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+    \textrm{H} \bouchon{85} \textsf{Id} \, (y') : \textsf{INTEGER} \,
+    \OList{$(c_j, v_j)$}{j}{p} \rightarrow \overline{v}}
+
+% ENUMERATED constants
+%
+\inferrule
+  {\exists j \in [1..p].y' = c_j}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+    \textrm{H} \bouchon{85} \textsf{Id} \, (y') : \textsf{ENUMERATED}
+    \, \OList{$(c_j, v_j)$}{j}{p} \rightarrow \textsf{Enum} \, (y')}
+
+% Value unfolding (1/4)
+%
+% Please note that VRef is not possible at this stage.
+%
+\inferrule
+  {y' \in \mathcal{B}\\
+  \Delta(y') \lhd (\emptyL\!, \textsf{TRef} \, x', \{\}, v')\\
+  v \not\in \textrm{H}\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, v \Cons
+  \textrm{H} \bouchon{85} v' : \textrm{T}' \rightarrow \overline{v}'}
+%------
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+    \textrm{H} \bouchon{85} (\textsf{Id} \, (y') \AS v) : \textrm{T}
+    \rightarrow \overline{v}'}
+
+% BIT  STRING specified with identifiers
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{BIT STRING} \, \OList{$(c_j, v_j)$}{j}{p}\\
+  \forall i \in [1..n].\exists j \in [1..p].y_i = c_j\\
+  \forall j \in [1..p].\domain{\mathcal{A}} \Gamma,
+  \domain{\mathcal{B}} \Delta, \textrm{H} \bouchon{85} v_j :
+  \emptyINTEGER \rightarrow \textsf{Int} \, (n_j)\\
+  bs \triangleq \textrm{positions\_to\_bits} \,\, \OList{$y_i$}{i}{n} \, \OList{$(c_j, n_j)$}{j}{p}}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+    \textrm{H} \bouchon{85} \bob \OList{($\textsf{None}, \textsf{Id}
+      \, y_i)$}{i}{n} \bcb : \textrm{T} \rightarrow \textsf{BinStr} \,
+    (bs)}
+
+% Identifier list may be empty
+%
+\inferrule
+  {\textrm{T} \lhd \wildBITSTRING}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+    \textrm{H} \bouchon{85} \bob \emptyL\! \bcb : \textrm{T}
+    \rightarrow \textsf{BinStr} \, (\emptyStr)}
+
+% BIT STRING speicified with hexa string
+%
+\inferrule
+  {\textrm{T} \lhd \wildBITSTRING \mid \textsf{OCTET STRING}\\
+  bs \triangleq \textrm{hexa\_to\_bin} \, (hs)}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+    \textrm{H} \bouchon{85} \textsf{HexaStr} \, (hs) : \textrm{T} \rightarrow \textsf{BinStr} \, (bs)}
+
+% SEQUENCE OF
+%
+\inferrule
+   {\textrm{T} \lhd \textsf{SEQUENCE OF} \, \tau' \, \textrm{T}' \, \sigma'\\
+   v \not\in \textrm{H}\\
+   \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, v \Cons
+   \textrm{H} \bouchon{85} v' : \textrm{T}' \rightarrow \overline{v}'\\
+   \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+   \textrm{H} \bouchon{85} \bob V \bcb : \textrm{T} \rightarrow \bob
+   \overline{V} \bcb}
+%-----
+   {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+     \textrm{H} \bouchon{85} (\bob (\textsf{None}, v') \Cons V \bcb
+     \AS v) : \textrm{T} \rightarrow \bob (\textsf{None},
+     \overline{v}') \Cons \overline{V} \bcb}
+
+% SET OF
+%
+\inferrule
+   {\textrm{T} \lhd \textsf{SET OF} \, \tau' \, \textrm{T}' \, \sigma'\\
+   v \not\in \textrm{H}\\
+   \forall i \in [1..n].\domain{\mathcal{A}} \Gamma,
+   \domain{\mathcal{B}} \Delta, v \Cons \textrm{H} \bouchon{85} v'_i :
+          \textrm{T}'_i \rightarrow \overline{v}'_i\\
+   \overline{v} \triangleq \bob \OList{$(\textsf{None}, \overline{v}'_{\pi(i)})$}{i}{n} \bcb\\
+   \permutation{\pi}{[1..n]}}
+%-----
+   {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+     \textrm{H} \bouchon{85} (\bob \OList{$(\textsf{None},
+       v'_i)$}{i}{n} \bcb \AS v) : \textrm{T} \rightarrow \overline{v}}
+
+% CHOICE
+%
+\inferrule
+   {\textrm{T} \lhd \textsf{CHOICE} \, ((l', \tau', \textrm{T}',
+     \sigma', s') \Cons \mathcal{F}')\\
+   x' = l'\\
+   v \not\in \textrm{H}\\
+   \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, v \Cons
+   \textrm{H} \bouchon{85} v' : \textrm{T}' \rightarrow \overline{v}'}
+%-----
+   {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+     \textrm{H} \bouchon{85} ((x' \colon v') \AS v) : \textrm{T}
+     \rightarrow x' \colon \overline{v}'}
+
+\inferrule
+   {\textrm{T} \lhd \textsf{CHOICE} \, ((l', \tau', \textrm{T}',
+     \sigma', s') \Cons \mathcal{F}')\\
+   x' \neq l'\\
+   \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+   \textrm{H} \bouchon{85} (x' \colon v') : \textsf{CHOICE} \,
+   \mathcal{F}' \rightarrow \overline{v}}
+%-----
+   {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+     \textrm{H} \bouchon{85} (x' \colon v') : \textrm{T} \rightarrow
+     \overline{v}}
+
+% SET
+% ..... matched field
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+  V \lhd [(\textsf{Some} \, l', v')] \sqcup V'\\
+  v \not\in \textrm{H}\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, v \Cons
+  \textrm{H} \bouchon{85} v' : \textrm{T}' \rightarrow \overline{v}'\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, \textrm{H}
+  \bouchon{85} \bob V' \bcb : \textsf{SET} \, \Phi' \rightarrow \bob
+  \overline{V}' \bcb\\
+  \overline{V} \triangleq [(\textsf{Some} \, l', \overline{v}')]
+  \listunion \overline{V}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+    \textrm{H} \bouchon{85} \bob V \bcb : \textsf{SET} \,
+    (\varphi'\Cons\Phi') \rightarrow \bob \overline{V} \bcb}
+
+% ..... absent value and DEFAULT value specified
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+  \forall \hat{v} \listin V.(\hat{v} \lhd (\textsf{Some} \, x', \wild\!) \AND x' \neq l')\\
+   s' \lhd \textsf{Some} \, (\textsf{DEFAULT} \, v')\\
+   v \not\in \textrm{H}\\
+   \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, v \Cons
+   \textrm{H} \bouchon{85} v' : \textrm{T}' \rightarrow \overline{v}'\\
+   \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+   \textrm{H} \bouchon{85} v : \textsf{SET} \, \Phi' \rightarrow \bob
+   \overline{V}' \bcb\\
+  \overline{V} \triangleq [(\textsf{Some} \, l', \overline{v}')] \listunion \overline{V}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+    \textrm{H} \bouchon{85} (\bob V \bcb \AS v) : \textsf{SET} \,
+    (\varphi'\Cons\Phi') \rightarrow \bob \overline{V} \bcb}
+
+% ..... unmatched (OPTIONAL) field
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+  \forall \hat{v} \listin V.(\hat{v} \lhd (\textsf{Some} \, x', \wild\!) \AND x' \neq l')\\
+  s' \nlhd \textsf{Some} \, (\textsf{DEFAULT} \, \wild\!)\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, \textrm{H}
+  \bouchon{85} \bob V \bcb : \textsf{SET} \, \Phi' \rightarrow
+  \overline{v}}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+    \textrm{H} \bouchon{85} \bob V \bcb : \textsf{SET} \,
+    (\varphi'\Cons\Phi') \rightarrow \overline{v}}
+
+% SEQUENCE
+%
+% ..... matched field
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+  V \lhd (\textsf{Some} \, x', v') \Cons V'\\
+  x' = l'\\
+  v \not\in \textrm{H}\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, v \Cons
+  \textrm{H} \bouchon{85} v' : \textrm{T}' \rightarrow \overline{v}'\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, \textrm{H}
+  \bouchon{85} \bob V' \bcb : \textsf{SEQUENCE} \, \Phi' \rightarrow
+  \bob \overline{V}' \bcb\\
+  \overline{V} \triangleq (\textsf{Some} \, x', \overline{v}') \Cons \overline{V}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+    \textrm{H} \bouchon{85} (\bob V \bcb \AS v) : \textsf{SEQUENCE} \,
+    (\varphi'\Cons\Phi') \rightarrow \bob \overline{V} \bcb}
+
+% ..... absent value and DEFAULT value specified
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+  V \lhd (\textsf{Some} \, x', \wild\!) \Cons V'\\
+  x' \neq l'\\
+  s' \lhd \textsf{Some} \, (\textsf{DEFAULT} \, v')\\
+  v \not\in \textrm{H}\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, v \Cons
+  \textrm{H} \bouchon{85} v' : \textrm{T}' \rightarrow \overline{v}'\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, \textrm{H}
+  \bouchon{85} v : \textsf{SEQUENCE} \, \Phi' \rightarrow \bob
+  \overline{V}' \bcb\\
+  \overline{V} \triangleq (\textsf{Some} \, x', \overline{v}') \Cons \overline{V}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+    \textrm{H} \bouchon{85} (\bob V \bcb \AS v) : \textsf{SEQUENCE} \,
+    (\varphi'\Cons\Phi') \rightarrow \bob \overline{V} \bcb}
+
+% ..... unmatched (OPTIONAL) field
+%
+\inferrule
+  {\varphi' \lhd \textsf{Field} \, (l', \tau', \textrm{T}', \sigma', s')\\
+  V \lhd (\textsf{Some} \, x', \wild\!) \Cons V'\\
+  x' \neq l'\\
+  s' \nlhd \textsf{Some} \, (\textsf{DEFAULT} \, \wild\!)\\
+  \domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta, \textrm{H}
+  \bouchon{85} \bob V \bcb : \textsf{SEQUENCE} \, \Phi' \rightarrow
+  \overline{v}}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+    \textrm{H} \bouchon{85} \bob V \bcb : \textsf{SEQUENCE} \,
+    (\varphi'\Cons\Phi') \rightarrow \overline{v}}
+
+% Other types
+%
+\inferrule
+  {\noother}
+%------
+  {\domain{\mathcal{A}} \Gamma, \domain{\mathcal{B}} \Delta,
+    \textrm{H} \bouchon{85} v : \textrm{T} \rightarrow v}
+
+\end{mathparpagebreakable}

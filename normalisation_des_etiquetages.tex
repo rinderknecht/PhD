@@ -1,0 +1,35 @@
+%%-*-latex-*-
+
+\subsection{Globalisation des étiquetages}
+\label{globalisation_des_etiquetages}
+\input{globalisation_des_etiquetages}
+
+\subsection{Ajout des étiquettes \textsf{UNIVERSAL} implicites}
+\label{ajout_des_etiquettes_UNIVERSAL_implicites}
+\input{ajout_des_etiquettes_UNIVERSAL_implicites}
+
+\subsection{Calcul des étiquetages}
+\label{calcul_des_etiquetages}
+\input{calcul_des_etiquetages}
+
+\subsection{Normalisation des étiquetages}
+
+\begin{mathpar}
+\inferrule
+% Globalisation des étiquetages (1/2)
+  {\domain{\varnothing} \Xi \bouchon{49} \domain{\mathcal{A}} \Gamma
+    \rightarrow (\domain{\mathcal{A}_0} \Gamma_0, \domain{\mathcal{X}_0}
+    \Xi_0)\\
+% Globalisation des étiquetages (2/2)
+  \domain{\mathcal{X}_0} \Xi_0 \bouchon{4} \domain{\mathcal{A}_0}
+  \Gamma_0 \rightarrow \domain{\mathcal{A}_1} \Gamma_1\\
+% Ajout des étiquettes UNIVERSAL
+  \bouchon{67} \domain{\mathcal{A}_1} \Gamma_1 \rightarrow \domain{\mathcal{A}_2} \Gamma_2\\
+% Calcul des étiquetages
+  \domain{\mathcal{B}} \Delta \bouchon{6} \domain{\mathcal{A}_2}
+  \Gamma_2 \rightarrow \domain{\overline{\mathcal{A}}} \overline\Gamma}
+%------
+  {\domain{\mathcal{B}} \Delta \bouchon{33} \domain{\mathcal{A}}
+    \Gamma \rightarrow \domain{\overline{\mathcal{A}}} \overline\Gamma}
+
+\end{mathpar}

@@ -1,0 +1,41 @@
+%%-*-latex-*-
+
+Nous avons montré à la
+section~\vref{controle_semantique_des_types_informel} que le contrôle
+sémantique des types était non déterministe, c'est-à-dire que que
+l'exécution de cet algorithme suppose la possibilité de rebroussement:
+si l'algorithme aboutit à une impasse alors le mécanisme d'exécution
+doit être à même de rebrousser chemin jusqu'à trouver un chemin de
+calcul qui réussisse, ou qui échoue si tous les chemins ont été
+essayés.
+
+Comme nous l'avons déjà dit à la
+section~\vref{definition_semantique_informelle}, le succès du contrôle
+sémantique des types implique le succès d'un éventuel
+décodage. L'intention est donc que les propriétés du contrôle
+sémantique des types impliquent, par construction, une propriété
+semblable sur un éventuel décodage. En particulier, nous démontrons
+formellement à la
+section~\vref{unicite_du_controle_semantique_des_types} le théorème
+suivant:
+\begin{quote}
+\em Soit un code~$c$ et un type~\emph{T} bien étiqueté. Il n'existe
+qu'une seule façon de vérifier si~$c$ est de type~\emph{T}.
+\end{quote}
+Ce théorème pourrait être aussi intitulé «~Déterminisme de
+  l'algorithme de contrôle sémantique des types~», et a pour
+conséquence pratique de rendre l'implémentation du décodage nettement
+plus efficace, car il n'y a alors plus besoin de conserver une trace
+des chemins de calculs empruntés.
+
+Lorsque ce théorème est d'autre part mis en perspective avec les
+théorèmes de correction sémantique du codage (à la
+section~\vref{correction_du_codage_informelle}), de déterminisme du
+contrôle syntaxique des types (à la
+section~\vref{unicite_du_controle_des_types_informel}) ainsi que de
+déterminisme du codage (à la
+section~\vref{unicite_du_codage_informel}), nous avons maintenant en
+plus l'assurance que \emph{le décodage produira une valeur identique}.
+(N'oublions pas qu'en hypothèse de tous nos théorèmes, nous nous
+plaçons dans le noyau d'ASN.1, donc en particulier les valeurs sont en
+forme normale et ne contiennent plus d'identificateurs.)

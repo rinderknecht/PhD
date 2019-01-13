@@ -1,0 +1,119 @@
+%%-*-latex-*-
+
+\begin{mathparpagebreakable}
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \emptyL \bouchon{95} e_0 \Wide e_1}
+%-----
+  {\domain{\mathcal{A}} \Gamma \vdash e_0 \Wide e_1}
+\;\TirName{[0]}
+\label{inclusion_d_etiquetages_0}
+
+% Termination
+%
+\inferrule
+  {\textrm{H} \lhd [(e_0, e_1)] \sqcup \textrm{H}'}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H} \bouchon{95} e_0 \Wide e_1}
+\;\TirName{[1]} 
+\label{inclusion_d_etiquetages_1}
+
+% Type reference
+
+% LEFT
+%
+\inferrule
+  {x' \in \mathcal{A}\\
+  \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+  \domain{\mathcal{A}} \Gamma, \textrm{H} \bouchon{95} (\tau',
+  \textrm{T}') \Wide e_1}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H} \bouchon{95} (\emptyL\!,
+    \textsf{TRef} \, x') \Wide e_1}
+\;\TirName{[2]}
+\label{inclusion_d_etiquetages_2}
+
+% RIGHT
+%
+\inferrule
+  {x' \in \mathcal{A}\\
+  \Gamma(x') \lhd (\alpha', \tau', \{(\textrm{T}', \sigma')\})\\
+  \domain{\mathcal{A}} \Gamma, \textrm{H} \bouchon{95} e_0 \Wide
+  (\tau', \textrm{T}')}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H} \bouchon{95} e_0 \Wide
+    (\emptyL\!, \textsf{TRef} \, x')}
+\;\TirName{[3]}
+\label{inclusion_d_etiquetages_3}
+
+% Tag elimination
+%
+\inferrule
+  {\domain{\mathcal{A}} \Gamma, \textrm{H} \bouchon{95} (\tau'_0,
+    \textrm{T}_0) \Wide (\tau'_1, \textrm{T}_1)}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H} \bouchon{95} (t \Cons
+    \tau'_0, \textrm{T}_0) \Wide (t \Cons \tau'_1, \textrm{T}_1)}
+\;\TirName{[4]}
+\label{inclusion_d_etiquetages_4}
+
+% Type dispatching (CHOICE)
+
+% LEFT
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}')\\
+  f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+  \domain{\mathcal{A}} \Gamma, (e_0, e_1) \Cons \textrm{H}
+  \bouchon{95} (\tau', \textrm{T}') \Wide e_1\\
+  \domain{\mathcal{A}} \Gamma, \textrm{H} \bouchon{95} (\emptyL\!,
+  \textsf{CHOICE} \, \mathcal{F}') \Wide e_1}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H} \bouchon{95} (\emptyL\!,
+    \textrm{T}) \AS e_0 \Wide e_1}
+\;\TirName{[5]}
+\label{inclusion_d_etiquetages_5}
+
+\inferrule
+  {}
+  {\domain{\mathcal{A}} \Gamma, \textrm{H} \bouchon{95} (\emptyL\!,
+    \textsf{CHOICE} \, \emptyL\!) \Wide e_1}
+\;\TirName{[6]}
+\label{inclusion_d_etiquetages_6}
+
+% RIGHT
+%
+\inferrule
+  {\textrm{T} \lhd \textsf{CHOICE} \, ([f'] \sqcup \mathcal{F}')\\
+  f' \lhd (l', \tau', \textrm{T}', \sigma', s')\\
+  \domain{\mathcal{A}} \Gamma, (e_0, e_1) \Cons \textrm{H}
+  \bouchon{95} e_0 \Wide (\tau', \textrm{T}')}
+%------
+  {\domain{\mathcal{A}} \Gamma, \textrm{H} \bouchon{95} e_0 \Wide
+    (\emptyL\!, \textrm{T}) \AS e_1}
+\;\TirName{[7]}
+\label{inclusion_d_etiquetages_7}
+
+% Termination 5
+%
+\inferrule
+  {\textrm{T}_0 \nlhd \wildCHOICE \mid \wildTRef \mid \wildSelect\\
+   \textrm{T}_1 \nlhd \wildCHOICE \mid \wildTRef \mid \wildSelect}
+%-----
+  {\domain{\mathcal{A}} \Gamma, \textrm{H} \bouchon{95} (\emptyL\!,
+    \textrm{T}_0) \Wide (\emptyL\!, \textrm{T}_1)}
+\;\TirName{[8]}
+\label{inclusion_d_etiquetages_8}
+\end{mathparpagebreakable}
+
+\bigskip
+
+\newtheorem{Reflexivite_inclusion}{Propriété}[subsection]
+\begin{Reflexivite_inclusion}[Réflexivité]
+\label{Reflexivite_inclusion}
+\ \\
+$\forall a : \mathcal{E} \times \mathcal{T}.\domain{\mathcal{A}}
+\Gamma \vdash a \Wide a$
+\end{Reflexivite_inclusion}
+
+\noindent \textbf{Preuve de la propriété~\ref{Reflexivite_inclusion}}.
+Laissée au lecteur.

@@ -1,0 +1,597 @@
+\section{Présentation du formalisme syntaxique}
+
+\subsection{Les grammaires algébriques}
+
+La notation pour les grammaires adoptée dans ce document est
+\emph{grosso modo} la BNF (\emph{Backus-Naur Form}), plus quelques
+ajouts (notamment d'opérateurs rationnels).
+
+\subsubsection{Lexique}
+
+\begin{itemize}
+
+  \item Les identificateurs de terminaux apparaissent en minuscules.
+
+  \item Les mots-clefs sont en majuscules. 
+
+  \item Les identificateurs de non-terminaux sont la concaténation
+    d'identificateurs en minuscules, débutant chacun par une
+    majuscule.
+
+  \item Les extraits de syntaxe concrète (terminaux) sont entre
+    guillemets ---~si ces derniers font partie de la syntaxe concrète,
+    alors ils sont précédés d'une contre-oblique (anglais,
+    \emph{backslash}).
+
+\end{itemize}
+
+\subsubsection{Grammaires}
+\label{GRAM}
+
+Nous appellerons \emph{règle de production} (ou, en abrégé,
+\emph{règle}), le couple formé par un non-terminal et tous les mots
+qui peuvent en être dérivés en une étape. Nous nommerons \emph{membre
+  droit d'une règle de production} (ou ,en abrégé, \emph{membre
+  droit}) un des mots (constitué de terminaux ou non) que l'on peut
+dériver en une étape. Par exemple, $\textrm{X}_0 \textrm{X}_1 \ldots
+\textrm{X}_n$ est un membre droit de la règle de production~X dans
+\begin{equation*}
+\textrm{X} \rightarrow \textrm{X}_0 \textrm{X}_1 \ldots \textrm{X}_n
+\mid \ldots
+\end{equation*}
+Nous baptiserons \emph{production} l'ensemble des membres droits d'une
+règle de production.
+\begin{description} 
+
+  \item[Structure] La grammaire est découpée en sections qui sont
+    divisées en sous-sections séparées par une ligne. Le but de ce
+    découpage est de regrouper des règles qui ont une sémantique
+    voisine ou qui contribuent à une même sémantique. Une
+    sous-section~$A$ séparée par une ligne double d'une
+    sous-section~$B$ signifie que $B$~est une transformée
+    de~$A$. L'ordre des règles au sein d'une même sous-section est
+    significatif: c'est un parcours en largeur à partir d'une règle
+    d'entrée, en considérant les productions dans l'ordre d'écriture.
+    L'ordre entre les règles d'entrée n'est pas significatif.
+
+  \item[Les règles d'entrée] sont des règles qui sont appelées en
+    dehors de la sous-section où elles sont définies. Si les appels
+    sont restreints à la section courante, la règle est dite
+    \emph{locale} (à la section), s'ils sont limités au dehors de la
+    section définissante, elle est dite \emph{globale}, et s'il existe
+    des appels à la fois dans la section courante et dans les autres
+    sections, elle est qualifiée de \emph{mixte}. Dans le premier cas,
+    l'identificateur du non-terminal définissant apparaîtra en
+    italique, dans le deuxième en souligné, et dans le dernier en
+    italique souligné. L'axiome sera en gras. Il peut y avoir
+    plusieurs règles d'entrée dans une sous-section.
+
+  \item[Commentaires] Dans la présentation des grammaires
+    intermédiaires, les commentaires seront dans des boîtes, après les
+    règles. Il est impératif de les lire dans l'ordre d'apparition
+    dans la sous-section, car ils peuvent décrire des transformations
+    composées (d'où le séquencement). Pour la même raison, il faut
+    lire les sections dans l'ordre d'apparition. D'autre part, les
+    règles créées par une transformation seront données entre
+    parenthèses.
+
+  \item[Conventions] En transformant une règle se créent de nouvelles
+    règles pour lesquelles il est difficile de trouver un
+    identificateur pertinent suggérant sa sémantique. Dans ce cas,
+    chacune de ces règles aura pour identificateur la concaténation de
+    celui de la règle appelante (parfois abrégé), plus un préfixe
+    et/ou un suffixe, souvent numéroté. Dans les exemples contenus
+    dans ce document, nous adopterons en outre les conventions
+    lexicographiques supplémentaires suivantes:
+    \begin{itemize}
+
+      \item La production vide est notée~$\varepsilon$.
+
+      \item Une lettre latine minuscule représente toujours un
+        terminal.
+
+      \item Une lettre latine majuscule représente toujours un
+        non-terminal.
+
+      \item Une lettre grecque minuscule représente toujours une
+        concaténation quelconque de terminaux et de non-terminaux.
+
+      \item Nous noterons $\textrm{A} \Longrightarrow \alpha$ la
+        relation «~A produit~$\alpha$~».
+
+    \end{itemize}
+\end{description}
+
+\subsubsection{Opérateurs rationnels}
+\label{OPRAT}
+
+Les opérateurs rationnels suivants ont été rajouté à la notation BNF,
+pour gagner en compacité et lisibilité (il ne s'agit pas d'un gain
+d'expressivité) : $\alpha^*$, $\alpha^+$, [$\alpha$], \{ A a \ldots
+\}$^*$, \{ A a \ldots \}$^+$.  Chaque occurrence de ces expressions
+peut être remplacée par un non-terminal dont la règle définissante est
+spécifique. Voici le tableau donnant leur définition .
+\begin{center}
+\begin{tabular}{|l|l|c|} \hline
+ \multicolumn{1}{|c|}{Notation}
+ &
+ \multicolumn{1}{c|}{Définition}
+ &
+ \multicolumn{1}{c|}{Contrainte de validité} \\ \hline \hline
+
+ X $\rightarrow \alpha^*$
+ &
+ X $\rightarrow \alpha$ X $\mid \varepsilon$
+ &
+ $\neg (\alpha \stackrel{*}{\Longrightarrow} \varepsilon)$ \\ \hline
+
+ X $\rightarrow \alpha^+$
+ &
+ X $\rightarrow \alpha \textrm{A}^*$
+ & 
+ $\neg (\alpha \stackrel{*}{\Longrightarrow} \varepsilon)$ \\ \hline
+
+ X $\rightarrow$ [$\alpha$]
+ &
+ X $\rightarrow \alpha \mid \varepsilon$
+ &
+ $\neg (\alpha \stackrel{*}{\Longrightarrow} \varepsilon)$ \\ \hline
+
+ X $\rightarrow$ \{A a \ldots\}$^*$
+ &
+ X $\rightarrow \varepsilon \mid$ A (a A)$^*$ 
+ &
+ $\neg (\mbox{A} \stackrel{*}{\Longrightarrow} \varepsilon)$ \\ \hline
+
+ X $\rightarrow$ \{A a \ldots\}$^+$
+ &
+ X $\rightarrow$ A (a A)$^*$  
+ &
+ $\neg (\mbox{A} \stackrel{*}{\Longrightarrow} \varepsilon)$ \\ \hline
+\end{tabular} 
+\end{center} 
+
+\noindent Les définitions choisie sont LL(1).
+
+\subsection{Les transformations de grammaires}
+
+Ce sont des applications de propriétés de base des expressions
+rationnelles, exprimées avec des notations un peu différentes dans le
+cadre des grammaires algébriques.
+
+\paragraph{La factorisation} forme des préfixes ou des suffixes (ou
+les deux à la fois) d'un ensemble de productions d'une même règle.
+\begin{itemize}
+
+  \item \textbf{Préfixe} \\
+    \begin{tabular}{@{}lll@{}}
+      $\textrm{X} \rightarrow \beta \gamma_{1} \mid \beta \gamma_{2}
+      \mid \ldots \mid \beta \gamma_{n} \mid \textrm{B}$
+      & \emph{devient}
+      & \begin{tabular}{@{}l@{\;}r@{\;}l@{}}
+          X & $\rightarrow$ & $\beta \textrm{Y} \mid \textrm{B}$\\
+          Y & $\rightarrow$ & $\gamma_{1} \mid \gamma_{2} \mid
+              \ldots \mid \gamma_{n}$
+        \end{tabular}
+    \end{tabular}
+
+  \item \textbf{Suffixe} \\
+    \begin{tabular}{@{}lll@{}}
+      $\textrm{X} \rightarrow \alpha_{1} \beta \mid \alpha_{2} \beta
+      \mid \ldots \mid \alpha_{n} \beta \mid \textrm{B}$
+      & \emph{devient}
+      & \begin{tabular}{@{}l@{\;}r@{\;}l@{}}
+          X & $\rightarrow$ & $\textrm{Y} \beta \mid \textrm{B}$\\
+          Y & $\rightarrow$ & $\alpha_{1} \mid \alpha_{2} \mid
+                              \ldots \mid \alpha_{n}$
+        \end{tabular}
+    \end{tabular}
+
+  \item \textbf{Bifixe} \\
+    \begin{tabular}{@{}l@{\;\;}l@{\;\;}l@{}}
+      $\textrm{X} \rightarrow \alpha \beta_{1} \gamma \mid \alpha
+      \beta_{2} \gamma \mid \ldots \mid \alpha \beta_{n} \gamma \mid
+      \textrm{B}$
+      & \emph{devient}
+      & \begin{tabular}{@{}l@{\;}r@{\;}l@{}}
+          X & $\rightarrow$ & $\alpha \textrm{Y} \gamma \mid
+                              \textrm{B}$ \\
+          Y & $\rightarrow$ & $\beta_{1} \mid \beta_{2} \mid \ldots
+                              \mid \beta_{n}$
+        \end{tabular}
+    \end{tabular}
+
+\end{itemize}
+Nous pouvons appliquer ces factorisations si $n=1$, ou sur une partie
+seulement des productions factorisables.
+
+\paragraph{La réduction} regroupe des productions d'une même règle pour
+    former un nouveau non-terminal: \\
+\begin{tabular}{lcl}
+  $\textrm{X} \rightarrow \alpha_{1} \mid \alpha_{2} \mid \ldots \mid
+  \alpha_{n}$
+  & \emph{devient} 
+  & \begin{tabular}{lrl}
+      X & $\rightarrow$ & $\textrm{Y} \mid \alpha_{i+1} \mid \alpha_{i+2}
+                          \mid \ldots \mid \alpha_{n}$ \\
+      Y & $\rightarrow$ & $\alpha_{1} \mid \alpha_{2} \mid \ldots
+                           \mid \alpha_{i}$
+    \end{tabular}
+\end{tabular}
+
+\paragraph{L'élimination} Toute règle devenue inutile (typiquement à la
+suite d'une expansion globale) peut être supprimée.  Une règle
+d'entrée globale ou mixte, devenue inutile au sein d'une section, n'y
+figurera plus par la suite ---~ce qui ne signifie pas son élimination
+de la grammaire! Nous pouvons aussi éliminer les productions
+redondantes au sein d'une même règle pour n'en conserver qu'une.
+\begin{description}
+
+  \item[Remarque 1] La transformation suivante n'est \emph{pas} une
+    élimination:\\
+    \begin{tabular}{lcl}
+        $\textrm{X} \rightarrow \textrm{X} \mid \textrm{A}$
+      & \emph{devient}
+      & $\textrm{X} \rightarrow \textrm{A}$
+    \end{tabular} \\
+    Cf. le paragraphe consacré au lemme d'Arden (\vref{Arden}).
+
+  \item[Remarque 2] L'élimination suivante est licite:\\
+    \begin{tabular}{lcl}
+      $\textrm{X} \rightarrow \texttt{lower$_{val}$} \mid
+      \texttt{lower$_{id}$}$
+      & \emph{devient}
+      & $\textrm{X} \rightarrow \texttt{lower}$
+    \end{tabular}
+
+\end{description}
+
+\paragraph{Le renommage} Pour des raisons de lisibilité, les
+identificateurs peuvent être renommés globalement dans toute la
+grammaire.  Nous tâcherons d'éviter cette manipulation en choisissant
+dès le départ des noms adaptés pour éviter les collisions.
+
+\paragraph{L'expansion} peut être totale, partielle, préfixe, suffixe ou
+globale.
+\begin{description}
+
+  \item[Totale] Elle consiste à substituer textuellement tout le
+    membre droit d'une règle à \emph{une} occurrence du non-terminal
+    correspondant. Par exemple:\\
+        \begin{tabular}{lcl}
+          \begin{tabular}{lrl}
+            A & $\rightarrow$ & a B C \\
+            & $\mid$        & B \\
+            B & $\rightarrow$ & b A \\
+            & $\mid$        & b \\
+            C & $\rightarrow$ & c \\
+          \end{tabular} 
+          &
+          \emph{devient}
+          &
+          \begin{tabular}{lrl}
+            A & $\rightarrow$ & a b A C \\
+            & $\mid$        & a b C \\
+            & $\mid$        & B \\
+            B & $\rightarrow$ & b A \\
+            & $\mid$        & b \\
+            C & $\rightarrow$ & c \\
+          \end{tabular}
+        \end{tabular}
+  
+        Ce sera l'expansion par défaut, en l'absence de qualificatif.
+
+      \item[Globale] C'est une expansion \textbf{totale} d'une règle
+        pour toutes les occurrences possibles dans toute la grammaire
+        (cette règle peut alors être éliminée).  La présentation des
+        transformations se faisant par modules, le lecteur pourrait
+        être dérouté par cette portée globale.  Concrètement, une
+        expansion globale équivaudra à une expansion totale appliquée
+        à toute la sous-section, suivie d'une élimination; sinon une
+        note sera fournie.
+
+      \item[Partielle] C'est la composition d'une expansion
+        \textbf{globale}, d'une factorisation bifixe partielle et d'un
+        renommage. En résumé:\\
+        \begin{tabular}{lrl}
+          Z & $\rightarrow$ & $\alpha$ A $\beta$ \\
+          A & $\rightarrow$ & $\gamma_{1} \mid \gamma_{2} \mid \ldots \mid
+          \gamma_{n}$
+        \end{tabular}
+
+        \emph{devient}
+
+        \begin{tabular}{lrl}
+          Z & $\rightarrow$ & $\alpha \gamma_{1} \beta \mid \alpha
+          \gamma_{2} \beta \mid \ldots \mid \alpha \gamma_{i-1} \beta
+          \mid \alpha$ A $\beta$ \\
+          A & $\rightarrow$ & $\gamma_{i} \mid \gamma_{i+1} \mid
+          \ldots \mid \gamma_{n}$
+        \end{tabular}
+    
+      \item[Préfixe] C'est la composition d'une expansion
+        \textbf{globale} d'une règle factorisable à gauche, d'une
+        factorisation bifixe et d'un renommage. Schématiquement:\\
+        \begin{tabular}{lrl}
+            Z & $\rightarrow$ & $\alpha$ A $\beta$ \\
+            A & $\rightarrow$ & $\gamma \alpha_{1} \mid \gamma
+            \alpha_{2} \mid \ldots \mid \gamma \alpha_{n}$
+        \end{tabular}
+
+        \emph{devient}
+
+        \begin{tabular}{lrl}
+            Z & $\rightarrow$ & $\alpha \gamma$ A $\beta$ \\
+            A & $\rightarrow$ & $\alpha_{1} \mid \alpha_{2} \mid
+            \ldots \mid \alpha_{n}$
+        \end{tabular}
+
+      \item[Suffixe] C'est la composition d'une expansion
+        \textbf{globale} d'une règle factorisable à droite, d'une
+        factorisation bifixe et d'un renommage. C'est-à-dire:\\
+        \begin{tabular}{lrl}
+            Z & $\rightarrow$ & $\alpha$ A $\beta$ \\
+            A & $\rightarrow$ & $\alpha_{1} \gamma \mid \alpha_{2}
+                \gamma \mid \ldots \mid \alpha_{n} \gamma$
+        \end{tabular}
+
+        \emph{devient}
+
+        \begin{tabular}{lrl}
+            Z & $\rightarrow$ & $\alpha$ A $\gamma \beta$ \\
+            A & $\rightarrow$ & $\alpha_{1} \mid \alpha_{2} \mid
+            \ldots \mid \alpha_{n}$
+        \end{tabular}
+
+    \end{description}
+
+\paragraph{L'option} \label{OPTION} C'est le cas particulier de
+l'expansion \textbf{partielle} d'une production vide, suivie d'une
+«~mise entre crochets~». Par exemple:\\
+    \begin{tabular}{lcl}
+      \begin{tabular}{lrl}
+        A & $\rightarrow$ & a B C \\
+        & $\mid$        & B \\
+        B & $\rightarrow$ & b A \\
+        & $\mid$        & $\varepsilon$ \\
+        C & $\rightarrow$ & c
+      \end{tabular} 
+      &
+      \emph{devient}
+      &
+      \begin{tabular}{lrl}
+        A & $\rightarrow$ & a [B] C \\
+        & $\mid$        & [B] \\
+        B & $\rightarrow$ & b A \\
+        C & $\rightarrow$ & c 
+      \end{tabular} 
+    \end{tabular}
+
+    De même, nous assimilerons à une option (par raccourci) la
+    transformation:
+
+    \begin{tabular}{lcl}
+      \begin{tabular}{lrl}
+        X & $\rightarrow$ & A \\
+        & $\mid$        & b \\
+        
+        A & $\rightarrow$ & \{ B ``\textsf{,}'' \ldots\}* \\
+        & $\mid$        & [a B c] \\
+        & $\mid$        & a
+      \end{tabular}
+      &
+      \emph{devient}
+      &
+      \begin{tabular}{lrl}
+        X & $\rightarrow$ & [A] \\
+        & $\mid$        & b \\
+        A & $\rightarrow$ & \{ B ``\textsf{,}'' \ldots\}$^+$ \\
+        & $\mid$        & a B c \\
+        & $\mid$        & a
+      \end{tabular}
+    \end{tabular}
+
+    Dans le but de faciliter la preuve de la propriété LL(1) de la
+    grammaire finale, nous appliquerons l'option chaque fois que cela
+    sera possible. Ainsi, la forme résultante ne contiendra plus de
+    productions vides \emph{explicites} (attention : nous ne faisons
+    \emph{pas} disparaître ces productions!). En d'autres termes, nous
+    n'autorisons aucune règle à produire explicitement~$\varepsilon$.
+
+Notons que les réciproques des factorisations, des réductions, des
+expansions et des options sont aussi des transformations licites.
+
+\subsubsection{Le lemme d'Arden}
+\label{Arden}
+
+Supposons que nous ayons une équation rationnelle de langages de la
+forme $\textrm{X} = \alpha \textrm{X} + \beta$, avec $\varepsilon \not
+\in \alpha$, et où~$+$ représente la disjonction ($\mid$).  Alors le
+lemme d'Arden affirme que $\textrm{X} = \alpha^* \beta$ est la
+solution unique de l'équation.  Si $\varepsilon \in \alpha$, alors
+$\textrm{X} = \alpha^* (\beta + \gamma)$ est solution, quelque
+soit~$\gamma$ (qui peut même être un langage contextuel).  Nous avons
+donc une infinité de solutions, et nous choisirons dans ce cas le plus
+petit langage solution (le point fixe minimal): $\textrm{X} = \alpha^*
+\beta$.  En résumé, nous autoriserons toujours la transformation:
+$\textrm{X} \rightarrow \alpha \textrm{X} \mid \beta$ devient
+$\textrm{X} \rightarrow \alpha^* \beta$. Nous avons ainsi le cas
+particulier $\textrm{X} \rightarrow \textrm{X} \mid \beta$ devient
+$\textrm{X} \rightarrow \beta$.  Nous nommerons \emph{Arden} toutes
+les transformations élémentaires qui impliquent l'application du lemme
+d'Arden:
+\begin{center}
+  \begin{tabular}{|c|} \hline
+    \begin{tabular}{lcl}
+      \begin{tabular}{c}
+        X $\rightarrow \alpha$ X $\mid \varepsilon$ \\
+        \emph{ou} \\
+        X $\rightarrow$ X $\alpha \mid \varepsilon$
+      \end{tabular}
+      &
+      \emph{devient}
+      &
+      X $\rightarrow \alpha^*$ \\
+    \end{tabular} \\ \hline \\
+
+    \begin{tabular}{lrl}
+      \begin{tabular}{c}
+        X $\rightarrow \alpha$ X $\mid \alpha$ \\
+        \emph{ou} \\
+        X $\rightarrow$ X $\alpha \mid \alpha$
+      \end{tabular}
+      &
+      \emph{devient}
+      &
+      X $\rightarrow \alpha^+$ \\
+    \end{tabular} \\ \hline \\
+
+    \begin{tabular}{lcl}
+      X $\rightarrow$ A $\mid$ A a X 
+      &
+      \emph{devient}
+      &
+      X $\rightarrow$ \{A a \ldots\}$^+$ \\
+    \end{tabular} \\ \hline \\
+    
+    \begin{tabular}{lcl}
+      X $\rightarrow \varepsilon \mid$ A $\mid$ A a X 
+      &
+      \emph{devient}
+      &
+      X $\rightarrow$ \{A a \ldots\}$^*$ \\
+    \end{tabular} \\ \hline
+  \end{tabular}
+\end{center}
+\begin{description}
+
+  \item[Remarque 1] Nous avons: $\textrm{X} \rightarrow \textrm{X}
+    \alpha \mid \beta$ devient $\textrm{X} \rightarrow \beta \alpha^*$.
+
+  \item[Remarque 2] Le lemme d'Arden permet d'écrire des égalités non
+    triviales, comme par exemple: $(a+cb^*d)^* = a^* +
+    a^*c(b+da^*c)^*da^*$.
+
+\end{description}
+
+\subsubsection{Ambiguïtés syntaxiques}
+\label{Ambiguïtés}
+
+L'ambiguïté d'une grammaire est toujours un problème épineux pour
+l'analyse du langage qu'elle engendre. Une grammaire est ambiguë si et
+seulement si on peut construire deux dérivations différentes pour un
+même mot du langage.  Une condition suffisante d'ambiguïté est la
+double récursivité d'une règle. Quand la double récursivité est au
+sein d'une même production, nous pouvons parfois régler ce problème en
+appliquant le lemme d'Arden.  Un cas typique où apparaît cette double
+récursivité est celui des grammaires d'expressions arithmétiques, où
+des opérateurs sont binaires et infixes: $\textrm{E} \rightarrow
+\textrm{E}$ ``\textsf{$+$}'' E $\mid$ E ``\textsf{$*$}'' E $\mid$
+``\textsf{(}'' E ``\textsf{)''} $\mid$ \textbf{id}. Si la double
+récursivité est à gauche et à droite, sur deux productions, nous
+pouvons procéder comme suit. Supposons: $\textrm{Z} \rightarrow
+\textrm{A} \textrm{Z} \mid \textrm{Z} \textrm{B} \mid \textrm{C}$. Le
+lemme d'Arden donne ici: $\textrm{Z} \rightarrow \textrm{A} \textrm{Z}
+\textrm{B}^* \mid \textrm{C} \textrm{B}^*$. Or, il est trivial que:
+$\textrm{X} \rightarrow \alpha \textrm{X} \beta \mid \gamma$ devient
+$\forall n \geq 0.\textrm{X} \rightarrow \alpha^n \gamma
+\beta^n$. D'où: $\forall n \geq 0.\textrm{Z} \rightarrow \textrm{A}^n
+(\textrm{C} \textrm{B}^*) (\textrm{B}^*)^n$, qui se simplifie en
+$\textrm{Z} \rightarrow \textrm{A}^* \textrm{C} \textrm{B}^*$. En
+réécrivant $Z \rightarrow \textrm{A}^+ \textrm{C} \textrm{B}^* \mid
+\textrm{C} \textrm{B}^*$, il vient $\textrm{Z} \rightarrow \textrm{A}
+\textrm{Z} \mid \textrm{C} \textrm{B}^*$. En résumé, nous retiendrons
+la transformation suivante:\\
+\begin{tabular}{|l|} \hline 
+$\textrm{Z} \rightarrow \textrm{A} \textrm{Z} \mid \textrm{Z}
+  \textrm{B} \mid \textrm{C}$ devient $\textrm{Z} \rightarrow
+  \textrm{A} \textrm{Z} \mid \textrm{C} \textrm{B}^*$\\
+\hline
+\end{tabular}
+
+\subsection{Lexique d'ASN.1}
+
+\subsubsection{Une grammaire pour le lexique d'ASN.1}
+
+À partir de la norme nous pouvons extraire une grammaire du lexique
+(non LL(1)). Pour plus de détails voir le code de l'analyseur lexical
+en annexe.
+\begin{center}
+\begin{tabular}{|lrl|} \hline 
+         &               & \\
+Lower    & $\rightarrow$ & ``a'' $\mid$ ``b'' $\mid$ \ldots $\mid$ ``z'' \\
+Upper    & $\rightarrow$ & ``A'' $\mid$ ``B'' $\mid$ \ldots $\mid$ ``Z'' \\
+Letter   & $\rightarrow$ & Lower $\mid$ Upper \\
+Digit    & $\rightarrow$ & ``0'' $\mid$ ``1'' $\mid$ \ldots $\mid$ ``9'' \\
+Alpha    & $\rightarrow$ & Letter $\mid$ Digit \\
+ExtAlpha & $\rightarrow$ & Alpha $\mid$ extrasym \\
+HexaBin  & $\rightarrow$ & ``H'' $\mid$ ``B'' \\ 
+         &               & \\ \hline
+
+       &               & \\
+Lexer  & $\rightarrow$ & Tokens$^*$ \\
+Tokens & $\rightarrow$ & Blank$^*$ Start \\
+Blank  & $\rightarrow$ & ``$\sqcup$'' $\mid$ ``\texttt{$\backslash$t}'' $\mid$
+``\texttt{$\backslash$n}'' \\
+Start  & $\rightarrow$ & stdsym \\
+       & $\mid$        & Digit$^+$ \\
+       & $\mid$        & ``-'' [AuxMinus] \\
+       & $\mid$        & ``.'' [AuxDot] \\
+       & $\mid$        & ``:'' [AuxColon] \\
+       & $\mid$        & ``\texttt{$\backslash$"}'' AuxString \\
+       & $\mid$        & ``\texttt{'}'' Alpha$^*$ ``\texttt{'}'' HexaBin \\
+       & $\mid$        & Lower AuxRef \\
+       & $\mid$        & Upper AuxRef \\ 
+       &               & \\ \hline 
+
+          &               & \\
+AuxMinus  & $\rightarrow$ & ``-'' [Comment] \\
+AuxDot    & $\rightarrow$ & ``.'' [``.''] \\
+AuxColon  & $\rightarrow$ & ``:'' [Four] \\
+AuxString & $\rightarrow$ & ExtAlpha$^*$ ``\texttt{$\backslash$"}''
+[``\texttt{$\backslash$"}'' AuxString] \\
+AuxRef    & $\rightarrow$ & Alpha$^*$ ``-'' (Alpha$^+$ ``-'')$^*$
+AuxMinus \\ 
+          &               & \\ \hline 
+ 
+        &               & \\
+Comment & $\rightarrow$ & ``\texttt{$\backslash$n}'' $\mid$ '-' [AuxCom] $\mid$ ExtAlpha [Comment] \\
+AuxCom  & $\rightarrow$ & ``-'' $\mid$ Comment \\
+Four    & $\rightarrow$ & ``='' $\mid$ AuxColon \\ 
+        &               & \\ \hline
+\end{tabular}
+\end{center}
+
+\subsubsection{Ambiguïtés lexicales}
+\label{AMBLEX}
+
+D'après le document ISO, plusieurs terminaux sémantiquement différents
+sont lexicalement indistinguables.  Seul le contexte où ils
+apparaissent permet de les distinguer.  Ainsi, un identificateur de
+type \texttt{type\-ref\-eren\-ce} est identique à un identificateur de
+module \texttt{module\-ref\-erence}.  De même, un identificateur de
+valeur \texttt{value\-reference} est identique à un identificateur de
+champ \texttt{identifier} dans un type \texttt{SEQUENCE}. Dans la
+grammaire de la syntaxe d'ASN.1, ils seront dénotés respectivement par
+les identificateurs \texttt{upper} et \texttt{lower}.  Lorsqu'il n'y a
+pas d'ambiguïté, nous ferons figurer en indice la véritable nature du
+terminal: \\
+\begin{tabular}{lcl}
+\texttt{typereference}, \texttt{modulereference}
+&
+$\rightarrow$
+&
+\texttt{upper$_{typ}$}, \texttt{upper$_{mod}$}, \texttt{upper} \\
+
+\texttt{valuereference}, \texttt{identifier}
+&
+$\rightarrow$
+&
+\texttt{lower$_{val}$}, \texttt{lower$_{id}$}, \texttt{lower} \\
+\end{tabular} \\
+
+Les terminaux \texttt{bstring} et \texttt{hstring} ont la même
+sémantique (qui est celle de dénoter un nombre en base binaire ou
+hexadécimale), et seront donc fusionnés sous le nom
+\texttt{basednum}. De plus, \texttt{cstring} qui dénote une chaîne de
+caractères à été rebaptisé \texttt{string}.
